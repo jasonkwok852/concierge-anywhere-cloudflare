@@ -1,42 +1,60 @@
 export async function onRequestPost({ request, env }) {
   try {
-    // 解析請求中的 JSON 數據
-    const { token } = await request.json();
-
-    // 驗證 token 是否有效
-    if (!token || typeof token !== 'string' || token.length < 10) {
+    // 驗證環境變數
+    if (!env.TURNSTILE_SECRET_KEY) {
+      console.error({
+        error: 'Missing configuration',
+        detail: 'TURNSTILE_SECRET_KEY not set in environment'
+      });
       return new Response(
-        JSON.stringify({ success: false, error: '無效的 Turnstile token' }),
+        JSON.stringify({ success: false, error: 'Server configuration error' }),
         {
-          status: 400,
+          status: 500,
           headers: {
             'Content-Type': 'application/json',
-            'X-Content-Type-Options': 'nosniff'
+            'X-Content-Type-Options': 'nosniff',
+            'Content-Security-Policy': "default-src 'none'",
+            'Cache-Control': 'no-store'
           }
         }
       );
     }
 
-    // 從環境變數獲取 Turnstile Secret Key
-    const secretKey = env.TURNSTILE_SECRET_KEY;
-    if (!secretKey) {
-      console.error('Turnstile 密鑰未配置');
+    // 解析請求數據
+    const { token } = await request.json();
+    
+    // 獲取客戶端 IP
+    const clientIp = request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For') || '';
+
+    // 驗證 token 格式
+    if (!token || typeof token !== 'string' || token.length < 10) {
+      console.warn({
+        error: 'Invalid token',
+        detail: 'Token validation failed',
+        clientIp
+      });
       return new Response(
-        JSON.stringify({ success: false, error: '伺服器配置錯誤' }),
+        JSON.stringify({ success: false, error: 'Invalid Turnstile token' }),
         {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' }
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Content-Type-Options': 'nosniff',
+            'Content-Security-Policy': "default-src 'none'",
+            'Cache-Control': 'no-store'
+          }
         }
       );
     }
 
-    // 向 Turnstile API 發送驗證請求
+    // 準備 Turnstile API 請求
     const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-        secret: secretKey,
-        response: token
+        secret: env.TURNSTILE_SECRET_KEY,
+        response: token,
+        remoteip: clientIp
       })
     });
 
@@ -44,36 +62,60 @@ export async function onRequestPost({ request, env }) {
 
     // 處理驗證結果
     if (verification.success) {
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Content-Type-Options': 'nosniff',
-          'Access-Control-Allow-Origin': '*' // 可根據需求限制特定域名
+      return new Response(
+        JSON.stringify({ success: true, challenge_ts: verification.challenge_ts }),
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Content-Type-Options': 'nosniff',
+            'Content-Security-Policy': "default-src 'none'",
+            'Cache-Control': 'no-store',
+            // 使用環境變數配置允許的域名
+            'Access-Control-Allow-Origin': env.CORS_ORIGIN || '*',
+            'Access-Control-Allow-Methods': 'POST',
+            'Access-Control-Max-Age': '86400'
+          }
         }
-      });
+      );
     } else {
-      console.log('Turnstile 驗證失敗:', verification['error-codes']);
+      console.warn({
+        error: 'Turnstile verification failed',
+        errorCodes: verification['error-codes'],
+        clientIp
+      });
       return new Response(
         JSON.stringify({
           success: false,
-          error: 'Turnstile 驗證失敗'
-          // 生產環境中可移除 error-codes
-          // codes: verification['error-codes']
+          error: 'Turnstile verification failed'
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Content-Type-Options': 'nosniff',
+            'Content-Security-Policy': "default-src 'none'",
+            'Cache-Control': 'no-store'
+          }
         }
       );
     }
   } catch (err) {
-    console.error('伺服器錯誤:', err);
+    console.error({
+      error: 'Server error',
+      detail: err.message,
+      stack: err.stack
+    });
     return new Response(
-      JSON.stringify({ success: false, error: '伺服器錯誤' }),
+      JSON.stringify({ success: false, error: 'Internal server error' }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Content-Type-Options': 'nosniff',
+          'Content-Security-Policy': "default-src 'none'",
+          'Cache-Control': 'no-store'
+        }
       }
     );
   }
