@@ -531,7 +531,7 @@
             </div>
             <div class="header-actions">
                 <button class="menu-btn" id="menuButton">
-                    <i class="bi bi-list"></i> <span>選單</span>
+                    <i class="bi bi-gear-fill"></i> 控制中心 <i class="bi bi-list"></i> <span>選單</span>
                 </button>
                 <div class="dropdown-menu" id="dropdownMenu">
                     <a href="turnstile.html" class="dropdown-item">Turnstile 頁面</a>
@@ -622,6 +622,10 @@
 
         function redirectToRetool(action) {
             const baseUrl = 'https://hello.concierge-anywhere.com/p/search/info_directory_page';
+            if (!action || !action.type || !action.value) {
+                alert('重定向失敗：缺少必要的動作參數。請重新搜尋或選擇分類。');
+                return;
+            }
             let redirectUrl;
             if (action.type === 'search') {
                 redirectUrl = `${baseUrl}#keyword=${encodeURIComponent(action.value)}`;
@@ -633,8 +637,13 @@
             }
             try {
                 window.location.href = redirectUrl;
+                setTimeout(() => {
+                    if (window.location.href !== redirectUrl) {
+                        window.location.replace(redirectUrl);
+                    }
+                }, 2000);
             } catch (error) {
-                alert('無法重定向到 Retool 頁面，請檢查網絡或瀏覽器設置。');
+                alert(`無法重定向到 Retool 頁面：${error.message || '未知錯誤'}。請檢查網絡或瀏覽器設置。`);
             }
         }
 
@@ -655,7 +664,7 @@
                     elements.turnstileContainer.style.display = 'none';
                     state.isTurnstileRendered = false;
                     if (window.turnstile) window.turnstile.remove();
-                    debounceShowTurnstile(); // 添加重試
+                    debounceShowTurnstile();
                 }
             } catch (error) {
                 alert(`驗證過程中發生錯誤：${error.message || '未知錯誤'}。請檢查網絡連線後重試。`);
@@ -694,7 +703,7 @@
             if (window.turnstile) {
                 try {
                     window.turnstile.render(turnstileDiv, {
-                        sitekey: '0x4AAAAAAAQOrX6jyaqqHxdp', // 實際站點金鑰
+                        sitekey: 'your-actual-sitekey', // 請替換為你的實際站點金鑰
                         callback: 'onTurnstileSuccess'
                     });
                     state.isTurnstileRendered = true;
