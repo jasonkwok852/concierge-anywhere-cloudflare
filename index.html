@@ -1,45 +1,863 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-HK">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Turnstile Test</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="顧客服務提供商，提供資訊手冊和圖表資源">
+    <title>顧客服務</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    
+    <!-- Cloudflare Turnstile -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    
+    <style>
+        :root {
+            --main-color: #23396C;
+            --secondary-color: #3A5A9A;
+            --accent-color: #F8EF32;
+            --bg-color: #FAFAFA;
+            --border-color: #243D51;
+            --header-bg: #243D51;
+            --button-hover-color: #243D51;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 8px 20px rgba(35, 57, 108, 0.3);
+        }
+
+        ::selection {
+            color: #F8EF32;
+            background: #243D51;
+        }
+
+        a:link, a:visited, a:hover, a:active {
+            color: #23396C;
+            background-color: transparent;
+            text-decoration: none;
+        }
+
+        a:hover, a:active {
+            text-decoration: underline;
+        }
+
+        .highlight {
+            font-size: 24px;
+            color: #23396C;
+            font-weight: bold;
+            background: linear-gradient(to top, #EAECED 40%, transparent 40%);
+            display: inline;
+            border-radius: 2px;
+        }
+
+        * {
+            font-family: 'Noto Sans HK', sans-serif;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            color: var(--main-color);
+            background-color: var(--bg-color);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start;
+            box-sizing: border-box;
+            padding: 0;
+        }
+
+        header {
+            width: 100%;
+            background-color: var(--header-bg);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 74px;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .header-inner {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            height: 74px;
+            box-sizing: border-box;
+        }
+        
+        .site-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+            user-select: none;
+        }
+        
+        .site-icon {
+            height: 80px;
+            width: 200px;
+            object-fit: contain;
+            transition: all 0.3s ease;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+        
+        .menu-btn {
+            background: transparent;
+            color: #fafafa;
+            border: 2px solid #fafafa;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 14px;
+            padding: 4px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 36px;
+        }
+        
+        .menu-btn .bi {
+            margin-right: 2px;
+        }
+        
+        .menu-btn:hover, .menu-btn:focus {
+            background: #fafafa;
+            color: #23396C;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 5px);
+            right: 0;
+            background-color: #fafafa;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 12px 16px;
+            min-width: 240px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: block;
+            padding: 8px 16px;
+            color: #23396C;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(35, 57, 108, 0.1);
+        }
+
+        .main-content {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            padding: 32px 12px 80px;
+            box-sizing: border-box;
+            margin-top: 5%;
+        }
+
+        .title {
+            font-weight: 700;
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            text-align: center;
+            margin: 0 0 1rem;
+            position: relative;
+            user-select: none;
+            line-height: 1.2;
+            min-height: 2.8rem;
+        }
+        
+        .typing-text {
+            white-space: nowrap;
+            overflow: hidden;
+            position: relative;
+            font-size: inherit;
+            color: var(--main-color);
+            display: inline-block;
+            min-height: 1.2em;
+        }
+        
+        .typing-text::after {
+            content: "|";
+            display: inline-block;
+            width: 0.15em;
+            height: 1.2em;
+            color: var(--main-color);
+            margin-left: 0.1em;
+            vertical-align: text-top;
+            animation: blinkCursor 0.7s steps(2) infinite;
+            position: relative;
+            border-radius: 2px;
+            background: transparent;
+        }
+        
+        @keyframes blinkCursor {
+            0%,100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .timer-container {
+            background: transparent;
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-weight: bold;
+            user-select: none;
+            transition: var(--transition);
+            backdrop-filter: blur(5px);
+        }
+        
+        .time {
+            font-size: 16px;
+            line-height: 1;
+            margin-bottom: 0.2rem;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .date {
+            font-size: 16px;
+            opacity: 0.8;
+            font-weight: bold;
+        }
+
+        .search-container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 1.5rem;
+            gap: 0.5rem;
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 0.6rem 2.5rem 0.6rem 0.9rem;
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            outline: none;
+            transition: var(--transition);
+            background-color: rgba(255,255,255,0.8);
+            backdrop-filter: blur(5px);
+            color: #23396C;
+        }
+        
+        .search-input:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(58, 90, 154, 0.2);
+        }
+        
+        .clear-icon {
+            position: absolute;
+            right: 80px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #666;
+            cursor: pointer;
+            display: none;
+            background: none;
+            border: none;
+            outline: none;
+            padding: 0;
+        }
+        
+        .clear-icon:hover {
+            color: #000;
+        }
+        
+        .search-input:not(:placeholder-shown) + .clear-icon {
+            display: block;
+        }
+        
+        .search-button {
+            padding: 0.6rem 0.8rem;
+            font-size: clamp(0.85rem, 3vw, 0.95rem);
+            font-weight: 600;
+            color: #243D51;
+            background-color: #FAFAFA;
+            border: 1px solid #243D51;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            min-width: 60px;
+            white-space: nowrap;
+        }
+        
+        .search-button.active {
+            background-color: var(--button-hover-color);
+            border-color: var(--button-hover-color);
+            color: #fff;
+        }
+        
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .search-button .button-text {
+            display: inline;
+        }
+
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.8rem;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .action-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            padding: 0.5rem 0.8rem;
+            font-size: clamp(0.65rem, 3vw, 0.75rem);
+            font-weight: 600;
+            color: #243D51;
+            background-color: rgba(255,255,255,0.8);
+            border: 1px solid #243D51;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            transition: var(--transition);
+            user-select: none;
+            cursor: pointer;
+            outline: none;
+            text-align: center;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(5px);
+            min-width: 90px;
+        }
+        
+        .action-button:hover, .action-button:focus {
+            background-color: var(--button-hover-color);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: var(--hover-shadow);
+        }
+        
+        .bi {
+            font-size: 1em;
+            vertical-align: middle;
+        }
+
+        .turnstile-container {
+            margin: 1.5rem 0;
+            display: none;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .fixed-icon {
+            position: fixed;
+            bottom: 60px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .fixed-icon a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px;
+            background-color: transparent;
+            border-radius: 5px;
+            text-decoration: none;
+            box-shadow: none;
+        }
+        
+        .fixed-icon a:hover {
+            background-color: rgba(36, 61, 81, 0.1);
+        }
+        
+        .fixed-icon .bi {
+            font-size: 2.5rem;
+            color: #243D51;
+            transition: transform 0.2s;
+        }
+        
+        .fixed-icon a:hover .bi {
+            transform: scale(1.1);
+        }
+        
+        .icon-text {
+            margin-top: 5px;
+            color: #243D51;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        footer {
+            width: 100%;
+            text-align: center;
+            padding: 1rem 0;
+            font-size: 0.8rem;
+            color: var(--main-color);
+            background-color: var(--bg-color);
+            margin-top: auto;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin-bottom: 5px;
+            z-index: 2;
+        }
+
+        footer p {
+            font-weight: bold;
+        }
+
+        @media (max-width: 767px) {
+            .site-icon {
+                height: 60px;
+                width: 150px;
+            }
+            
+            .header-inner { 
+                padding: 0 16px; 
+            }
+            
+            .main-content { 
+                padding: 16px 4px 80px;
+                margin-top: 5%;
+            }
+            
+            .button-container { 
+                gap: 0.6rem; 
+            }
+            
+            .action-button { 
+                min-width: 80px; 
+                padding: 0.4rem 0.6rem; 
+            }
+            
+            .search-container { 
+                flex-direction: row;
+                gap: 8px;
+            }
+            
+            .search-input {
+                width: 100%;
+                padding: 0.5rem 2.3rem 0.5rem 0.8rem;
+                font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+            }
+            
+            .search-button {
+                padding: 0.5rem 0.8rem;
+                font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+                min-width: 50px;
+            }
+
+            .search-button .button-text {
+                display: none;
+            }
+            
+            .clear-icon {
+                right: 60px;
+                font-size: 16px;
+            }
+            
+            .fixed-icon { 
+                bottom: 55px; 
+            }
+
+            .menu-btn {
+                font-size: 14px;
+                padding: 4px 12px;
+                height: 36px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>Turnstile Verification Test</h1>
-  <form id="turnstile-form">
-    <div class="cf-turnstile" data-sitekey="0x4AAAAAAAQOrX6jyaqqHxdp"></div>
-    <button type="submit">Verify</button>
-  </form>
-  <p id="result"></p>
+    <header>
+        <div class="header-inner">
+            <div class="site-brand">
+                <a href="https://concierge-anywhere.com">
+                    <img src="https://concierge-anywhere-storage.s3.ap-east-1.amazonaws.com/icon%2Btext(%E9%80%8F%E6%98%8E%E8%83%8C%E6%99%AF)(%E6%9C%89%E9%99%B0%E5%BD%B1)+1000x400.png" alt="網站標誌" class="site-icon" />
+                </a>
+            </div>
+            <div class="header-actions">
+                <button class="menu-btn" id="menuButton">
+                    <i class="bi bi-list"></i> <span>選單</span>
+                </button>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <a href="turnstile.html" class="dropdown-item">Turnstile 頁面</a>
+                    <a href="#" class="dropdown-item">選項一</a>
+                    <a href="#" class="dropdown-item">選項二</a>
+                    <a href="#" class="dropdown-item">選項三</a>
+                </div>
+            </div>
+        </div>
+    </header>
 
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-  <script>
-    document.getElementById("turnstile-form").addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const resultElement = document.getElementById("result");
-      const token = document.querySelector("input[name='cf-turnstile-response']").value;
+    <main class="main-content">
+        <h1 class="title"><span id="typing" class="typing-text" aria-label="顧客服務工作的好助手"></span></h1>
+        <div class="timer-container" aria-label="目前時間與日期">
+            <div class="time" id="time" aria-live="polite" role="timer"></div>
+            <div class="date" id="date" aria-live="polite"></div>
+        </div>
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="輸入『主標題』或『副標題』或『附加說明』的內容" aria-label="搜尋關鍵字">
+            <span class="clear-icon" id="clearIcon">×</span>
+            <button id="searchButton" class="search-button" aria-label="搜尋">
+                <i class="bi bi-search" aria-hidden="true"></i> <span class="button-text">搜尋</span>
+            </button>
+        </div>
+        <div class="button-container">
+            <button class="action-button" data-category="航空公司" aria-label="航空公司資訊">
+                <i class="bi bi-airplane" aria-hidden="true"></i> 航空公司
+            </button>
+            <button class="action-button" data-category="各地機場" aria-label="各地機場資訊">
+                <i class="bi bi-building" aria-hidden="true"></i> 各地機場
+            </button>
+            <button class="action-button" data-category="實用資訊" aria-label="實用資訊">
+                <i class="bi bi-info-circle" aria-hidden="true"></i> 實用資訊
+            </button>
+            <button class="action-button" data-category="失物認領" aria-label="失物認領資訊">
+                <i class="bi bi-bag-check" aria-hidden="true"></i> 失物認領
+            </button>
+            <button class="action-button" data-category="交通相關" aria-label="交通相關資訊">
+                <i class="bi bi-bus-front" aria-hidden="true"></i> 交通相關
+            </button>
+        </div>
+        <div class="turnstile-container" id="turnstileContainer"></div>
+    </main>
 
-      if (!token) {
-        resultElement.textContent = "Please complete the Turnstile challenge.";
-        return;
-      }
+    <div class="fixed-icon">
+        <a href="https://concierge-anywhere.com/app/welcome/favorited_products_page">
+            <i class="bi bi-bag-heart-fill"></i>
+            <span class="icon-text">精選商品</span>
+        </a>
+    </div>
 
-      try {
-        const response = await fetch("/turnstile", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ token }),
-        });
+    <footer>
+        <p>Concierge Anywhere © All Rights Reserved</p>
+    </footer>
 
-        const data = await response.json();
-        resultElement.textContent = JSON.stringify(data, null, 2);
-      } catch (error) {
-        resultElement.textContent = "Error: " + error.message;
-      }
-    });
-  </script>
+    <script>
+    (function() {
+        'use strict';
+
+        // 狀態管理
+        const state = {
+            isVerified: false,
+            pendingAction: null,
+            isTurnstileRendered: false
+        };
+
+        // DOM 元素
+        const elements = {
+            typing: document.getElementById('typing'),
+            time: document.getElementById('time'),
+            date: document.getElementById('date'),
+            searchInput: document.getElementById('searchInput'),
+            searchButton: document.getElementById('searchButton'),
+            clearIcon: document.getElementById('clearIcon'),
+            categoryButtons: document.querySelectorAll('.action-button[data-category]'),
+            turnstileContainer: document.getElementById('turnstileContainer'),
+            menuButton: document.getElementById('menuButton'),
+            dropdownMenu: document.getElementById('dropdownMenu')
+        };
+
+        // 初始化下拉選單
+        function initDropdownMenu() {
+            elements.menuButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                elements.dropdownMenu.classList.toggle('show');
+            });
+            document.addEventListener('click', function() {
+                elements.dropdownMenu.classList.remove('show');
+            });
+        }
+
+        // 重定向到 Retool 頁面
+        function redirectToRetool(action) {
+            console.log('redirectToRetool called with action:', action);
+            const baseUrl = 'https://hello.concierge-anywhere.com/p/search/info_directory_page';
+            let redirectUrl;
+            if (action.type === 'search') {
+                redirectUrl = `${baseUrl}#keyword=${encodeURIComponent(action.value)}`;
+            } else if (action.type === 'category') {
+                redirectUrl = `${baseUrl}#category=${encodeURIComponent(action.value)}`;
+            } else {
+                console.error('Invalid action type:', action);
+                alert('重定向失敗：無效的動作類型。請重試。');
+                return;
+            }
+            console.log('Redirecting to:', redirectUrl);
+            try {
+                window.location.href = redirectUrl;
+            } catch (error) {
+                console.error('Redirect error:', error);
+                alert('無法重定向到 Retool 頁面，請檢查網絡或瀏覽器設置。');
+            }
+        }
+
+        // 調用後端驗證
+        async function validateToken(token) {
+            console.log('validateToken called with token:', token);
+            try {
+                const response = await fetch('https://concierge-anywhere.com/turnstile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+                console.log('Backend response status:', response.status);
+                const result = await response.json();
+                console.log('Backend response:', result);
+
+                if (result.success) {
+                    state.isVerified = true;
+                    console.log('Verification successful, calling redirectToRetool with:', state.pendingAction);
+                    redirectToRetool(state.pendingAction);
+                } else {
+                    console.error('後端驗證失敗:', result.error || 'Unknown error', result.codes || []);
+                    alert(`驗證失敗：${result.error || '未知錯誤'} (代碼: ${result.codes || '無'}). 請重試或聯繫支援。`);
+                    elements.turnstileContainer.style.display = 'none';
+                    state.isTurnstileRendered = false;
+                    if (window.turnstile) window.turnstile.remove();
+                }
+            } catch (error) {
+                console.error('後端驗證錯誤:', error);
+                alert(`驗證過程中發生錯誤：${error.message || '未知錯誤'}。請檢查網絡連線後重試。`);
+                elements.turnstileContainer.style.display = 'none';
+                state.isTurnstileRendered = false;
+                if (window.turnstile) window.turnstile.remove();
+            }
+        }
+
+        // Turnstile 驗證成功回調
+        window.onTurnstileSuccess = function(token) {
+            console.log('Turnstile frontend verification successful, token:', token);
+            if (!state.pendingAction) {
+                console.error('No pending action found');
+                alert('驗證成功，但無待處理動作。請重新搜尋或選擇分類。');
+                elements.turnstileContainer.style.display = 'none';
+                state.isTurnstileRendered = false;
+                if (window.turnstile) window.turnstile.remove();
+                return;
+            }
+            validateToken(token);
+        };
+
+        // 顯示並渲染 Turnstile widget
+        let debounceTimer = null;
+        function showTurnstile() {
+            console.log('showTurnstile called, isTurnstileRendered:', state.isTurnstileRendered);
+            if (state.isTurnstileRendered) {
+                if (window.turnstile) {
+                    console.log('Resetting existing Turnstile widget');
+                    window.turnstile.reset();
+                    return;
+                }
+            }
+
+            elements.turnstileContainer.innerHTML = '';
+            const turnstileDiv = document.createElement('div');
+            turnstileDiv.className = 'cf-turnstile';
+            elements.turnstileContainer.appendChild(turnstileDiv);
+            elements.turnstileContainer.style.display = 'flex';
+
+            if (window.turnstile) {
+                console.log('Rendering new Turnstile widget');
+                try {
+                    window.turnstile.render(turnstileDiv, {
+                        sitekey: '0x4AAAAAAAQOrX6jyaqqHxdp',
+                        callback: 'onTurnstileSuccess'
+                    });
+                    state.isTurnstileRendered = true;
+                } catch (error) {
+                    console.error('Turnstile render error:', error);
+                    alert('無法渲染驗證元件，請刷新頁面或檢查網絡。');
+                    elements.turnstileContainer.style.display = 'none';
+                    state.isTurnstileRendered = false;
+                }
+            } else {
+                console.error('Turnstile API not loaded');
+                alert('無法載入驗證元件，請刷新頁面後重試。');
+            }
+        }
+
+        function debounceShowTurnstile() {
+            if (debounceTimer) clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(showTurnstile, 300);
+        }
+
+        // 執行搜尋
+        function performSearch() {
+            const keyword = elements.searchInput.value.trim();
+            if (!keyword) {
+                alert('請輸入關鍵字');
+                return;
+            }
+            state.pendingAction = { type: 'search', value: keyword };
+            console.log('performSearch: pendingAction set to:', state.pendingAction);
+            debounceShowTurnstile();
+        }
+
+        // 分類按鈕點擊處理
+        function handleCategoryClick(category) {
+            state.pendingAction = { type: 'category', value: category };
+            console.log('handleCategoryClick: pendingAction set to:', state.pendingAction);
+            debounceShowTurnstile();
+        }
+
+        // 清除輸入
+        function clearSearchInput() {
+            elements.searchInput.value = '';
+            elements.searchInput.dispatchEvent(new Event('input'));
+            elements.searchInput.focus();
+        }
+
+        // 初始化搜尋輸入監聽
+        function initSearchInput() {
+            elements.clearIcon.addEventListener('click', clearSearchInput);
+            elements.searchInput.addEventListener('input', function() {
+                const hasValue = this.value.trim().length > 0;
+                elements.searchButton.classList.toggle('active', hasValue);
+                elements.clearIcon.style.display = hasValue ? 'block' : 'none';
+            });
+        }
+
+        // 打字效果
+        function initTypingEffect() {
+            if (!elements.typing) {
+                console.error('Typing element not found');
+                return;
+            }
+            const text = "顧客服務工作的好助手";
+            let index = 0;
+            let isDeleting = false;
+
+            function typeWriter() {
+                try {
+                    elements.typing.textContent = text.substring(0, index);
+                    if (!isDeleting) {
+                        if (index < text.length) {
+                            index++;
+                            setTimeout(typeWriter, 100);
+                        } else {
+                            isDeleting = true;
+                            setTimeout(typeWriter, 1000);
+                        }
+                    } else {
+                        if (index > 0) {
+                            index--;
+                            setTimeout(typeWriter, 50);
+                        } else {
+                            isDeleting = false;
+                            setTimeout(typeWriter, 200);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Typing effect error:', error);
+                }
+            }
+
+            console.log('Starting typing effect');
+            setTimeout(typeWriter, 500);
+        }
+
+        // 時間更新
+        function updateTime() {
+            const now = new Date();
+            const timeOptions = { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' };
+            elements.time.textContent = now.toLocaleTimeString('zh-TW', timeOptions);
+            elements.date.textContent = now.toLocaleDateString('zh-TW', dateOptions).replace(/\//g, ' / ');
+        }
+
+        // 搜尋功能
+        function initSearch() {
+            elements.searchButton.addEventListener('click', performSearch);
+            elements.searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') performSearch();
+            });
+        }
+
+        // 分類按鈕功能
+        function initCategoryButtons() {
+            elements.categoryButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const category = button.getAttribute('data-category');
+                    handleCategoryClick(category);
+                });
+            });
+        }
+
+        // 主初始化函數
+        function init() {
+            try {
+                initTypingEffect();
+                updateTime();
+                initSearchInput();
+                initSearch();
+                initCategoryButtons();
+                initDropdownMenu();
+                setInterval(updateTime, 1000);
+            } catch (error) {
+                console.error('Initialization error:', error);
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+    </script>
 </body>
 </html>
