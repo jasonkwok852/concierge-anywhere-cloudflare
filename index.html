@@ -592,262 +592,261 @@
 
     <script>
     (function() {
-        'use strict';
+    'use strict';
 
-        const state = {
-            isVerified: false,
-            pendingAction: null,
-            isTurnstileRendered: false
-        };
+    const state = {
+        isVerified: false,
+        pendingAction: null,
+        isTurnstileRendered: false
+    };
 
-        const elements = {
-            typing: document.getElementById('typing'),
-            time: document.getElementById('time'),
-            date: document.getElementById('date'),
-            searchInput: document.getElementById('searchInput'),
-            searchButton: document.getElementById('searchButton'),
-            clearIcon: document.getElementById('clearIcon'),
-            categoryButtons: document.querySelectorAll('.action-button[data-category]'),
-            turnstileContainer: document.getElementById('turnstileContainer'),
-            menuButton: document.getElementById('menuButton'),
-            controlCenterButton: document.getElementById('controlCenterButton'), // 新增控制中心按鈕的引用
-            dropdownMenu: document.getElementById('dropdownMenu')
-        };
+    const elements = {
+        typing: document.getElementById('typing'),
+        time: document.getElementById('time'),
+        date: document.getElementById('date'),
+        searchInput: document.getElementById('searchInput'),
+        searchButton: document.getElementById('searchButton'),
+        clearIcon: document.getElementById('clearIcon'),
+        categoryButtons: document.querySelectorAll('.action-button[data-category]'),
+        turnstileContainer: document.getElementById('turnstileContainer'),
+        menuButton: document.getElementById('menuButton'),
+        controlCenterButton: document.getElementById('controlCenterButton'),
+        dropdownMenu: document.getElementById('dropdownMenu')
+    };
 
-        function initDropdownMenu() {
-            elements.menuButton.addEventListener('click', function(e) {
-                e.stopPropagation();
-                elements.dropdownMenu.classList.toggle('show');
-            });
-            elements.controlCenterButton.addEventListener('click', function(e) {
-                e.stopPropagation();
-                // 這裡可以添加控制中心的邏輯，例如彈出控制面板
-                alert('控制中心功能尚未實現，請聯繫管理員！');
-            });
-            document.addEventListener('click', function() {
-                elements.dropdownMenu.classList.remove('show');
-            });
+    function initDropdownMenu() {
+        elements.menuButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            elements.dropdownMenu.classList.toggle('show');
+        });
+        elements.controlCenterButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            alert('控制中心功能尚未實現，請聯繫管理員！');
+        });
+        document.addEventListener('click', function() {
+            elements.dropdownMenu.classList.remove('show');
+        });
+    }
+
+    function redirectToRetool(action) {
+        const baseUrl = 'https://hello.concierge-anywhere.com/p/search/info_directory_page';
+        if (!action || !action.type || !action.value) {
+            alert('重定向失敗：缺少必要的動作參數。請重新搜尋或選擇分類。');
+            return;
         }
+        let redirectUrl;
+        if (action.type === 'search') {
+            redirectUrl = `${baseUrl}#keyword=${encodeURIComponent(action.value)}`;
+        } else if (action.type === 'category') {
+            redirectUrl = `${baseUrl}#category=${encodeURIComponent(action.value)}`;
+        } else {
+            alert('重定向失敗：無效的動作類型。請重試。');
+            return;
+        }
+        console.log('Redirecting to:', redirectUrl);
+        try {
+            window.location.href = redirectUrl;
+            setTimeout(() => {
+                if (window.location.href !== redirectUrl) {
+                    window.location.replace(redirectUrl);
+                    setTimeout(() => {
+                        if (window.location.href !== redirectUrl) {
+                            alert('重定向失敗：可能因域名或網絡問題，請手動訪問 ' + redirectUrl);
+                        }
+                    }, 2000);
+                }
+            }, 2000);
+        } catch (error) {
+            alert(`無法重定向到 Retool 頁面：${error.message || '未知錯誤'}。請檢查網絡或瀏覽器設置。`);
+        }
+    }
 
-        function redirectToRetool(action) {
-            const baseUrl = 'https://hello.concierge-anywhere.com/p/search/info_directory_page';
-            if (!action || !action.type || !action.value) {
-                alert('重定向失敗：缺少必要的動作參數。請重新搜尋或選擇分類。');
-                return;
-            }
-            let redirectUrl;
-            if (action.type === 'search') {
-                redirectUrl = `${baseUrl}#keyword=${encodeURIComponent(action.value)}`;
-            } else if (action.type === 'category') {
-                redirectUrl = `${baseUrl}#category=${encodeURIComponent(action.value)}`;
+    async function validateToken(token) {
+        try {
+            const response = await fetch('https://concierge-anywhere.com/turnstile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token })
+            });
+            const result = await response.json();
+            console.log('Backend response:', result);
+
+            if (result.success) {
+                state.isVerified = true;
+                redirectToRetool(state.pendingAction);
             } else {
-                alert('重定向失敗：無效的動作類型。請重試。');
-                return;
-            }
-            console.log('Redirecting to:', redirectUrl);
-            try {
-                window.location.href = redirectUrl;
-                setTimeout(() => {
-                    if (window.location.href !== redirectUrl) {
-                        window.location.replace(redirectUrl);
-                        setTimeout(() => {
-                            if (window.location.href !== redirectUrl) {
-                                alert('重定向失敗：可能因域名或網絡問題，請手動訪問 ' + redirectUrl);
-                            }
-                        }, 2000);
-                    }
-                }, 2000);
-            } catch (error) {
-                alert(`無法重定向到 Retool 頁面：${error.message || '未知錯誤'}。請檢查網絡或瀏覽器設置。`);
-            }
-        }
-
-        async function validateToken(token) {
-            try {
-                const response = await fetch('https://concierge-anywhere.com/turnstile', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token })
-                });
-                const result = await response.json();
-                console.log('Backend response:', result);
-
-                if (result.success) {
-                    state.isVerified = true;
-                    redirectToRetool(state.pendingAction);
-                } else {
-                    alert(`驗證失敗：${result.error || '未知錯誤'} (代碼: ${result.codes || '無'}). 請重試或聯繫支援。`);
-                    elements.turnstileContainer.style.display = 'none';
-                    state.isTurnstileRendered = false;
-                    if (window.turnstile) window.turnstile.remove();
-                    debounceShowTurnstile();
-                }
-            } catch (error) {
-                alert(`驗證過程中發生錯誤：${error.message || '未知錯誤'}。請檢查網絡連線後重試。`);
+                alert(`驗證失敗：${result.error || '未知錯誤'} (代碼: ${result.codes || '無'}). 請重試或聯繫支援。`);
                 elements.turnstileContainer.style.display = 'none';
                 state.isTurnstileRendered = false;
                 if (window.turnstile) window.turnstile.remove();
+                debounceShowTurnstile();
             }
+        } catch (error) {
+            alert(`驗證過程中發生錯誤：${error.message || '未知錯誤'}。請檢查網絡連線後重試。`);
+            elements.turnstileContainer.style.display = 'none';
+            state.isTurnstileRendered = false;
+            if (window.turnstile) window.turnstile.remove();
         }
+    }
 
-        window.onTurnstileSuccess = function(token) {
-            if (!state.pendingAction) {
-                alert('驗證成功，但無待處理動作。請重新搜尋或選擇分類。');
-                elements.turnstileContainer.style.display = 'none';
-                state.isTurnstileRendered = false;
-                if (window.turnstile) window.turnstile.remove();
-                return;
-            }
-            console.log('Token received:', token);
-            validateToken(token);
-        };
+    window.onTurnstileSuccess = function(token) {
+        if (!state.pendingAction) {
+            alert('驗證成功，但無待處理動作。請重新搜尋或選擇分類。');
+            elements.turnstileContainer.style.display = 'none';
+            state.isTurnstileRendered = false;
+            if (window.turnstile) window.turnstile.remove();
+            return;
+        }
+        console.log('Token received:', token);
+        validateToken(token);
+    };
 
-        let debounceTimer = null;
-        function showTurnstile() {
-            if (state.isTurnstileRendered) {
-                if (window.turnstile) {
-                    window.turnstile.reset();
-                    return;
-                }
-            }
-
-            elements.turnstileContainer.innerHTML = '';
-            const turnstileDiv = document.createElement('div');
-            turnstileDiv.className = 'cf-turnstile';
-            elements.turnstileContainer.appendChild(turnstileDiv);
-            elements.turnstileContainer.style.display = 'flex';
-
+    let debounceTimer = null;
+    function showTurnstile() {
+        if (state.isTurnstileRendered) {
             if (window.turnstile) {
-                try {
-                    window.turnstile.render(turnstileDiv, {
-                        sitekey: '0x4AAAAAAAQOrX6jyaqqHxdp', // 請替換為你的實際站點金鑰
-                        callback: 'onTurnstileSuccess',
-                        'error-callback': function(error) {
-                            alert(`Turnstile 渲染錯誤：${error.message || '未知錯誤'}。請刷新頁面或聯繫支援。`);
-                            elements.turnstileContainer.style.display = 'none';
-                            state.isTurnstileRendered = false;
-                        }
-                    });
-                    state.isTurnstileRendered = true;
-                } catch (error) {
-                    alert('無法渲染驗證元件，請刷新頁面或檢查網絡。');
-                    elements.turnstileContainer.style.display = 'none';
-                    state.isTurnstileRendered = false;
-                }
-            } else {
-                alert('無法載入驗證元件，請刷新頁面後重試。');
-            }
-        }
-
-        function debounceShowTurnstile() {
-            if (debounceTimer) clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(showTurnstile, 300);
-        }
-
-        function performSearch() {
-            const keyword = elements.searchInput.value.trim();
-            if (!keyword) {
-                alert('請輸入關鍵字');
+                window.turnstile.reset();
                 return;
             }
-            state.pendingAction = { type: 'search', value: keyword };
-            debounceShowTurnstile();
         }
 
-        function handleCategoryClick(category) {
-            state.pendingAction = { type: 'category', value: category };
-            debounceShowTurnstile();
-        }
+        elements.turnstileContainer.innerHTML = '';
+        const turnstileDiv = document.createElement('div');
+        turnstileDiv.className = 'cf-turnstile';
+        elements.turnstileContainer.appendChild(turnstileDiv);
+        elements.turnstileContainer.style.display = 'flex';
 
-        function clearSearchInput() {
-            elements.searchInput.value = '';
-            elements.searchInput.dispatchEvent(new Event('input'));
-            elements.searchInput.focus();
-        }
-
-        function initSearchInput() {
-            elements.clearIcon.addEventListener('click', clearSearchInput);
-            elements.searchInput.addEventListener('input', function() {
-                const hasValue = this.value.trim().length > 0;
-                elements.searchButton.classList.toggle('active', hasValue);
-                elements.clearIcon.style.display = hasValue ? 'block' : 'none';
-            });
-        }
-
-        function initTypingEffect() {
-            if (!elements.typing) return;
-            const text = "顧客服務工作的好助手";
-            let index = 0;
-            let isDeleting = false;
-
-            function typeWriter() {
-                try {
-                    elements.typing.textContent = text.substring(0, index);
-                    if (!isDeleting) {
-                        if (index < text.length) {
-                            index++;
-                            setTimeout(typeWriter, 100);
-                        } else {
-                            isDeleting = true;
-                            setTimeout(typeWriter, 1000);
-                        }
-                    } else {
-                        if (index > 0) {
-                            index--;
-                            setTimeout(typeWriter, 50);
-                        } else {
-                            isDeleting = false;
-                            setTimeout(typeWriter, 200);
-                        }
-                    }
-                } catch (error) {}
-            }
-
-            setTimeout(typeWriter, 500);
-        }
-
-        function updateTime() {
-            const now = new Date();
-            const timeOptions = { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' };
-            const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' };
-            elements.time.textContent = now.toLocaleTimeString('zh-TW', timeOptions);
-            elements.date.textContent = now.toLocaleDateString('zh-TW', dateOptions).replace(/\//g, ' / ');
-        }
-
-        function initSearch() {
-            elements.searchButton.addEventListener('click', performSearch);
-            elements.searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') performSearch();
-            });
-        }
-
-        function initCategoryButtons() {
-            elements.categoryButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const category = button.getAttribute('data-category');
-                    handleCategoryClick(category);
-                });
-            });
-        }
-
-        function init() {
+        if (window.turnstile) {
             try {
-                initTypingEffect();
-                updateTime();
-                initSearchInput();
-                initSearch();
-                initCategoryButtons();
-                initDropdownMenu();
-                setInterval(updateTime, 1000);
+                window.turnstile.render(turnstileDiv, {
+                    sitekey: '0x4AAAAAAAQOrX6jyaqqHxdp', // 請替換為你的實際站點金鑰
+                    callback: 'onTurnstileSuccess',
+                    'error-callback': function(error) {
+                        alert(`Turnstile 渲染錯誤：${error.message || '未知錯誤'}。請刷新頁面或聯繫支援。`);
+                        elements.turnstileContainer.style.display = 'none';
+                        state.isTurnstileRendered = false;
+                    }
+                });
+                state.isTurnstileRendered = true;
+            } catch (error) {
+                alert('無法渲染驗證元件，請刷新頁面或檢查網絡。');
+                elements.turnstileContainer.style.display = 'none';
+                state.isTurnstileRendered = false;
+            }
+        } else {
+            alert('無法載入驗證元件，請刷新頁面後重試。');
+        }
+    }
+
+    function debounceShowTurnstile() {
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(showTurnstile, 300);
+    }
+
+    function performSearch() {
+        const keyword = elements.searchInput.value.trim();
+        if (!keyword) {
+            alert('請輸入關鍵字');
+            return;
+        }
+        state.pendingAction = { type: 'search', value: keyword };
+        debounceShowTurnstile();
+    }
+
+    function handleCategoryClick(category) {
+        state.pendingAction = { type: 'category', value: category };
+        debounceShowTurnstile();
+    }
+
+    function clearSearchInput() {
+        elements.searchInput.value = '';
+        elements.searchInput.dispatchEvent(new Event('input'));
+        elements.searchInput.focus();
+    }
+
+    function initSearchInput() {
+        elements.clearIcon.addEventListener('click', clearSearchInput);
+        elements.searchInput.addEventListener('input', function() {
+            const hasValue = this.value.trim().length > 0;
+            elements.searchButton.classList.toggle('active', hasValue);
+            elements.clearIcon.style.display = hasValue ? 'block' : 'none';
+        });
+    }
+
+    function initTypingEffect() {
+        if (!elements.typing) return;
+        const text = "顧客服務工作的好助手";
+        let index = 0;
+        let isDeleting = false;
+
+        function typeWriter() {
+            try {
+                elements.typing.textContent = text.substring(0, index);
+                if (!isDeleting) {
+                    if (index < text.length) {
+                        index++;
+                        setTimeout(typeWriter, 100);
+                    } else {
+                        isDeleting = true;
+                        setTimeout(typeWriter, 1000);
+                    }
+                } else {
+                    if (index > 0) {
+                        index--;
+                        setTimeout(typeWriter, 50);
+                    } else {
+                        isDeleting = false;
+                        setTimeout(typeWriter, 200);
+                    }
+                }
             } catch (error) {}
         }
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
-        }
-    })();
+        setTimeout(typeWriter, 500);
+    }
+
+    function updateTime() {
+        const now = new Date();
+        const timeOptions = { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' };
+        const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' };
+        elements.time.textContent = now.toLocaleTimeString('zh-TW', timeOptions);
+        elements.date.textContent = now.toLocaleDateString('zh-TW', dateOptions).replace(/\//g, ' / ');
+    }
+
+    function initSearch() {
+        elements.searchButton.addEventListener('click', performSearch);
+        elements.searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performSearch();
+        });
+    }
+
+    function initCategoryButtons() {
+        elements.categoryButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const category = button.getAttribute('data-category');
+                handleCategoryClick(category);
+            });
+        });
+    }
+
+    function init() {
+        try {
+            initTypingEffect();
+            updateTime();
+            initSearchInput();
+            initSearch();
+            initCategoryButtons();
+            initDropdownMenu();
+            setInterval(updateTime, 1000);
+        } catch (error) {}
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
     </script>
 </body>
 </html>
