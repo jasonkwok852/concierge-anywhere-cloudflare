@@ -649,7 +649,7 @@
         async function validateToken(token) {
             console.log('validateToken called with token:', token);
             try {
-                const response = await fetch('https://concierge-anywhere.com/turnstile_verify', {
+                const response = await fetch('https://concierge-anywhere.com/turnstile', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token })
