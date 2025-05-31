@@ -1,15 +1,7 @@
-export async function onRequest() {
-  return new Response("Turnstile Test", { status: 200 });
-}
-
 export async function onRequestPost({ request, env }) {
   try {
     // 驗證環境變數
     if (!env.TURNSTILE_SECRET_KEY) {
-      console.error({
-        error: 'Missing configuration',
-        detail: 'TURNSTILE_SECRET_KEY not set in environment'
-      });
       return new Response(
         JSON.stringify({ success: false, error: 'Server configuration error' }),
         {
@@ -32,11 +24,6 @@ export async function onRequestPost({ request, env }) {
 
     // 驗證 token 格式
     if (!token || typeof token !== 'string' || token.length < 10) {
-      console.warn({
-        error: 'Invalid token',
-        detail: 'Token validation failed',
-        clientIp
-      });
       return new Response(
         JSON.stringify({ success: false, error: 'Invalid Turnstile token' }),
         {
@@ -75,7 +62,6 @@ export async function onRequestPost({ request, env }) {
             'X-Content-Type-Options': 'nosniff',
             'Content-Security-Policy': "default-src 'none'",
             'Cache-Control': 'no-store',
-            // 使用環境變數配置允許的域名
             'Access-Control-Allow-Origin': env.CORS_ORIGIN || '*',
             'Access-Control-Allow-Methods': 'POST',
             'Access-Control-Max-Age': '86400'
@@ -83,11 +69,6 @@ export async function onRequestPost({ request, env }) {
         }
       );
     } else {
-      console.warn({
-        error: 'Turnstile verification failed',
-        errorCodes: verification['error-codes'],
-        clientIp
-      });
       return new Response(
         JSON.stringify({
           success: false,
@@ -105,11 +86,6 @@ export async function onRequestPost({ request, env }) {
       );
     }
   } catch (err) {
-    console.error({
-      error: 'Server error',
-      detail: err.message,
-      stack: err.stack
-    });
     return new Response(
       JSON.stringify({ success: false, error: 'Internal server error' }),
       {
