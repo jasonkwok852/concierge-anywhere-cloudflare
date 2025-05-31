@@ -1,3 +1,3 @@
-export async function onRequest(context) {
-  return new Response("Hello from turnstile.js", { status: 200 });
+export async function onRequest() {
+  return new Response("Hello World", { status: 200 });
 }
