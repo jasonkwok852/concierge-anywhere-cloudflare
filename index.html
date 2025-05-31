@@ -635,11 +635,17 @@
                 alert('重定向失敗：無效的動作類型。請重試。');
                 return;
             }
+            console.log('Redirecting to:', redirectUrl);
             try {
                 window.location.href = redirectUrl;
                 setTimeout(() => {
                     if (window.location.href !== redirectUrl) {
                         window.location.replace(redirectUrl);
+                        setTimeout(() => {
+                            if (window.location.href !== redirectUrl) {
+                                alert('重定向失敗：可能因域名或網絡問題，請手動訪問 ' + redirectUrl);
+                            }
+                        }, 2000);
                     }
                 }, 2000);
             } catch (error) {
@@ -655,6 +661,7 @@
                     body: JSON.stringify({ token })
                 });
                 const result = await response.json();
+                console.log('Backend response:', result);
 
                 if (result.success) {
                     state.isVerified = true;
@@ -682,6 +689,7 @@
                 if (window.turnstile) window.turnstile.remove();
                 return;
             }
+            console.log('Token received:', token);
             validateToken(token);
         };
 
@@ -703,8 +711,13 @@
             if (window.turnstile) {
                 try {
                     window.turnstile.render(turnstileDiv, {
-                        sitekey: 'your-actual-sitekey', // 請替換為你的實際站點金鑰
-                        callback: 'onTurnstileSuccess'
+                        sitekey: '0x4AAAAAAAQOrX6jyaqqHxdp', // 請替換為你的實際站點金鑰
+                        callback: 'onTurnstileSuccess',
+                        'error-callback': function(error) {
+                            alert(`Turnstile 渲染錯誤：${error.message || '未知錯誤'}。請刷新頁面或聯繫支援。`);
+                            elements.turnstileContainer.style.display = 'none';
+                            state.isTurnstileRendered = false;
+                        }
                     });
                     state.isTurnstileRendered = true;
                 } catch (error) {
