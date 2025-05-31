@@ -1,3 +1,7 @@
+export async function onRequest() {
+  return new Response("Turnstile Test", { status: 200 });
+}
+
 export async function onRequestPost({ request, env }) {
   try {
     // 驗證環境變數
