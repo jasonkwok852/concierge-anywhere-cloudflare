@@ -128,7 +128,7 @@
             position: relative;
         }
         
-        .menu-btn {
+        .header-button {
             background: transparent;
             color: #fafafa;
             border: 2px solid #fafafa;
@@ -146,11 +146,11 @@
             height: 36px;
         }
         
-        .menu-btn .bi {
+        .header-button .bi {
             margin-right: 2px;
         }
         
-        .menu-btn:hover, .menu-btn:focus {
+        .header-button:hover, .header-button:focus {
             background: #fafafa;
             color: #23396C;
         }
@@ -513,7 +513,7 @@
                 bottom: 55px; 
             }
 
-            .menu-btn {
+            .header-button {
                 font-size: 14px;
                 padding: 4px 12px;
                 height: 36px;
@@ -530,8 +530,11 @@
                 </a>
             </div>
             <div class="header-actions">
-                <button class="menu-btn" id="menuButton">
-                    <i class="bi bi-gear-fill"></i> 控制中心 <i class="bi bi-list"></i> <span>選單</span>
+                <button class="header-button" id="controlCenterButton">
+                    <i class="bi bi-gear-fill"></i> 控制中心
+                </button>
+                <button class="header-button" id="menuButton">
+                    <i class="bi bi-list"></i> <span>選單</span>
                 </button>
                 <div class="dropdown-menu" id="dropdownMenu">
                     <a href="turnstile.html" class="dropdown-item">Turnstile 頁面</a>
@@ -607,6 +610,7 @@
             categoryButtons: document.querySelectorAll('.action-button[data-category]'),
             turnstileContainer: document.getElementById('turnstileContainer'),
             menuButton: document.getElementById('menuButton'),
+            controlCenterButton: document.getElementById('controlCenterButton'), // 新增控制中心按鈕的引用
             dropdownMenu: document.getElementById('dropdownMenu')
         };
 
@@ -614,6 +618,11 @@
             elements.menuButton.addEventListener('click', function(e) {
                 e.stopPropagation();
                 elements.dropdownMenu.classList.toggle('show');
+            });
+            elements.controlCenterButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                // 這裡可以添加控制中心的邏輯，例如彈出控制面板
+                alert('控制中心功能尚未實現，請聯繫管理員！');
             });
             document.addEventListener('click', function() {
                 elements.dropdownMenu.classList.remove('show');
