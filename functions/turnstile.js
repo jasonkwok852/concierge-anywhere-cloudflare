@@ -51,7 +51,7 @@ export async function onRequestPost({ request, env }) {
 
     const verification = await verifyResponse.json();
 
-    // 處理驗證結果
+    // 處理驗證結果 
     if (verification.success) {
       return new Response(
         JSON.stringify({ success: true, challenge_ts: verification.challenge_ts }),
