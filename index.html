@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="顧客服務提供商，提供資訊手冊和圖表資源">
+    <meta name="description" content="顧客服務提供商，提供資訊手冊和圖表資源" />
     <title>顧客服務</title>
     
     <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet" />
     
     <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
     
     <!-- Cloudflare Turnstile -->
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
@@ -31,32 +31,9 @@
             --hover-shadow: 0 8px 20px rgba(35, 57, 108, 0.3);
         }
 
-        ::selection {
-            color: #F8EF32;
-            background: #243D51;
-        }
-
-        a:link, a:visited, a:hover, a:active {
-            color: #23396C;
-            background-color: transparent;
-            text-decoration: none;
-        }
-
-        a:hover, a:active {
-            text-decoration: underline;
-        }
-
-        .highlight {
-            font-size: 24px;
-            color: #23396C;
-            font-weight: bold;
-            background: linear-gradient(to top, #EAECED 40%, transparent 40%);
-            display: inline;
-            border-radius: 2px;
-        }
-
         * {
             font-family: 'Noto Sans HK', sans-serif;
+            box-sizing: border-box;
         }
 
         html, body {
@@ -75,33 +52,25 @@
             display: flex;
             flex-direction: column;
             align-items: stretch;
-            justify-content: flex-start;
-            box-sizing: border-box;
-            padding: 0;
         }
 
         header {
             width: 100%;
             background-color: var(--header-bg);
             color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             height: 74px;
-            box-sizing: border-box;
             position: relative;
             z-index: 10;
         }
         
         .header-inner {
-            width: 100%;
             max-width: 1200px;
+            margin: 0 auto;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 32px;
-            height: 74px;
-            box-sizing: border-box;
+            height: 100%;
         }
         
         .site-brand {
@@ -118,14 +87,13 @@
             height: 80px;
             width: 200px;
             object-fit: contain;
-            transition: all 0.3s ease;
+            transition: var(--transition);
         }
         
         .header-actions {
             display: flex;
             align-items: center;
             gap: 12px;
-            position: relative;
         }
         
         .header-button {
@@ -137,19 +105,16 @@
             font-size: 14px;
             padding: 4px 12px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            outline: none;
-            text-decoration: none;
-            display: inline-flex;
+            transition: var(--transition);
+            display: flex;
             align-items: center;
-            justify-content: center;
             height: 36px;
         }
         
         #controlCenterButton {
-            border: none;
             padding: 4px;
             width: 36px;
+            border: none;
         }
         
         #controlCenterButton span {
@@ -160,9 +125,10 @@
             margin-right: 2px;
         }
         
-        .header-button:hover, .header-button:focus {
+        .header-button:hover,
+        .header-button:focus {
             background: #fafafa;
-            color: #23396C;
+            color: var(--main-color);
         }
 
         .dropdown-menu {
@@ -171,7 +137,7 @@
             right: 0;
             background-color: #fafafa;
             border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: var(--shadow);
             padding: 12px 16px;
             min-width: 240px;
             z-index: 1000;
@@ -185,7 +151,7 @@
         .dropdown-item {
             display: block;
             padding: 8px 16px;
-            color: #23396C;
+            color: var(--main-color);
             text-decoration: none;
             font-weight: 500;
             transition: background-color 0.2s;
@@ -196,14 +162,11 @@
         }
 
         .main-content {
-            flex: 1 1 auto;
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-            width: 100%;
             padding: 32px 12px 80px;
-            box-sizing: border-box;
             margin-top: 5%;
         }
 
@@ -211,9 +174,7 @@
             font-weight: 700;
             font-size: clamp(1.5rem, 4vw, 2.2rem);
             text-align: center;
-            margin: 0 0 1rem;
-            position: relative;
-            user-select: none;
+            margin-bottom: 1rem;
             line-height: 1.2;
             min-height: 2.8rem;
         }
@@ -221,60 +182,51 @@
         .typing-text {
             white-space: nowrap;
             overflow: hidden;
-            position: relative;
-            font-size: inherit;
             color: var(--main-color);
             display: inline-block;
-            min-height: 1.2em;
         }
         
         .typing-text::after {
             content: "|";
-            display: inline-block;
             width: 0.15em;
             height: 1.2em;
             color: var(--main-color);
             margin-left: 0.1em;
             vertical-align: text-top;
             animation: blinkCursor 0.7s steps(2) infinite;
-            position: relative;
             border-radius: 2px;
-            background: transparent;
         }
         
         @keyframes blinkCursor {
-            0%,100% { opacity: 1; }
             50% { opacity: 0; }
         }
 
         .timer-container {
-            background: transparent;
             padding: 0.8rem 1.5rem;
             border-radius: 0.5rem;
             text-align: center;
             margin-bottom: 1.5rem;
             font-weight: bold;
             user-select: none;
-            transition: var(--transition);
             backdrop-filter: blur(5px);
         }
         
-        .time {
+        .time, .date {
             font-size: 16px;
             line-height: 1;
+        }
+        
+        .time {
             margin-bottom: 0.2rem;
             font-variant-numeric: tabular-nums;
         }
         
         .date {
-            font-size: 16px;
             opacity: 0.8;
-            font-weight: bold;
         }
 
         .search-container {
             display: flex;
-            flex-direction: row;
             align-items: center;
             width: 100%;
             max-width: 500px;
@@ -291,9 +243,9 @@
             border-radius: 0.5rem;
             outline: none;
             transition: var(--transition);
-            background-color: rgba(255,255,255,0.8);
+            background-color: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(5px);
-            color: #23396C;
+            color: var(--main-color);
         }
         
         .search-input:focus {
@@ -312,7 +264,6 @@
             display: none;
             background: none;
             border: none;
-            outline: none;
             padding: 0;
         }
         
@@ -328,9 +279,9 @@
             padding: 0.6rem 0.8rem;
             font-size: clamp(0.85rem, 3vw, 0.95rem);
             font-weight: 600;
-            color: #243D51;
+            color: var(--main-color);
             background-color: #FAFAFA;
-            border: 1px solid #243D51;
+            border: 1px solid var(--border-color);
             border-radius: 0.5rem;
             cursor: pointer;
             transition: var(--transition);
@@ -339,22 +290,16 @@
             justify-content: center;
             gap: 0.3rem;
             min-width: 80px;
-            white-space: nowrap;
         }
         
         .search-button.active {
             background-color: var(--button-hover-color);
-            border-color: var(--button-hover-color);
             color: #fff;
         }
         
         .search-button:hover {
             transform: translateY(-2px);
             box-shadow: var(--hover-shadow);
-        }
-
-        .search-button .button-text {
-            display: inline;
         }
 
         .button-container {
@@ -375,22 +320,20 @@
             padding: 0.5rem 0.8rem;
             font-size: clamp(0.65rem, 3vw, 0.75rem);
             font-weight: 600;
-            color: #243D51;
-            background-color: rgba(255,255,255,0.8);
-            border: 1px solid #243D51;
+            color: var(--main-color);
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid var(--border-color);
             border-radius: 0.5rem;
             text-decoration: none;
             transition: var(--transition);
-            user-select: none;
             cursor: pointer;
-            outline: none;
-            text-align: center;
             box-shadow: var(--shadow);
             backdrop-filter: blur(5px);
             min-width: 90px;
         }
         
-        .action-button:hover, .action-button:focus {
+        .action-button:hover,
+        .action-button:focus {
             background-color: var(--button-hover-color);
             color: #fff;
             transform: translateY(-2px);
@@ -410,10 +353,6 @@
             min-height: 65px;
         }
 
-        .cf-turnstile {
-            margin: 0 auto;
-        }
-
         .fixed-icon {
             position: fixed;
             bottom: 60px;
@@ -429,7 +368,6 @@
             background-color: transparent;
             border-radius: 5px;
             text-decoration: none;
-            box-shadow: none;
         }
         
         .fixed-icon a:hover {
@@ -438,7 +376,7 @@
         
         .fixed-icon .bi {
             font-size: 2.5rem;
-            color: #243D51;
+            color: var(--main-color);
             transition: transform 0.2s;
         }
         
@@ -448,13 +386,12 @@
         
         .icon-text {
             margin-top: 5px;
-            color: #243D51;
+            color: var(--main-color);
             font-size: 14px;
             font-weight: bold;
         }
 
         footer {
-            width: 100%;
             text-align: center;
             padding: 1rem 0;
             font-size: 0.8rem;
@@ -474,65 +411,16 @@
         }
 
         @media (max-width: 767px) {
-            .site-icon {
-                height: 60px;
-                width: 150px;
-            }
-            
-            .header-inner { 
-                padding: 0 16px; 
-            }
-            
-            .main-content { 
-                padding: 16px 4px 80px;
-                margin-top: 5%;
-            }
-            
-            .button-container { 
-                gap: 0.6rem; 
-            }
-            
-            .action-button { 
-                min-width: 80px; 
-                padding: 0.4rem 0.6rem; 
-            }
-            
-            .search-container { 
-                flex-direction: row;
-                gap: 8px;
-            }
-            
-            .search-input {
-                width: 100%;
-                padding: 0.5rem 2.3rem 0.5rem 0.8rem;
-                font-size: clamp(0.75rem, 2.5vw, 0.85rem);
-            }
-            
-            .search-button {
-                padding: 0.5rem 0.8rem;
-                font-size: clamp(0.8rem, 2.5vw, 0.9rem);
-                min-width: 60px;
-            }
-
-            .search-button .button-text {
-                display: inline;
-                font-size: 0.7rem;
-            }
-            
-            .clear-icon {
-                right: 60px;
-                font-size: 16px;
-            }
-            
-            .fixed-icon { 
-                bottom: 55px; 
-            }
-
-            .header-button {
-                font-size: 14px;
-                padding: 4px 12px;
-                height: 36px;
-            }
+            .site-icon { height: 60px; width: 150px; }
+            .header-inner { padding: 0 16px; }
+            .main-content { padding: 16px 4px 80px; }
+            .button-container { gap: 0.6rem; }
+            .action-button { min-width: 80px; padding: 0.4rem 0.6rem; }
+            .search-container { gap: 8px; }
+            .search-input { padding: 0.5rem 2.3rem 0.5rem 0.8rem; font-size: clamp(0.75rem, 2.5vw, 0.85rem); }
+            .search-button { padding: 0.5rem 0.8rem; font-size: clamp(0.8rem, 2.5vw, 0.9rem); min-width: 60px; }
+            .clear-icon { right: 60px; font-size: 16px; }
+            .fixed-icon { bottom: 55px; }
         }
     </style>
 </head>
@@ -541,13 +429,12 @@
         <div class="header-inner">
             <div class="site-brand">
                 <a href="https://concierge-anywhere.com">
-                    <img src="https://concierge-anywhere-storage.s3.ap-east-1.amazonaws.com/icon%2Btext(%E9%80%8F%E6%98%8E%E8%83%8C%E6%99%AF)(%E6%9C%89%E9%99%B0%E5%BD%B1)+1000x400.png" alt="網站標誌" class="site-icon" />
+                    <img src="https://concierge-anywhere-storage.s3.ap-east-1.amazonaws.com/icon%2Btext(%E9%80%8F%E6%98%8E%E8%83%8C%E6%99%AF)(%E6%9C%89%E9%99%B0%E5%BD%B1)+1000x400.png" alt="網站標誌" class="site-icon" loading="lazy" />
                 </a>
             </div>
             <div class="header-actions">
                 <button class="header-button" id="controlCenterButton" aria-label="控制中心">
                     <i class="bi bi-gear-fill"></i>
-                    <span>控制中心</span>
                 </button>
                 <button class="header-button" id="menuButton">
                     <i class="bi bi-list"></i> <span>選單</span>
@@ -569,7 +456,7 @@
             <div class="date" id="date" aria-live="polite"></div>
         </div>
         <div class="search-container">
-            <input type="text" id="searchInput" class="search-input" placeholder="輸入『主標題』或『副標題』或『附加說明』的內容" aria-label="搜尋關鍵字">
+            <input type="text" id="searchInput" class="search-input" placeholder="輸入『主標題』或『副標題』或『附加說明』的內容" aria-label="搜尋關鍵字" />
             <span class="clear-icon" id="clearIcon">×</span>
             <button id="searchButton" class="search-button" aria-label="搜尋">
                 <i class="bi bi-search" aria-hidden="true"></i> <span class="button-text">搜尋</span>
@@ -593,9 +480,7 @@
             </button>
         </div>
         <div class="turnstile-container" id="turnstileContainer">
-            <div class="cf-turnstile" 
-                 data-sitekey="0x4AAAAAAAQOrX6jyaqqHxdp"
-                 data-callback="onTurnstileSuccess"></div>
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAAQOrX6jyaqqHxdp" data-callback="onTurnstileSuccess"></div>
         </div>
     </main>
 
@@ -617,8 +502,7 @@
         const state = {
             isVerified: false,
             pendingAction: null,
-            isTurnstileRendered: false,
-            isProcessing: false
+            isTurnstileRendered: false
         };
 
         const elements = {
@@ -635,27 +519,19 @@
             dropdownMenu: document.getElementById('dropdownMenu')
         };
 
-        function initDropdownMenu() {
-            elements.menuButton.addEventListener('click', function(e) {
-                e.stopPropagation();
-                elements.dropdownMenu.classList.toggle('show');
-            });
-            elements.controlCenterButton.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-            document.addEventListener('click', function() {
-                elements.dropdownMenu.classList.remove('show');
-            });
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
         }
 
         function redirectToRetool(action) {
             const baseUrl = 'https://hello.concierge-anywhere.com/p/search/info_directory_page';
-            if (!action || !action.type || !action.value) {
-                console.error('重定向失敗：缺少必要的動作參數。');
-                return;
-            }
+            if (!action?.type || !action?.value) return;
             
-            const redirectUrl = action.type === 'search' 
+            const redirectUrl = action.type === 'search'
                 ? `${baseUrl}#keyword=${encodeURIComponent(action.value)}`
                 : `${baseUrl}#category=${encodeURIComponent(action.value)}`;
             
@@ -664,62 +540,47 @@
         }
 
         function showTurnstile() {
-            if (state.isProcessing) return;
-            
-            state.isProcessing = true;
-            elements.turnstileContainer.style.display = 'flex';
-            
             if (state.isTurnstileRendered && window.turnstile) {
                 window.turnstile.reset();
                 return;
             }
 
+            elements.turnstileContainer.style.display = 'flex';
             state.isTurnstileRendered = true;
         }
 
         window.onTurnstileSuccess = function(token) {
             console.log('Turnstile 驗證成功，Token:', token);
             state.isVerified = true;
-            state.isProcessing = false;
-            
-            if (state.pendingAction) {
-                redirectToRetool(state.pendingAction);
-            }
+            if (state.pendingAction) redirectToRetool(state.pendingAction);
+            elements.turnstileContainer.style.display = 'none';
+            if (window.turnstile) window.turnstile.remove();
         };
+
+        const debouncedShowTurnstile = debounce(showTurnstile, 300);
 
         function performSearch() {
             const keyword = elements.searchInput.value.trim();
             if (!keyword) return;
             
             state.pendingAction = { type: 'search', value: keyword };
-            
-            if (state.isVerified) {
-                redirectToRetool(state.pendingAction);
-            } else {
-                showTurnstile();
-            }
+            state.isVerified ? redirectToRetool(state.pendingAction) : debouncedShowTurnstile();
         }
 
         function handleCategoryClick(category) {
             state.pendingAction = { type: 'category', value: category };
-            
-            if (state.isVerified) {
-                redirectToRetool(state.pendingAction);
-            } else {
-                showTurnstile();
-            }
+            state.isVerified ? redirectToRetool(state.pendingAction) : debouncedShowTurnstile();
         }
 
         function clearSearchInput() {
             elements.searchInput.value = '';
             elements.searchInput.dispatchEvent(new Event('input'));
-            elements.searchInput.focus();
         }
 
         function initSearchInput() {
             elements.clearIcon.addEventListener('click', clearSearchInput);
-            elements.searchInput.addEventListener('input', function() {
-                const hasValue = this.value.trim().length > 0;
+            elements.searchInput.addEventListener('input', (e) => {
+                const hasValue = e.target.value.trim().length > 0;
                 elements.searchButton.classList.toggle('active', hasValue);
                 elements.clearIcon.style.display = hasValue ? 'block' : 'none';
             });
@@ -728,82 +589,57 @@
         function initTypingEffect() {
             if (!elements.typing) return;
             const text = "顧客服務工作的好助手";
-            let index = 0;
-            let isDeleting = false;
+            let index = 0, isDeleting = false;
 
             function typeWriter() {
-                try {
-                    elements.typing.textContent = text.substring(0, index);
-                    if (!isDeleting) {
-                        if (index < text.length) {
-                            index++;
-                            setTimeout(typeWriter, 100);
-                        } else {
-                            isDeleting = true;
-                            setTimeout(typeWriter, 1000);
-                        }
-                    } else {
-                        if (index > 0) {
-                            index--;
-                            setTimeout(typeWriter, 50);
-                        } else {
-                            isDeleting = false;
-                            setTimeout(typeWriter, 200);
-                        }
-                    }
-                } catch (error) {
-                    console.error('打字效果錯誤:', error);
+                elements.typing.textContent = text.substring(0, index);
+                if (!isDeleting) {
+                    if (index < text.length) index++;
+                    else isDeleting = true;
+                } else {
+                    if (index > 0) index--;
+                    else isDeleting = false;
                 }
+                setTimeout(typeWriter, isDeleting ? 50 : index === text.length ? 1000 : 100);
             }
-
             setTimeout(typeWriter, 500);
         }
 
         function updateTime() {
             const now = new Date();
-            const timeOptions = { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' };
-            const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' };
-            elements.time.textContent = now.toLocaleTimeString('zh-TW', timeOptions);
-            elements.date.textContent = now.toLocaleDateString('zh-TW', dateOptions).replace(/\//g, ' / ');
+            elements.time.textContent = now.toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            elements.date.textContent = now.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' }).replace(/\//g, ' / ');
         }
 
         function initSearch() {
             elements.searchButton.addEventListener('click', performSearch);
-            elements.searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') performSearch();
-            });
+            elements.searchInput.addEventListener('keypress', (e) => e.key === 'Enter' && performSearch());
         }
 
         function initCategoryButtons() {
-            elements.categoryButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const category = button.getAttribute('data-category');
-                    handleCategoryClick(category);
-                });
-            });
+            elements.categoryButtons.forEach(button => button.addEventListener('click', () => handleCategoryClick(button.dataset.category)));
+        }
+
+        function initDropdownMenu() {
+            elements.menuButton.addEventListener('click', (e) => { e.stopPropagation(); elements.dropdownMenu.classList.toggle('show'); });
+            elements.controlCenterButton.addEventListener('click', (e) => e.stopPropagation());
+            document.addEventListener('click', () => elements.dropdownMenu.classList.remove('show'));
         }
 
         function init() {
-            try {
-                console.log('頁面初始化開始');
-                initTypingEffect();
-                updateTime();
-                initSearchInput();
-                initSearch();
-                initCategoryButtons();
-                initDropdownMenu();
-                setInterval(updateTime, 1000);
-                console.log('頁面初始化完成');
-            } catch (error) {
-                console.error('初始化錯誤:', error);
-            }
+            console.log('頁面初始化開始');
+            initTypingEffect();
+            updateTime();
+            initSearchInput();
+            initSearch();
+            initCategoryButtons();
+            initDropdownMenu();
+            setInterval(updateTime, 1000);
+            console.log('頁面初始化完成');
         }
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
-        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+        else init();
     })();
     </script>
 </body>
