@@ -146,6 +146,17 @@
             height: 36px;
         }
         
+        /* Modified control center button style - removed text and border */
+        #controlCenterButton {
+            border: none;
+            padding: 4px;
+            width: 36px;
+        }
+        
+        #controlCenterButton span {
+            display: none;
+        }
+        
         .header-button .bi {
             margin-right: 2px;
         }
@@ -328,7 +339,7 @@
             align-items: center;
             justify-content: center;
             gap: 0.3rem;
-            min-width: 60px;
+            min-width: 80px; /* Increased width by 20px */
             white-space: nowrap;
         }
         
@@ -496,7 +507,7 @@
             .search-button {
                 padding: 0.5rem 0.8rem;
                 font-size: clamp(0.8rem, 2.5vw, 0.9rem);
-                min-width: 50px;
+                min-width: 60px;
             }
 
             .search-button .button-text {
@@ -530,8 +541,9 @@
                 </a>
             </div>
             <div class="header-actions">
-                <button class="header-button" id="controlCenterButton">
-                    <i class="bi bi-gear-fill"></i> 控制中心
+                <button class="header-button" id="controlCenterButton" aria-label="控制中心">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>控制中心</span>
                 </button>
                 <button class="header-button" id="menuButton">
                     <i class="bi bi-list"></i> <span>選單</span>
@@ -666,9 +678,9 @@
             }
         }
 
-        // 移除後端驗證，僅依賴 Turnstile 回調
+        // Turnstile success callback - now only does frontend verification before redirect
         window.onTurnstileSuccess = function(token) {
-            console.log('Turnstile success callback triggered with token:', token);
+            console.log('Turnstile verification successful with token:', token);
             if (!state.pendingAction) {
                 console.warn('驗證成功，但無待處理動作。');
                 alert('驗證成功，但無待處理動作。請重新搜尋或選擇分類。');
@@ -677,9 +689,12 @@
                 if (window.turnstile) window.turnstile.remove();
                 return;
             }
-            console.log('Token received, proceeding with redirect:', state.pendingAction);
-            state.isVerified = true;
+            
+            // No backend verification - proceed directly to redirect
+            console.log('Frontend verification complete, redirecting to:', state.pendingAction);
             redirectToRetool(state.pendingAction);
+            
+            // Clean up
             elements.turnstileContainer.style.display = 'none';
             state.isTurnstileRendered = false;
             if (window.turnstile) window.turnstile.remove();
@@ -713,8 +728,8 @@
                             elements.turnstileContainer.style.display = 'none';
                             state.isTurnstileRendered = false;
                         },
-                        retry: 'auto', // 自動重試以應對可能的網絡或 cookie 問題
-                        'retry-interval': 1000 // 重試間隔設為 1 秒
+                        retry: 'auto',
+                        'retry-interval': 1000
                     });
                     state.isTurnstileRendered = true;
                     console.log('Turnstile widget 渲染成功');
