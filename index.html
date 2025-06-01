@@ -617,7 +617,8 @@
         const state = {
             isVerified: false,
             pendingAction: null,
-            isTurnstileRendered: false
+            isTurnstileRendered: false,
+            isProcessing: false
         };
 
         const elements = {
@@ -641,7 +642,6 @@
             });
             elements.controlCenterButton.addEventListener('click', function(e) {
                 e.stopPropagation();
-                // 移除alert訊息
             });
             document.addEventListener('click', function() {
                 elements.dropdownMenu.classList.remove('show');
@@ -654,74 +654,60 @@
                 console.error('重定向失敗：缺少必要的動作參數。');
                 return;
             }
-            let redirectUrl;
-            if (action.type === 'search') {
-                redirectUrl = `${baseUrl}#keyword=${encodeURIComponent(action.value)}`;
-            } else if (action.type === 'category') {
-                redirectUrl = `${baseUrl}#category=${encodeURIComponent(action.value)}`;
-            } else {
-                console.error('重定向失敗：無效的動作類型。');
-                return;
-            }
+            
+            const redirectUrl = action.type === 'search' 
+                ? `${baseUrl}#keyword=${encodeURIComponent(action.value)}`
+                : `${baseUrl}#category=${encodeURIComponent(action.value)}`;
+            
             console.log('Redirecting to:', redirectUrl);
-            try {
-                window.location.href = redirectUrl;
-            } catch (error) {
-                console.error('重定向過程中發生錯誤:', error);
-            }
+            window.location.href = redirectUrl;
         }
 
         function showTurnstile() {
+            if (state.isProcessing) return;
+            
+            state.isProcessing = true;
             elements.turnstileContainer.style.display = 'flex';
             
             if (state.isTurnstileRendered && window.turnstile) {
-                console.log('Turnstile 已渲染，正在重置');
                 window.turnstile.reset();
                 return;
             }
 
-            if (window.turnstile) {
-                try {
-                    console.log('Turnstile 自動初始化中...');
-                    state.isTurnstileRendered = true;
-                } catch (error) {
-                    console.error('Turnstile 初始化錯誤:', error);
-                    elements.turnstileContainer.style.display = 'none';
-                    state.isTurnstileRendered = false;
-                }
-            } else {
-                console.error('Turnstile 腳本未載入');
-            }
+            state.isTurnstileRendered = true;
         }
 
         window.onTurnstileSuccess = function(token) {
             console.log('Turnstile 驗證成功，Token:', token);
-            
-            if (!state.pendingAction) {
-                console.warn('驗證成功，但無待處理動作');
-                return;
-            }
-            
             state.isVerified = true;
-            console.log('前端驗證已完成，自動跳轉', state.pendingAction);
+            state.isProcessing = false;
             
-            // 驗證成功後直接跳轉
-            redirectToRetool(state.pendingAction);
+            if (state.pendingAction) {
+                redirectToRetool(state.pendingAction);
+            }
         };
 
         function performSearch() {
             const keyword = elements.searchInput.value.trim();
-            if (!keyword) {
-                return;
-            }
+            if (!keyword) return;
             
             state.pendingAction = { type: 'search', value: keyword };
-            showTurnstile();
+            
+            if (state.isVerified) {
+                redirectToRetool(state.pendingAction);
+            } else {
+                showTurnstile();
+            }
         }
 
         function handleCategoryClick(category) {
             state.pendingAction = { type: 'category', value: category };
-            showTurnstile();
+            
+            if (state.isVerified) {
+                redirectToRetool(state.pendingAction);
+            } else {
+                showTurnstile();
+            }
         }
 
         function clearSearchInput() {
