@@ -233,7 +233,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 32px 12px 100px;
+            padding: 32px 12px 40px;
             margin-top: 5%;
         }
 
@@ -295,7 +295,6 @@
             opacity: 0.8;
         }
 
-        /* Tab Container 樣式 */
         .tab-container {
             width: 100%;
             max-width: 800px;
@@ -351,7 +350,6 @@
             to { opacity: 1; }
         }
 
-        /* 修改後的 search-container 樣式 */
         .search-container {
             position: relative;
             width: 100%;
@@ -531,10 +529,7 @@
             font-size: 0.8rem;
             color: var(--main-color);
             background-color: var(--bg-color);
-            position: fixed;
-            bottom: 0;
             width: 100%;
-            z-index: 2;
         }
 
         .footer-content {
@@ -591,7 +586,7 @@
         @media (max-width: 767px) {
             .site-icon { height: 60px; width: 150px; }
             .header-inner { padding: 0 16px; }
-            .main-content { padding: 16px 4px 120px; }
+            .main-content { padding: 16px 4px 20px; }
             .button-container { gap: 0.6rem; }
             .action-button { min-width: 80px; padding: 0.4rem 0.6rem; }
             .search-container { gap: 8px; }
@@ -801,14 +796,6 @@
             tabContents: document.querySelectorAll('.tab-content')
         };
 
-        function debounce(func, wait) {
-            let timeout;
-            return function(...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(this, args), wait);
-            };
-        }
-
         async function verifyTurnstile(token) {
             try {
                 const response = await fetch('https://concierge-anywhere.com/turnstile', {
@@ -832,6 +819,7 @@
                 const isVerified = await verifyTurnstile(state.turnstileToken);
                 if (!isVerified) {
                     console.log('Turnstile 後端驗證失敗');
+                    elements.turnstileContainer.style.display = 'none';
                     return;
                 }
                 state.isVerified = true;
@@ -853,18 +841,17 @@
                 window.turnstile.reset();
                 return;
             }
-
             elements.turnstileContainer.style.display = 'flex';
             state.isTurnstileRendered = true;
         }
 
-        window.onTurnstileSuccess = function(token) {
+        window.onTurnstileSuccess = async function(token) {
             console.log('Turnstile 前端驗證成功，Token:', token);
             state.turnstileToken = token;
-            if (state.pendingAction) redirectToRetool(state.pendingAction);
+            if (state.pendingAction) {
+                await redirectToRetool(state.pendingAction);
+            }
         };
-
-        const debouncedShowTurnstile = debounce(showTurnstile, 300);
 
         async function performSearch() {
             const keyword = elements.searchInput.value.trim();
@@ -872,23 +859,20 @@
                 console.log('搜尋輸入為空，不執行搜尋');
                 return;
             }
-            
             state.pendingAction = { type: 'search', value: keyword };
-            
             if (state.isVerified) {
                 await redirectToRetool(state.pendingAction);
             } else {
-                debouncedShowTurnstile();
+                showTurnstile();
             }
         }
 
         async function handleCategoryClick(category) {
             state.pendingAction = { type: 'category', value: category };
-            
             if (state.isVerified) {
                 await redirectToRetool(state.pendingAction);
             } else {
-                debouncedShowTurnstile();
+                showTurnstile();
             }
         }
 
