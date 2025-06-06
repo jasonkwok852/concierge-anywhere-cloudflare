@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Concierge Anywhere 使用條款和免責聲明" />
+    <meta name="keywords" content="使用條款, 免責聲明, Concierge Anywhere, 顧客服務" />
+    <meta name="robots" content="index, follow" />
+    <title>使用條款 - Concierge Anywhere</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&family=Archivo+Black&display=swap" rel="stylesheet" />
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+    
+    <style>
+        :root {
+            --main-color: #23396C;
+            --secondary-color: #3A5A9A;
+            --accent-color: #F8EF32;
+            --bg-color: #FAFAFA;
+            --border-color: #243D51;
+            --header-bg: #243D51;
+            --button-hover-color: #243D51;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 8px 20px rgba(35, 57, 108, 0.3);
+            --tab-border-color: #DDDDDD;
+            --tab-active-bg-color: #243D51;
+        }
+
+        ::selection {
+            color: #F8EF32;
+            background: #243D51;
+        }
+
+        * {
+            font-family: 'Noto Sans HK', sans-serif;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            color: var(--main-color);
+            background-color: var(--bg-color);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        a:link, a:visited, a:hover, a:active {
+            color: #23396C;
+            background-color: transparent;
+            text-decoration: none;
+        }
+
+        a:hover, a:active {
+            text-decoration: underline;
+        }
+
+        header {
+            width: 100%;
+            background-color: var(--header-bg);
+            color: #fff;
+            height: 74px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            height: 100%;
+        }
+        
+        .site-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+            user-select: none;
+        }
+        
+        .site-icon {
+            height: 80px;
+            width: 200px;
+            object-fit: contain;
+            transition: var(--transition);
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .header-button {
+            background: transparent;
+            color: #fafafa;
+            border: 2px solid #fafafa;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 14px;
+            padding: 4px 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            height: 36px;
+        }
+        
+        #controlCenterButton {
+            padding: 4px;
+            width: 36px;
+            height: 36px;
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #controlCenterButton span {
+            display: none;
+        }
+        
+        #controlCenterButton .bi {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        
+        .header-button .bi {
+            margin-right: 2px;
+        }
+        
+        .header-button:hover,
+        .header-button:focus {
+            background: #fafafa;
+            color: var(--main-color);
+        }
+
+        .dropdown-menu {
+            position: fixed;
+            top: 0;
+            right: -20%;
+            width: 20%;
+            height: 100%;
+            background-color: #fafafa;
+            border-radius: 0;
+            box-shadow: var(--shadow);
+            padding: 16px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            transition: right 0.3s ease-in-out;
+        }
+
+        .dropdown-menu.show {
+            right: 0;
+        }
+
+        .dropdown-close {
+            align-self: flex-end;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--main-color);
+            cursor: pointer;
+            padding: 8px;
+            transition: var(--transition);
+        }
+
+        .dropdown-close:hover {
+            color: var(--button-hover-color);
+            transform: scale(1.1);
+        }
+
+        .dropdown-item {
+            display: block;
+            padding: 12px 16px;
+            color: var(--main-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(35, 57, 108, 0.1);
+            text-decoration: none;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 12px 40px;
+            margin-top: 5%;
+            width: 100%;
+            max-width: 70%; /* 桌面端寬度 */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .title {
+            font-weight: 700;
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            text-align: center;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+            min-height: 2.8rem;
+        }
+
+        .section-title {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            font-weight: 700;
+            color: var(--main-color);
+            margin: 2rem 0 1rem;
+            text-align: left;
+            width: 100%;
+        }
+
+        .content-section {
+            width: 100%;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            color: var(--main-color);
+            line-height: 1.8;
+        }
+
+        .content-section p {
+            margin: 0.5rem 0;
+        }
+
+        .content-section ul {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        .content-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px 0;
+            font-size: 0.8rem;
+            color: var(--main-color);
+            background-color: var(--bg-color);
+            width: 100%;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        footer p {
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .primary_content_block {
+            width: 80%;
+            max-width: 600px;
+            height: auto;
+            max-height: 70px;
+            margin: 5px auto;
+        }
+
+        .primary_content_block_row_01 {
+            border-radius: 12px;
+            background-color: var(--border-color);
+            display: grid;
+            grid-template-columns: auto auto auto auto;
+            padding: 2px;
+        }
+
+        .primary_content_block_row_01_div {
+            text-align: centerევ
+            center;
+            padding: 2px;
+        } 
+
+        .primary_content_block_content {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            margin: 2px;
+            transition: var(--transition);
+        }
+
+        .primary_content_block_content .bi {
+            font-size: 16px;
+        }
+
+        .primary_content_block_row_01_div a:hover .primary_content_block_content {
+            color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 767px) {
+            .site-icon { height: 60px; width: 150px; }
+            .header-inner { padding: 0 16px; }
+            .main-content {
+                padding: 16px 0 20px; /* 移除左右邊距 */
+                max-width: 90%; /* 移動端寬度 */
+            }
+            .dropdown-menu {
+                width: 50%;
+                right: -50%;
+            }
+            .dropdown-menu.show {
+                right: 0;
+            }
+            #menuButton span { display: none; }
+            #menuButton { 
+                width: 36px; 
+                padding: 4px;
+                justify-content: center;
+                align-items: center;
+            }
+            #menuButton .bi { margin-right: 0; }
+            
+            .primary_content_block {
+                width: 90%;
+                max-height: 60px;
+            }
+            
+            .primary_content_block_content {
+                font-size: 12px;
+            }
+            
+            .primary_content_block_content .bi {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <div class="site-brand">
+                <a href="https://concierge-anywhere.com">
+                    <img src="https://concierge-anywhere-storage.s3.ap-east-1.amazonaws.com/icon%2Btext(%E9%80%8F%E6%98%8E%E8%83%8C%E6%99%AF)(%E6%9C%89%E9%99%B0%E5%BD%B1)+1000x400.png" alt="網站標誌" class="site-icon" loading="lazy" />
+                </a>
+            </div>
+            <div class="header-actions">
+                <button class="header-button" id="controlCenterButton" aria-label="控制中心">
+                    <i class="bi bi-gear-fill"></i>
+                </button>
+                <button class="header-button" id="menuButton">
+                    <i class="bi bi-list"></i> <span>選單</span>
+                </button>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <button class="dropdown-close" id="dropdownClose" aria-label="關閉選單">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                    <a href="https://hello.concierge-anywhere.com/p/search/info_directory_page" class="dropdown-item">資訊手冊</a>
+                    <a href="https://hello.concierge-anywhere.com/p/search/gallery_page" class="dropdown-item">圖冊</a>
+                    <a href="https://concierge-anywhere.com/app/welcome/favorited_products_page" class="dropdown-item">精選商品</a>
+                    <a href="https://hello.concierge-anywhere.com/p/search/privacy-policy" class="dropdown-item">私隱政策</a>
+                    <a href="https://hello.concierge-anywhere.com/p/search/terms-of-use" class="dropdown-item">使用條款</a>
+                    <a href="#" class="dropdown-item">報告錯漏</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <h1 class="title">使用條款</h1>
+        <section class="content-section">
+            <h2 class="section-title">使用條款</h2>
+            <h3>1. 接受使用條款</h3>
+            <p>歡迎您光臨「Concierge-Anywhere.com」（以下簡稱本網站），以下使用條款可不時更改，瀏覽及使用本網站，即表示您同意接受本網站的使用條款的約束。</p>
+            <h3>2. 用戶的行為</h3>
+            <p>您同意對您在本網站上刊登的或傳送到本網站的任何性質的材料負全責，尤其是您同意不會：</p>
+            <ul>
+                <li>刊登或傳送任何非法、欺詐、誹謗、淫褻、色情、辱駡、令人反感、侵犯他人私隱或在種族或民族或其他方面令人厭惡的材料；</li>
+                <li>刊登或傳送任何未經索取或未獲授權的廣告或推廣材料，或連鎖信件、層壓式推銷計劃或垃圾郵件；</li>
+                <li>刊登或傳送侵犯任何第三方的任何知識產權的任何材料或你無權披露的任何材料；</li>
+                <li>刊登或傳送包含任何電腦病毒或旨在干擾、損壞、損毀任何電腦軟件或硬件或電訊設備或限制其功能的任何電腦編碼、檔案或程式的任何材料；</li>
+                <li>「跟蹤」或以其他方式騷擾他人；或</li>
+                <li>收集或儲存關於另一用戶的個人資料。</li>
+            </ul>
+            <h3>3. 責任限制</h3>
+            <p>您明確地同意本網站無須對任何其他方的任何具有威脅、誹謗、淫褻、令人反感或違法的內容或行為，或對任何侵犯他人權利（包括知識產權）的行為，負上任何責任或法律責任。您亦明確地同意，您須自行承擔關於瀏覽或使用本網站的風險。此外，我們並無就以下事宜作出任何陳述或保證：</p>
+            <ul>
+                <li>本網站的可用性，或本網站將不會受到干擾或不會有錯誤，或缺陷將會被糾正；或</li>
+                <li>本網站沒有電腦病毒或其他有害元素。</li>
+            </ul>
+        </section>
+        <section class="content-section">
+            <h2 class="section-title">免責聲明</h2>
+            <p>網站所提供的資訊只供參考之用，不能保證絕對準確及更新，資訊或會隨時變更而不作另行通知，建議聯絡相關機構以作確認。資訊如有錯漏，敬請見諒，我們也不會對錯誤或遺漏承擔任何責任。</p>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="primary_content_block">
+                <div class="primary_content_block_row_01">
+                    <div class="primary_content_block_row_01_div">
+                        <a href="https://hello.concierge-anywhere.com/p/search/info_directory_page">
+                            <p class="primary_content_block_content">
+                                <i class="bi bi-book-half"></i>
+                            </p>
+                            <p class="primary_content_block_content">資訊手冊</p>
+                        </a>
+                    </div>
+                    <div class="primary_content_block_row_01_div">
+                        <a href="https://hello.concierge-anywhere.com/p/search/gallery_page">
+                            <p class="primary_content_block_content">
+                                <i class="bi bi-archive-fill"></i>
+                            </p>
+                            <p class="primary_content_block_content">圖冊</p>
+                        </a>
+                    </div>
+                    <div class="primary_content_block_row_01_div">
+                        <a href="#">
+                            <p class="primary_content_block_content">
+                                <i class="bi bi-wrench-adjustable-circle-fill"></i>
+                            </p>
+                            <p class="primary_content_block_content">實用工具</p>
+                        </a>
+                    </div>
+                    <div class="primary_content_block_row_01_div">
+                        <a href="https://concierge-anywhere.com/app/welcome/favorited_products_page">
+                            <p class="primary_content_block_content">
+                                <i class="bi bi-bag-heart-fill"></i>
+                            </p>
+                            <p class="primary_content_block_content">精選商品</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <p>Concierge Anywhere © All Rights Reserved</p>
+        </div>
+    </footer>
+
+    <script>
+    (function() {
+        'use strict';
+
+        const elements = {
+            menuButton: document.getElementById('menuButton'),
+            controlCenterButton: document.getElementById('controlCenterButton'),
+            dropdownMenu: document.getElementById('dropdownMenu'),
+            dropdownClose: document.getElementById('dropdownClose')
+        };
+
+        function initDropdownMenu() {
+            elements.menuButton.addEventListener('click', (e) => { 
+                e.stopPropagation(); 
+                console.log('選單按鈕點擊，切換選單顯示');
+                elements.dropdownMenu.classList.toggle('show'); 
+            });
+            elements.controlCenterButton.addEventListener('click', (e) => e.stopPropagation());
+            elements.dropdownClose.addEventListener('click', () => {
+                console.log('關閉選單');
+                elements.dropdownMenu.classList.remove('show');
+            });
+            document.addEventListener('click', (e) => {
+                if (!elements.dropdownMenu.contains(e.target) && !elements.menuButton.contains(e.target)) {
+                    console.log('點擊選單外區域，關閉選單');
+                    elements.dropdownMenu.classList.remove('show');
+                }
+            });
+        }
+
+        function init() {
+            console.log('頁面初始化開始');
+            initDropdownMenu();
+            console.log('頁面初始化完成');
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+    </script>
+</body>
+</html>
