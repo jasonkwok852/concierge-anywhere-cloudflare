@@ -2,6 +2,7 @@ export async function onRequestPost({ request, env }) {
   try {
     // 驗證環境變數
     if (!env.TURNSTILE_SECRET_KEY) {
+      console.error('Missing TURNSTILE_SECRET_KEY');
       return new Response(
         JSON.stringify({ success: false, error: 'Server configuration error' }),
         {
@@ -19,11 +20,9 @@ export async function onRequestPost({ request, env }) {
     // 解析請求數據
     const { token } = await request.json();
     
-    // 獲取客戶端 IP
-    const clientIp = request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For') || '';
-
     // 驗證 token 格式
     if (!token || typeof token !== 'string' || token.length < 10) {
+      console.warn('Invalid token received:', token);
       return new Response(
         JSON.stringify({ success: false, error: 'Invalid Turnstile token' }),
         {
@@ -38,7 +37,11 @@ export async function onRequestPost({ request, env }) {
       );
     }
 
-    // 準備 Turnstile API 請求
+    // 獲取客戶端 IP
+    const clientIp = request.headers.get('CF-Connecting-IP') || 
+                     (request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() || '');
+
+    // Turnstile API 請求
     const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -51,7 +54,7 @@ export async function onRequestPost({ request, env }) {
 
     const verification = await verifyResponse.json();
 
-    // 處理驗證結果 
+    // 處理驗證結果
     if (verification.success) {
       return new Response(
         JSON.stringify({ success: true, challenge_ts: verification.challenge_ts }),
@@ -62,17 +65,26 @@ export async function onRequestPost({ request, env }) {
             'X-Content-Type-Options': 'nosniff',
             'Content-Security-Policy': "default-src 'none'",
             'Cache-Control': 'no-store',
-            'Access-Control-Allow-Origin': env.CORS_ORIGIN || '*',
+            'Access-Control-Allow-Origin': env.CORS_ORIGIN || 'https://concierge-anywhere.com',
             'Access-Control-Allow-Methods': 'POST',
             'Access-Control-Max-Age': '86400'
           }
         }
       );
     } else {
+      console.warn('Turnstile verification failed:', verification['error-codes']);
+      let errorMessage = 'Turnstile verification failed';
+      if (verification['error-codes']?.length) {
+        const errorCode = verification['error-codes'][0];
+        errorMessage = errorCode === 'invalid-input-secret' ? 'Invalid server configuration' :
+                       errorCode === 'timeout-or-duplicate' ? 'Token expired or already used' :
+                       `Verification failed: ${errorCode}`;
+      }
       return new Response(
         JSON.stringify({
           success: false,
-          error: 'Turnstile verification failed'
+          error: errorMessage,
+          errorCodes: verification['error-codes']
         }),
         {
           status: 400,
@@ -86,6 +98,7 @@ export async function onRequestPost({ request, env }) {
       );
     }
   } catch (err) {
+    console.error('Internal server error:', err);
     return new Response(
       JSON.stringify({ success: false, error: 'Internal server error' }),
       {
