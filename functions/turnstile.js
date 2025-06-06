@@ -41,6 +41,14 @@ export async function onRequestPost({ request, env }) {
     const clientIp = request.headers.get('CF-Connecting-IP') || 
                      (request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() || '');
 
+    // 動態設置 CORS Origin
+    const origin = request.headers.get('Origin');
+    const allowedOrigins = [
+      'https://concierge-anywhere.com',
+      'https://www.concierge-anywhere.com'
+    ];
+    const corsOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+
     // Turnstile API 請求
     const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
       method: 'POST',
@@ -65,7 +73,7 @@ export async function onRequestPost({ request, env }) {
             'X-Content-Type-Options': 'nosniff',
             'Content-Security-Policy': "default-src 'none'",
             'Cache-Control': 'no-store',
-            'Access-Control-Allow-Origin': env.CORS_ORIGIN || 'https://concierge-anywhere.com',
+            'Access-Control-Allow-Origin': corsOrigin,
             'Access-Control-Allow-Methods': 'POST',
             'Access-Control-Max-Age': '86400'
           }
@@ -92,7 +100,8 @@ export async function onRequestPost({ request, env }) {
             'Content-Type': 'application/json',
             'X-Content-Type-Options': 'nosniff',
             'Content-Security-Policy': "default-src 'none'",
-            'Cache-Control': 'no-store'
+            'Cache-Control': 'no-store',
+            'Access-Control-Allow-Origin': corsOrigin
           }
         }
       );
@@ -107,7 +116,8 @@ export async function onRequestPost({ request, env }) {
           'Content-Type': 'application/json',
           'X-Content-Type-Options': 'nosniff',
           'Content-Security-Policy': "default-src 'none'",
-          'Cache-Control': 'no-store'
+          'Cache-Control': 'no-store',
+          'Access-Control-Allow-Origin': 'https://concierge-anywhere.com'
         }
       }
     );
