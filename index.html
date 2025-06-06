@@ -220,7 +220,7 @@
 
         @media (max-width: 767px) {
             .dropdown-menu {
-                width: 50%; /* 改為 50% */
+                width: 50%;
                 right: -50%;
             }
             .dropdown-menu.show {
@@ -278,22 +278,22 @@
             backdrop-filter: blur(5px);
         }
         
-        .time, .date {
+        .time {
             line-height: 1;
             font-family: 'Archivo Black', sans-serif;
-            color: #23396C; /* 設置字體顏色為 #23396C */
-        }
-        
-        .time {
+            color: #23396C; /* 時間顏色 */
             font-size: 24px;
             margin-bottom: 0.2rem;
             font-variant-numeric: tabular-nums;
-            opacity: 0.8;
+            opacity: 1; /* 透明度為 1 */
         }
         
         .date {
+            line-height: 1;
+            font-family: 'Archivo Black', sans-serif;
+            color: #cccccc; /* 日期顏色 */
             font-size: 18px;
-            opacity: 0.8;
+            opacity: 1; /* 透明度為 1 */
         }
 
         .tab-container {
@@ -880,9 +880,11 @@
         function closeErrorModal() {
             elements.errorModal.style.display = 'none';
             elements.turnstileContainer.style.display = 'none';
+            state.isTurnstileRendered = false; // 重置渲染狀態
         }
 
         async function verifyTurnstile(token) {
+            console.log('開始後端驗證，Token:', token);
             try {
                 const response = await fetch('/turnstile', {
                     method: 'POST',
@@ -892,8 +894,9 @@
                     body: JSON.stringify({ token })
                 });
                 const data = await response.json();
+                console.log('後端驗證響應:', data);
                 if (!data.success) {
-                    console.log('Turnstile 後端驗證失敗:', data.error || '未知錯誤');
+                    console.warn('Turnstile 後端驗證失敗:', data.error || '未知錯誤');
                     showErrorModal(data.error || '驗證失敗，請稍後再試或聯繫支援。');
                     return false;
                 }
@@ -906,61 +909,87 @@
         }
 
         async function redirectToRetool(action) {
+            console.log('執行跳轉，Action:', action);
             if (!state.isVerified && state.turnstileToken) {
                 const isVerified = await verifyTurnstile(state.turnstileToken);
                 if (!isVerified) {
+                    console.warn('後端驗證未通過，取消跳轉');
                     return;
                 }
                 state.isVerified = true;
             }
 
-            if (!action?.type || !action?.value) return;
+            if (!action?.type || !action?.value) {
+                console.warn('無效的跳轉 Action:', action);
+                return;
+            }
             
             const baseUrl = 'https://hello.concierge-anywhere.com/p/search/info_directory_page';
             const redirectUrl = action.type === 'search'
                 ? `${baseUrl}#keyword=${encodeURIComponent(action.value)}`
                 : `${baseUrl}#category=${encodeURIComponent(action.value)}`;
             
-            console.log('Redirecting to:', redirectUrl);
+            console.log('跳轉至:', redirectUrl);
             window.location.href = redirectUrl;
         }
 
         function showTurnstile() {
-            if (state.isTurnstileRendered && window.turnstile) {
-                window.turnstile.reset();
+            console.log('顯示 Turnstile 小部件，渲染狀態:', state.isTurnstileRendered);
+            elements.turnstileContainer.style.display = 'flex';
+            
+            // 確保 Turnstile 腳本已加載
+            if (typeof window.turnstile === 'undefined') {
+                console.warn('Turnstile 腳本未加載，等待重試');
+                setTimeout(showTurnstile, 100);
                 return;
             }
-            elements.turnstileContainer.style.display = 'flex';
-            state.isTurnstileRendered = true;
+
+            if (state.isTurnstileRendered) {
+                console.log('重置 Turnstile 小部件');
+                window.turnstile.reset();
+            } else {
+                console.log('初次渲染 Turnstile 小部件');
+                state.isTurnstileRendered = true;
+            }
         }
 
         window.onTurnstileSuccess = async function(token) {
             console.log('Turnstile 前端驗證成功，Token:', token);
             state.turnstileToken = token;
-            if (state.pendingAction) {
-                await redirectToRetool(state.pendingAction);
+            if (!state.pendingAction) {
+                console.warn('無待處理的 Action，無法跳轉');
+                return;
             }
+            await redirectToRetool(state.pendingAction);
         };
 
         async function performSearch() {
             const keyword = elements.searchInput.value.trim();
+            console.log('執行搜尋，關鍵字:', keyword);
             if (!keyword) {
                 console.log('搜尋輸入為空，不執行搜尋');
                 return;
             }
             state.pendingAction = { type: 'search', value: keyword };
+            console.log('設置 Pending Action:', state.pendingAction);
             if (state.isVerified) {
+                console.log('已驗證，直接跳轉');
                 await redirectToRetool(state.pendingAction);
             } else {
+                console.log('未驗證，顯示 Turnstile');
                 showTurnstile();
             }
         }
 
         async function handleCategoryClick(category) {
+            console.log('處理分類點擊，類別:', category);
             state.pendingAction = { type: 'category', value: category };
+            console.log('設置 Pending Action:', state.pendingAction);
             if (state.isVerified) {
+                console.log('已驗證，直接跳轉');
                 await redirectToRetool(state.pendingAction);
             } else {
+                console.log('未驗證，顯示 Turnstile');
                 showTurnstile();
             }
         }
@@ -983,7 +1012,12 @@
                 }
             });
             elements.searchButton.addEventListener('click', performSearch);
-            elements.searchInput.addEventListener('keypress', (e) => e.key === 'Enter' && performSearch());
+            elements.searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    console.log('按下 Enter 鍵，觸發搜尋');
+                    performSearch();
+                }
+            });
         }
 
         function initTypingEffect() {
@@ -1040,20 +1074,28 @@
         }
 
         function initCategoryButtons() {
-            elements.categoryButtons.forEach(button => button.addEventListener('click', () => handleCategoryClick(button.dataset.category)));
+            elements.categoryButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    console.log('分類按鈕點擊:', button.dataset.category);
+                    handleCategoryClick(button.dataset.category);
+                });
+            });
         }
 
         function initDropdownMenu() {
             elements.menuButton.addEventListener('click', (e) => { 
                 e.stopPropagation(); 
+                console.log('選單按鈕點擊，切換選單顯示');
                 elements.dropdownMenu.classList.toggle('show'); 
             });
             elements.controlCenterButton.addEventListener('click', (e) => e.stopPropagation());
             elements.dropdownClose.addEventListener('click', () => {
+                console.log('關閉選單');
                 elements.dropdownMenu.classList.remove('show');
             });
             document.addEventListener('click', (e) => {
                 if (!elements.dropdownMenu.contains(e.target) && !elements.menuButton.contains(e.target)) {
+                    console.log('點擊選單外區域，關閉選單');
                     elements.dropdownMenu.classList.remove('show');
                 }
             });
@@ -1062,6 +1104,7 @@
         function initTabs() {
             elements.tabButtons.forEach(button => {
                 button.addEventListener('click', () => {
+                    console.log('切換標籤:', button.getAttribute('data-tab'));
                     elements.tabButtons.forEach(btn => btn.classList.remove('active'));
                     elements.tabContents.forEach(content => content.classList.remove('active'));
                     button.classList.add('active');
@@ -1073,9 +1116,13 @@
         }
 
         function initModal() {
-            elements.modalClose.addEventListener('click', closeErrorModal);
+            elements.modalClose.addEventListener('click', () => {
+                console.log('關閉模態窗口');
+                closeErrorModal();
+            });
             elements.errorModal.addEventListener('click', (e) => {
                 if (e.target === elements.errorModal) {
+                    console.log('點擊模態背景，關閉模態窗口');
                     closeErrorModal();
                 }
             });
@@ -1094,8 +1141,11 @@
             console.log('頁面初始化完成');
         }
 
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-        else init();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
     })();
     </script>
 </body>
