@@ -171,8 +171,8 @@
         .dropdown-menu {
             position: fixed;
             top: 0;
-            right: -300px;
-            width: 300px;
+            right: -30%; /* 桌面端初始位置 */
+            width: 30%; /* 桌面端寬度 30% */
             height: 100%;
             background-color: #fafafa;
             border-radius: 0;
@@ -220,7 +220,7 @@
 
         @media (max-width: 767px) {
             .dropdown-menu {
-                width: 50%;
+                width: 50%; /* 移動端保持 50% */
                 right: -50%;
             }
             .dropdown-menu.show {
@@ -281,17 +281,17 @@
         .time {
             line-height: 1;
             font-family: 'Archivo Black', sans-serif;
-            color: #23396C; /* 時間顏色 */
+            color: #23396C;
             font-size: 24px;
             margin-bottom: 0.2rem;
             font-variant-numeric: tabular-nums;
-            opacity: 1; /* 透明度為 1 */
+            opacity: 1;
         }
         
         .date {
             line-height: 1;
             font-family: 'Archivo Black', sans-serif;
-            color: #cccccc; /* 日期顏色 */
+            color: #808080; /* 日期顏色 */
             font-size: 18px;
             opacity: 1; /* 透明度為 1 */
         }
@@ -873,14 +873,21 @@
         };
 
         function showErrorModal(message) {
+            console.log('顯示錯誤模態窗口，訊息:', message);
             elements.errorMessage.textContent = message;
             elements.errorModal.style.display = 'flex';
         }
 
         function closeErrorModal() {
+            console.log('關閉錯誤模態窗口');
             elements.errorModal.style.display = 'none';
             elements.turnstileContainer.style.display = 'none';
-            state.isTurnstileRendered = false; // 重置渲染狀態
+            state.isTurnstileRendered = false;
+            state.turnstileToken = null; // 清空 token
+            if (window.turnstile) {
+                console.log('重置 Turnstile 小部件');
+                window.turnstile.reset();
+            }
         }
 
         async function verifyTurnstile(token) {
@@ -921,6 +928,7 @@
 
             if (!action?.type || !action?.value) {
                 console.warn('無效的跳轉 Action:', action);
+                showErrorModal('無效的操作，請重試。');
                 return;
             }
             
@@ -936,20 +944,22 @@
         function showTurnstile() {
             console.log('顯示 Turnstile 小部件，渲染狀態:', state.isTurnstileRendered);
             elements.turnstileContainer.style.display = 'flex';
-            
-            // 確保 Turnstile 腳本已加載
-            if (typeof window.turnstile === 'undefined') {
+
+            // 使用 turnstile.ready 確保腳本加載完成
+            if (typeof window.turnstile !== 'undefined') {
+                window.turnstile.ready(() => {
+                    console.log('Turnstile 腳本已加載');
+                    if (state.isTurnstileRendered) {
+                        console.log('重置 Turnstile 小部件');
+                        window.turnstile.reset();
+                    } else {
+                        console.log('初次渲染 Turnstile 小部件');
+                        state.isTurnstileRendered = true;
+                    }
+                });
+            } else {
                 console.warn('Turnstile 腳本未加載，等待重試');
                 setTimeout(showTurnstile, 100);
-                return;
-            }
-
-            if (state.isTurnstileRendered) {
-                console.log('重置 Turnstile 小部件');
-                window.turnstile.reset();
-            } else {
-                console.log('初次渲染 Turnstile 小部件');
-                state.isTurnstileRendered = true;
             }
         }
 
@@ -958,6 +968,7 @@
             state.turnstileToken = token;
             if (!state.pendingAction) {
                 console.warn('無待處理的 Action，無法跳轉');
+                showErrorModal('操作未完成，請重試。');
                 return;
             }
             await redirectToRetool(state.pendingAction);
@@ -1002,22 +1013,32 @@
         }
 
         function initSearchInput() {
-            elements.clearIcon.addEventListener('click', clearSearchInput);
-            elements.searchInput.addEventListener('input', function() {
+            // 移除現有事件監聽器，防止重複綁定
+            elements.clearIcon.removeEventListener('click', clearSearchInput);
+            elements.searchInput.removeEventListener('input', handleSearchInput);
+            elements.searchButton.removeEventListener('click', performSearch);
+            elements.searchInput.removeEventListener('keypress', handleSearchKeypress);
+
+            function handleSearchInput() {
                 elements.clearIcon.style.display = this.value ? 'block' : 'none';
                 if (this.value.trim()) {
                     elements.searchButton.classList.add('active');
                 } else {
                     elements.searchButton.classList.remove('active');
                 }
-            });
-            elements.searchButton.addEventListener('click', performSearch);
-            elements.searchInput.addEventListener('keypress', (e) => {
+            }
+
+            function handleSearchKeypress(e) {
                 if (e.key === 'Enter') {
                     console.log('按下 Enter 鍵，觸發搜尋');
                     performSearch();
                 }
-            });
+            }
+
+            elements.clearIcon.addEventListener('click', clearSearchInput);
+            elements.searchInput.addEventListener('input', handleSearchInput);
+            elements.searchButton.addEventListener('click', performSearch);
+            elements.searchInput.addEventListener('keypress', handleSearchKeypress);
         }
 
         function initTypingEffect() {
@@ -1074,11 +1095,18 @@
         }
 
         function initCategoryButtons() {
+            // 移除現有事件監聽器，防止重複綁定
             elements.categoryButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    console.log('分類按鈕點擊:', button.dataset.category);
-                    handleCategoryClick(button.dataset.category);
-                });
+                button.removeEventListener('click', handleCategoryButtonClick);
+            });
+
+            function handleCategoryButtonClick() {
+                console.log('分類按鈕點擊:', this.dataset.category);
+                handleCategoryClick(this.dataset.category);
+            }
+
+            elements.categoryButtons.forEach(button => {
+                button.addEventListener('click', handleCategoryButtonClick);
             });
         }
 
