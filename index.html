@@ -11,10 +11,10 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&family=Archivo+Black&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&family=Archivo+Black&display=swap" rel="stylesheet" defer />
     
     <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" defer />
     
     <!-- Cloudflare Turnstile -->
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
@@ -71,15 +71,6 @@
 
         a:hover, a:active {
             text-decoration: underline;
-        }
-
-        .highlight {
-            font-size: 24px;
-            color: #23396C;
-            font-weight: bold;
-            background: linear-gradient(to top, #EAECED 40%, transparent 40%);
-            display: inline;
-            border-radius: 2px;
         }
 
         header {
@@ -171,8 +162,8 @@
         .dropdown-menu {
             position: fixed;
             top: 0;
-            right: -20%; /* 桌面端初始位置 */
-            width: 20%; /* 桌面端寬度改為 20% */
+            right: -20%;
+            width: 20%;
             height: 100%;
             background-color: #fafafa;
             border-radius: 0;
@@ -186,6 +177,16 @@
 
         .dropdown-menu.show {
             right: 0;
+        }
+
+        .dropdown-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--main-color);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .dropdown-close {
@@ -205,27 +206,20 @@
         }
 
         .dropdown-item {
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             padding: 12px 16px;
             color: var(--main-color);
             text-decoration: none;
             font-weight: 500;
             transition: background-color 0.2s;
+            border-radius: 4px;
         }
 
         .dropdown-item:hover {
             background-color: rgba(35, 57, 108, 0.1);
             text-decoration: none;
-        }
-
-        @media (max-width: 767px) {
-            .dropdown-menu {
-                width: 50%; /* 移動端保持 50% */
-                right: -50%;
-            }
-            .dropdown-menu.show {
-                right: 0;
-            }
         }
 
         .main-content {
@@ -235,6 +229,10 @@
             align-items: center;
             padding: 32px 12px 40px;
             margin-top: 5%;
+            width: 100%;
+            max-width: 70%;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .title {
@@ -285,7 +283,6 @@
             font-size: 24px;
             margin-bottom: 0.2rem;
             font-variant-numeric: tabular-nums;
-            opacity: 1;
         }
         
         .date {
@@ -293,7 +290,6 @@
             font-family: 'Archivo Black', sans-serif;
             color: #808080;
             font-size: 18px;
-            opacity: 1;
         }
 
         .tab-container {
@@ -378,7 +374,6 @@
             border: 1px solid var(--border-color);
             border-radius: 0.5rem;
             outline: none;
-            box-sizing: border-box;
             transition: var(--transition);
             background-color: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(5px);
@@ -405,7 +400,7 @@
             padding: 0;
         }
         
-        .search-button {
+        .search-button, .action-button {
             padding: 0.6rem 0.8rem;
             font-size: clamp(0.85rem, 3vw, 0.95rem);
             font-weight: 600;
@@ -419,7 +414,6 @@
             align-items: center;
             justify-content: center;
             gap: 0.3rem;
-            min-width: 80px;
         }
         
         .search-button.active {
@@ -428,7 +422,7 @@
             border-color: #243D51;
         }
         
-        .search-button:hover {
+        .search-button:hover, .action-button:hover {
             transform: translateY(-2px);
             box-shadow: var(--hover-shadow);
         }
@@ -444,33 +438,11 @@
         }
         
         .action-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
-            padding: 0.5rem 0.8rem;
-            font-size: clamp(0.65rem, 3vw, 0.75rem);
-            font-weight: 600;
-            color: var(--main-color);
-            background-color: rgba(255, 255, 255, 0.8);
-            border: 1px solid var(--border-color);
-            border-radius: 0.5rem;
-            text-decoration: none;
-            transition: var(--transition);
-            cursor: pointer;
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(5px);
             min-width: 90px;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
         }
-        
-        .action-button:hover,
-        .action-button:focus {
-            background-color: var(--button-hover-color);
-            color: #fff;
-            transform: translateY(-2px);
-            box-shadow: var(--hover-shadow);
-        }
-        
+
         .bi {
             font-size: 1em;
             vertical-align: middle;
@@ -584,7 +556,6 @@
             transform: translateY(-2px);
         }
 
-        /* 模態窗口樣式 */
         .modal {
             display: none;
             position: fixed;
@@ -641,9 +612,19 @@
         @media (max-width: 767px) {
             .site-icon { height: 60px; width: 150px; }
             .header-inner { padding: 0 16px; }
-            .main-content { padding: 16px 4px 20px; }
+            .main-content {
+                padding: 16px 0 20px;
+                max-width: 90%;
+            }
+            .dropdown-menu {
+                width: 50%;
+                right: -50%;
+            }
+            .dropdown-menu.show {
+                right: 0;
+            }
             .button-container { gap: 0.6rem; }
-            .action-button { min-width: 80px; padding: 0.4rem 0.6rem; }
+            .action-button { min-width: 80px; padding: 0.4rem 0.6rem; font-size: clamp(0.65rem, 2.5vw, 0.75rem); }
             .search-container { gap: 8px; }
             .search-input { padding: 0.5rem 2.3rem 0.5rem 0.8rem; font-size: clamp(0.75rem, 2.5vw, 0.85rem); }
             .search-button { padding: 0.5rem 0.8rem; font-size: clamp(0.8rem, 2.5vw, 0.9rem); min-width: 60px; }
@@ -652,52 +633,35 @@
             .search-button .button-text { display: none; }
             .search-button .bi { margin-right: 0; }
             #menuButton span { display: none; }
-            #menuButton { 
-                width: 36px; 
+            #menuButton {
+                width: 36px;
                 padding: 4px;
                 justify-content: center;
                 align-items: center;
             }
             #menuButton .bi { margin-right: 0; }
-            
             .primary_content_block {
                 width: 90%;
                 max-height: 60px;
             }
-            
             .primary_content_block_content {
                 font-size: 12px;
             }
-            
             .primary_content_block_content .bi {
                 font-size: 14px;
             }
-
             .tab-button {
                 padding: 4px 8px;
                 font-size: 12px;
             }
-
             .tab-button .bi {
                 font-size: 12px;
             }
-
-            .time {
-                font-size: 20px;
-            }
-
-            .turnstile-container {
-                padding-bottom: 30px;
-            }
-
-            .modal-content {
-                width: 95%;
-                padding: 15px;
-            }
-
-            .modal-content h3 {
-                font-size: 1.1rem;
-            }
+            .time { font-size: 20px; }
+            .date { font-size: 16px; }
+            .turnstile-container { padding-bottom: 30px; }
+            .modal-content { width: 95%; padding: 15px; }
+            .modal-content h3 { font-size: 1.1rem; }
         }
     </style>
 </head>
@@ -713,19 +677,34 @@
                 <button class="header-button" id="controlCenterButton" aria-label="控制中心">
                     <i class="bi bi-gear-fill"></i>
                 </button>
-                <button class="header-button" id="menuButton">
+                <button class="header-button" id="menuButton" aria-label="開啟選單">
                     <i class="bi bi-list"></i> <span>選單</span>
                 </button>
-                <div class="dropdown-menu" id="dropdownMenu">
+                <div class="dropdown-menu" id="dropdownMenu" role="menu">
+                    <div class="dropdown-title" aria-label="選單">
+                        <i class="bi bi-list"></i> 選單
+                    </div>
                     <button class="dropdown-close" id="dropdownClose" aria-label="關閉選單">
                         <i class="bi bi-x-lg"></i>
                     </button>
-                    <a href="https://hello.concierge-anywhere.com/p/search/info_directory_page" class="dropdown-item">資訊手冊</a>
-                    <a href="https://hello.concierge-anywhere.com/p/search/gallery_page" class="dropdown-item">圖冊</a>
-                    <a href="https://concierge-anywhere.com/app/welcome/favorited_products_page" class="dropdown-item">精選商品</a>
-                    <a href="https://hello.concierge-anywhere.com/p/search/privacy-policy" class="dropdown-item">私隱政策</a>
-                    <a href="https://hello.concierge-anywhere.com/p/search/terms-of-use" class="dropdown-item">使用條款</a>
-                    <a href="#" class="dropdown-item">報告錯漏</a>
+                    <a href="https://hello.concierge-anywhere.com/p/search/info_directory_page" class="dropdown-item" role="menuitem">
+                        <i class="bi bi-book-half"></i> 資訊手冊
+                    </a>
+                    <a href="#" class="dropdown-item" role="menuitem">
+                        <i class="bi bi-archive-fill"></i> 檔案庫
+                    </a>
+                    <a href="https://hello.concierge-anywhere.com/p/search/favorited_products_page" class="dropdown-item" role="menuitem">
+                        <i class="bi bi-bag-heart-fill"></i> 精選商品
+                    </a>
+                    <a href="https://concierge-anywhere.com/privacy_policy" class="dropdown-item" role="menuitem">
+                        <i class="bi bi-info-circle-fill"></i> 私隱政策
+                    </a>
+                    <a href="https://concierge-anywhere.com/terms_of_use" class="dropdown-item" role="menuitem">
+                        <i class="bi bi-info-circle-fill"></i> 使用條款
+                    </a>
+                    <a href="#" class="dropdown-item" role="menuitem">
+                        <i class="bi bi-exclamation-triangle-fill"></i> 報告錯漏
+                    </a>
                 </div>
             </div>
         </div>
@@ -740,11 +719,11 @@
 
         <div class="tab-container">
             <div class="tab-header">
-                <button class="tab-button active" data-tab="tab1">
-                    <i class="bi bi-book-half"></i>資訊手冊
+                <button class="tab-button active" data-tab="tab1" aria-selected="true">
+                    <i class="bi bi-book-half"></i> 資訊手冊
                 </button>
-                <button class="tab-button" data-tab="tab2">
-                    <i class="bi bi-archive-fill"></i>檔案庫
+                <button class="tab-button" data-tab="tab2" aria-selected="false">
+                    <i class="bi bi-archive-fill"></i> 檔案庫
                 </button>
             </div>
             
@@ -788,7 +767,6 @@
             <div class="cf-turnstile" data-sitekey="0x4AAAAAAAQOrX6jyaqqHxdp" data-callback="onTurnstileSuccess"></div>
         </div>
 
-        <!-- 模態窗口 -->
         <div class="modal" id="errorModal">
             <div class="modal-content">
                 <h3>Cloudflare Turnstile 驗證出錯</h3>
@@ -827,7 +805,7 @@
                         </a>
                     </div>
                     <div class="primary_content_block_row_01_div">
-                        <a href="https://concierge-anywhere.com/app/welcome/favorited_products_page">
+                        <a href="https://hello.concierge-anywhere.com/p/search/favorited_products_page">
                             <p class="primary_content_block_content">
                                 <i class="bi bi-bag-heart-fill"></i>
                             </p>
@@ -849,7 +827,9 @@
             pendingAction: null,
             isTurnstileRendered: false,
             activeTab: 'tab1',
-            turnstileToken: null
+            turnstileToken: null,
+            maxTurnstileRetries: 5,
+            turnstileRetryCount: 0
         };
 
         const elements = {
@@ -871,6 +851,14 @@
             errorMessage: document.getElementById('errorMessage'),
             modalClose: document.getElementById('modalClose')
         };
+
+        function debounce(fn, delay) {
+            let timeoutId;
+            return function (...args) {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
 
         function showErrorModal(message) {
             console.log('顯示錯誤模態窗口，訊息:', message);
@@ -895,9 +883,7 @@
             try {
                 const response = await fetch('/turnstile', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token })
                 });
                 const data = await response.json();
@@ -944,6 +930,13 @@
         function showTurnstile() {
             console.log('顯示 Turnstile 小部件，渲染狀態:', state.isTurnstileRendered);
             elements.turnstileContainer.style.display = 'flex';
+            state.turnstileRetryCount++;
+
+            if (state.turnstileRetryCount > state.maxTurnstileRetries) {
+                console.warn('超過最大 Turnstile 重試次數');
+                showErrorModal('無法加載驗證組件，請稍後再試。');
+                return;
+            }
 
             if (typeof window.turnstile !== 'undefined') {
                 window.turnstile.ready(() => {
@@ -955,6 +948,7 @@
                         console.log('初次渲染 Turnstile 小部件');
                         state.isTurnstileRendered = true;
                     }
+                    state.turnstileRetryCount = 0;
                 });
             } else {
                 console.warn('Turnstile 腳本未加載，等待重試');
@@ -966,12 +960,10 @@
             console.log('Turnstile 前端驗證成功，Token:', token);
             state.turnstileToken = token;
             if (!state.pendingAction) {
-                console.log('無待處理的 Action，隱藏 Turnstile 並不顯示錯誤');
+                console.log('無待處理的 Action，隱藏 Turnstile');
                 elements.turnstileContainer.style.display = 'none';
                 state.isTurnstileRendered = false;
-                if (window.turnstile) {
-                    window.turnstile.reset();
-                }
+                if (window.turnstile) window.turnstile.reset();
                 return;
             }
             await redirectToRetool(state.pendingAction);
@@ -1015,34 +1007,6 @@
             elements.searchInput.focus();
         }
 
-        function initSearchInput() {
-            elements.clearIcon.removeEventListener('click', clearSearchInput);
-            elements.searchInput.removeEventListener('input', handleSearchInput);
-            elements.searchButton.removeEventListener('click', performSearch);
-            elements.searchInput.removeEventListener('keypress', handleSearchKeypress);
-
-            function handleSearchInput() {
-                elements.clearIcon.style.display = this.value ? 'block' : 'none';
-                if (this.value.trim()) {
-                    elements.searchButton.classList.add('active');
-                } else {
-                    elements.searchButton.classList.remove('active');
-                }
-            }
-
-            function handleSearchKeypress(e) {
-                if (e.key === 'Enter') {
-                    console.log('按下 Enter 鍵，觸發搜尋');
-                    performSearch();
-                }
-            }
-
-            elements.clearIcon.addEventListener('click', clearSearchInput);
-            elements.searchInput.addEventListener('input', handleSearchInput);
-            elements.searchButton.addEventListener('click', performSearch);
-            elements.searchInput.addEventListener('keypress', handleSearchKeypress);
-        }
-
         function initTypingEffect() {
             if (!elements.typing) {
                 console.error('Typing element not found');
@@ -1056,13 +1020,13 @@
 
             function typeWriter() {
                 if (isPaused) {
-                    pauseTime += 50;
+                    pauseTime += 16;
                     if (pauseTime >= 2000) {
                         isPaused = false;
                         pauseTime = 0;
                         isDeleting = true;
-                        console.log('結束停頓，開始刪除');
                     }
+                    requestAnimationFrame(typeWriter);
                     return;
                 }
 
@@ -1074,20 +1038,20 @@
                         index++;
                     } else {
                         isPaused = true;
-                        console.log('文字完全顯示，進入停頓');
                     }
                 } else {
                     if (index > 0) {
                         index--;
                     } else {
                         isDeleting = false;
-                        console.log('文字完全刪除，重新開始打字');
                     }
                 }
+
+                requestAnimationFrame(typeWriter);
             }
 
             console.log('開始打字效果');
-            setInterval(typeWriter, isPaused ? 50 : isDeleting ? 50 : 100);
+            requestAnimationFrame(typeWriter);
         }
 
         function updateTime() {
@@ -1096,26 +1060,33 @@
             elements.date.textContent = now.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' }).replace(/\//g, ' / ');
         }
 
-        function initCategoryButtons() {
-            elements.categoryButtons.forEach(button => {
-                button.removeEventListener('click', handleCategoryButtonClick);
+        function initEvents() {
+            // Search Input
+            const handleSearchInput = debounce(() => {
+                elements.clearIcon.style.display = elements.searchInput.value ? 'block' : 'none';
+                elements.searchButton.classList.toggle('active', !!elements.searchInput.value.trim());
+            }, 100);
+
+            elements.searchInput.addEventListener('input', handleSearchInput);
+            elements.clearIcon.addEventListener('click', clearSearchInput);
+            elements.searchButton.addEventListener('click', performSearch);
+            elements.searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    console.log('按下 Enter 鍵，觸發搜尋');
+                    performSearch();
+                }
             });
 
-            function handleCategoryButtonClick() {
-                console.log('分類按鈕點擊:', this.dataset.category);
-                handleCategoryClick(this.dataset.category);
-            }
-
+            // Category Buttons
             elements.categoryButtons.forEach(button => {
-                button.addEventListener('click', handleCategoryButtonClick);
+                button.addEventListener('click', () => handleCategoryClick(button.dataset.category));
             });
-        }
 
-        function initDropdownMenu() {
-            elements.menuButton.addEventListener('click', (e) => { 
-                e.stopPropagation(); 
+            // Dropdown Menu
+            elements.menuButton.addEventListener('click', (e) => {
+                e.stopPropagation();
                 console.log('選單按鈕點擊，切換選單顯示');
-                elements.dropdownMenu.classList.toggle('show'); 
+                elements.dropdownMenu.classList.toggle('show');
             });
             elements.controlCenterButton.addEventListener('click', (e) => e.stopPropagation());
             elements.dropdownClose.addEventListener('click', () => {
@@ -1128,27 +1099,26 @@
                     elements.dropdownMenu.classList.remove('show');
                 }
             });
-        }
 
-        function initTabs() {
+            // Tabs
             elements.tabButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     console.log('切換標籤:', button.getAttribute('data-tab'));
-                    elements.tabButtons.forEach(btn => btn.classList.remove('active'));
+                    elements.tabButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.setAttribute('aria-selected', 'false');
+                    });
                     elements.tabContents.forEach(content => content.classList.remove('active'));
                     button.classList.add('active');
+                    button.setAttribute('aria-selected', 'true');
                     const tabId = button.getAttribute('data-tab');
                     document.getElementById(tabId).classList.add('active');
                     state.activeTab = tabId;
                 });
             });
-        }
 
-        function initModal() {
-            elements.modalClose.addEventListener('click', () => {
-                console.log('關閉模態窗口');
-                closeErrorModal();
-            });
+            // Modal
+            elements.modalClose.addEventListener('click', closeErrorModal);
             elements.errorModal.addEventListener('click', (e) => {
                 if (e.target === elements.errorModal) {
                     console.log('點擊模態背景，關閉模態窗口');
@@ -1161,11 +1131,7 @@
             console.log('頁面初始化開始');
             initTypingEffect();
             updateTime();
-            initSearchInput();
-            initCategoryButtons();
-            initDropdownMenu();
-            initTabs();
-            initModal();
+            initEvents();
             setInterval(updateTime, 1000);
             console.log('頁面初始化完成');
         }
