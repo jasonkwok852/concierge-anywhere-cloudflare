@@ -220,8 +220,8 @@
 
         @media (max-width: 767px) {
             .dropdown-menu {
-                width: 80%;
-                right: -80%;
+                width: 72%; /* 從 80% 減小 10% */
+                right: -72%;
             }
             .dropdown-menu.show {
                 right: 0;
@@ -583,6 +583,53 @@
             transform: translateY(-2px);
         }
 
+        /* 模態窗口樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--bg-color);
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .modal-content p {
+            margin: 0 0 20px;
+            font-size: 1rem;
+            color: var(--main-color);
+        }
+
+        .modal-close {
+            background-color: var(--button-hover-color);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
         @media (max-width: 767px) {
             .site-icon { height: 60px; width: 150px; }
             .header-inner { padding: 0 16px; }
@@ -633,6 +680,11 @@
 
             .turnstile-container {
                 padding-bottom: 30px;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 15px;
             }
         }
     </style>
@@ -723,6 +775,14 @@
         <div class="turnstile-container" id="turnstileContainer">
             <div class="cf-turnstile" data-sitekey="0x4AAAAAAAQOrX6jyaqqHxdp" data-callback="onTurnstileSuccess"></div>
         </div>
+
+        <!-- 模態窗口 -->
+        <div class="modal" id="errorModal">
+            <div class="modal-content">
+                <p id="errorMessage">驗證失敗，請稍後再試或聯繫支援。</p>
+                <button class="modal-close" id="modalClose">關閉</button>
+            </div>
+        </div>
     </main>
 
     <footer>
@@ -793,8 +853,21 @@
             dropdownMenu: document.getElementById('dropdownMenu'),
             dropdownClose: document.getElementById('dropdownClose'),
             tabButtons: document.querySelectorAll('.tab-button'),
-            tabContents: document.querySelectorAll('.tab-content')
+            tabContents: document.querySelectorAll('.tab-content'),
+            errorModal: document.getElementById('errorModal'),
+            errorMessage: document.getElementById('errorMessage'),
+            modalClose: document.getElementById('modalClose')
         };
+
+        function showErrorModal(message) {
+            elements.errorMessage.textContent = message;
+            elements.errorModal.style.display = 'flex';
+        }
+
+        function closeErrorModal() {
+            elements.errorModal.style.display = 'none';
+            elements.turnstileContainer.style.display = 'none';
+        }
 
         async function verifyTurnstile(token) {
             try {
@@ -805,11 +878,16 @@
                     },
                     body: JSON.stringify({ token })
                 });
-
                 const data = await response.json();
+                if (!data.success) {
+                    console.log('Turnstile 後端驗證失敗:', data.error || '未知錯誤');
+                    showErrorModal(data.error || '驗證失敗，請稍後再試或聯繫支援。');
+                    return false;
+                }
                 return data.success;
             } catch (error) {
                 console.error('Turnstile 驗證錯誤:', error);
+                showErrorModal('網絡錯誤，請檢查網絡連接後重試。');
                 return false;
             }
         }
@@ -818,8 +896,6 @@
             if (!state.isVerified && state.turnstileToken) {
                 const isVerified = await verifyTurnstile(state.turnstileToken);
                 if (!isVerified) {
-                    console.log('Turnstile 後端驗證失敗');
-                    elements.turnstileContainer.style.display = 'none';
                     return;
                 }
                 state.isVerified = true;
@@ -983,6 +1059,15 @@
             });
         }
 
+        function initModal() {
+            elements.modalClose.addEventListener('click', closeErrorModal);
+            elements.errorModal.addEventListener('click', (e) => {
+                if (e.target === elements.errorModal) {
+                    closeErrorModal();
+                }
+            });
+        }
+
         function init() {
             console.log('頁面初始化開始');
             initTypingEffect();
@@ -991,6 +1076,7 @@
             initCategoryButtons();
             initDropdownMenu();
             initTabs();
+            initModal();
             setInterval(updateTime, 1000);
             console.log('頁面初始化完成');
         }
