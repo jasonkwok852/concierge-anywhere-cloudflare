@@ -171,8 +171,8 @@
         .dropdown-menu {
             position: fixed;
             top: 0;
-            right: -30%; /* 桌面端初始位置 */
-            width: 30%; /* 桌面端寬度 30% */
+            right: -20%; /* 桌面端初始位置 */
+            width: 20%; /* 桌面端寬度改為 20% */
             height: 100%;
             background-color: #fafafa;
             border-radius: 0;
@@ -291,9 +291,9 @@
         .date {
             line-height: 1;
             font-family: 'Archivo Black', sans-serif;
-            color: #808080; /* 日期顏色 */
+            color: #808080;
             font-size: 18px;
-            opacity: 1; /* 透明度為 1 */
+            opacity: 1;
         }
 
         .tab-container {
@@ -883,7 +883,7 @@
             elements.errorModal.style.display = 'none';
             elements.turnstileContainer.style.display = 'none';
             state.isTurnstileRendered = false;
-            state.turnstileToken = null; // 清空 token
+            state.turnstileToken = null;
             if (window.turnstile) {
                 console.log('重置 Turnstile 小部件');
                 window.turnstile.reset();
@@ -945,7 +945,6 @@
             console.log('顯示 Turnstile 小部件，渲染狀態:', state.isTurnstileRendered);
             elements.turnstileContainer.style.display = 'flex';
 
-            // 使用 turnstile.ready 確保腳本加載完成
             if (typeof window.turnstile !== 'undefined') {
                 window.turnstile.ready(() => {
                     console.log('Turnstile 腳本已加載');
@@ -967,8 +966,12 @@
             console.log('Turnstile 前端驗證成功，Token:', token);
             state.turnstileToken = token;
             if (!state.pendingAction) {
-                console.warn('無待處理的 Action，無法跳轉');
-                showErrorModal('操作未完成，請重試。');
+                console.log('無待處理的 Action，隱藏 Turnstile 並不顯示錯誤');
+                elements.turnstileContainer.style.display = 'none';
+                state.isTurnstileRendered = false;
+                if (window.turnstile) {
+                    window.turnstile.reset();
+                }
                 return;
             }
             await redirectToRetool(state.pendingAction);
@@ -1013,7 +1016,6 @@
         }
 
         function initSearchInput() {
-            // 移除現有事件監聽器，防止重複綁定
             elements.clearIcon.removeEventListener('click', clearSearchInput);
             elements.searchInput.removeEventListener('input', handleSearchInput);
             elements.searchButton.removeEventListener('click', performSearch);
@@ -1095,7 +1097,6 @@
         }
 
         function initCategoryButtons() {
-            // 移除現有事件監聽器，防止重複綁定
             elements.categoryButtons.forEach(button => {
                 button.removeEventListener('click', handleCategoryButtonClick);
             });
