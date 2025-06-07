@@ -186,11 +186,11 @@
             margin-bottom: 12px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
+            width: 100%;
         }
 
         .dropdown-close {
-            align-self: flex-end;
             background: none;
             border: none;
             font-size: 24px;
@@ -198,6 +198,7 @@
             cursor: pointer;
             padding: 8px;
             transition: var(--transition);
+            line-height: 1;
         }
 
         .dropdown-close:hover {
@@ -682,11 +683,11 @@
                 </button>
                 <div class="dropdown-menu" id="dropdownMenu" role="menu">
                     <div class="dropdown-title" aria-label="選單">
-                        <i class="bi bi-list"></i> 選單
+                        <span><i class="bi bi-list"></i> 選單</span>
+                        <button class="dropdown-close" id="dropdownClose" aria-label="關閉選單">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
                     </div>
-                    <button class="dropdown-close" id="dropdownClose" aria-label="關閉選單">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
                     <a href="https://hello.concierge-anywhere.com/p/search/info_directory_page" class="dropdown-item" role="menuitem">
                         <i class="bi bi-book-half"></i> 資訊手冊
                     </a>
@@ -1017,16 +1018,18 @@
             let isDeleting = false;
             let isPaused = false;
             let pauseTime = 0;
+            const typingSpeed = 100; // Delay per character in milliseconds
+            const pauseDuration = 3000; // Pause time after full text
 
             function typeWriter() {
                 if (isPaused) {
                     pauseTime += 16;
-                    if (pauseTime >= 2000) {
+                    if (pauseTime >= pauseDuration) {
                         isPaused = false;
                         pauseTime = 0;
                         isDeleting = true;
                     }
-                    requestAnimationFrame(typeWriter);
+                    setTimeout(typeWriter, 16);
                     return;
                 }
 
@@ -1036,22 +1039,24 @@
                 if (!isDeleting) {
                     if (index < text.length) {
                         index++;
+                        setTimeout(typeWriter, typingSpeed);
                     } else {
                         isPaused = true;
+                        setTimeout(typeWriter, pauseDuration);
                     }
                 } else {
                     if (index > 0) {
                         index--;
+                        setTimeout(typeWriter, typingSpeed / 2); // Faster deletion
                     } else {
                         isDeleting = false;
+                        setTimeout(typeWriter, typingSpeed);
                     }
                 }
-
-                requestAnimationFrame(typeWriter);
             }
 
             console.log('開始打字效果');
-            requestAnimationFrame(typeWriter);
+            setTimeout(typeWriter, typingSpeed);
         }
 
         function updateTime() {
