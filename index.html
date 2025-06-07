@@ -190,6 +190,11 @@
             width: 100%;
         }
 
+        .dropdown-divider {
+            border-top: 1px solid var(--tab-border-color);
+            margin: 8px 0;
+        }
+
         .dropdown-close {
             background: none;
             border: none;
@@ -538,6 +543,7 @@
         .primary_content_block_row_01_div {
             text-align: center;
             padding: 2px;
+            position: relative; /* Added for dropdown positioning */
         } 
 
         .primary_content_block_content {
@@ -555,6 +561,42 @@
         .primary_content_block_row_01_div a:hover .primary_content_block_content {
             color: var(--accent-color);
             transform: translateY(-2px);
+        }
+
+        .tools-dropdown {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            background-color: #fafafa;
+            border-radius: 4px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            padding: 8px;
+        }
+
+        .tools-dropdown.show {
+            display: flex;
+        }
+
+        .tools-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            color: var(--main-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            border-radius: 4px;
+        }
+
+        .tools-dropdown-item:hover {
+            background-color: rgba(35, 57, 108, 0.1);
+            text-decoration: none;
         }
 
         .modal {
@@ -663,6 +705,16 @@
             .turnstile-container { padding-bottom: 30px; }
             .modal-content { width: 95%; padding: 15px; }
             .modal-content h3 { font-size: 1.1rem; }
+            .tools-dropdown {
+                width: 120px;
+                bottom: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            .tools-dropdown-item {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
         }
     </style>
 </head>
@@ -671,7 +723,7 @@
         <div class="header-inner">
             <div class="site-brand">
                 <a href="https://concierge-anywhere.com">
-                    <img src="https://concierge-anywhere-storage.s3.ap-east-1.amazonaws.com/icon%2Btext(%E9%80%8F%E6%98%8E%E8%83%8C%E6%99%AF)(%E6%9C%89%E9%99%B0%E5%BD%B1)+1000x400.png" alt="網站標誌" class="site-icon" loading="lazy" />
+                    <img src="https://concierge-anywhere.com/concierge_anywhere_icon_150x60.png" alt="網站標誌" class="site-icon" loading="lazy" />
                 </a>
             </div>
             <div class="header-actions">
@@ -688,6 +740,7 @@
                             <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
+                    <div class="dropdown-divider"></div>
                     <a href="https://hello.concierge-anywhere.com/p/search/info_directory_page" class="dropdown-item" role="menuitem">
                         <i class="bi bi-book-half"></i> 資訊手冊
                     </a>
@@ -797,13 +850,18 @@
                             <p class="primary_content_block_content">檔案庫</p>
                         </a>
                     </div>
-                    <div class="primary_content_block_row_01_div">
-                        <a href="#">
+                    <div class="primary_content_block_row_01_div" id="toolsContainer">
+                        <a href="#" id="toolsButton">
                             <p class="primary_content_block_content">
                                 <i class="bi bi-wrench-adjustable-circle-fill"></i>
                             </p>
                             <p class="primary_content_block_content">實用工具</p>
                         </a>
+                        <div class="tools-dropdown" id="toolsDropdown">
+                            <a href="#" class="tools-dropdown-item" data-action="world-time" role="menuitem">
+                                <i class="bi bi-clock"></i> 世界時間
+                            </a>
+                        </div>
                     </div>
                     <div class="primary_content_block_row_01_div">
                         <a href="https://hello.concierge-anywhere.com/p/search/favorited_products_page">
@@ -850,7 +908,10 @@
             tabContents: document.querySelectorAll('.tab-content'),
             errorModal: document.getElementById('errorModal'),
             errorMessage: document.getElementById('errorMessage'),
-            modalClose: document.getElementById('modalClose')
+            modalClose: document.getElementById('modalClose'),
+            toolsButton: document.getElementById('toolsButton'),
+            toolsDropdown: document.getElementById('toolsDropdown'),
+            toolsContainer: document.getElementById('toolsContainer')
         };
 
         function debounce(fn, delay) {
@@ -919,10 +980,15 @@
                 return;
             }
             
-            const baseUrl = 'https://hello.concierge-anywhere.com/p/search/info_directory_page';
-            const redirectUrl = action.type === 'search'
-                ? `${baseUrl}#keyword=${encodeURIComponent(action.value)}`
-                : `${baseUrl}#category=${encodeURIComponent(action.value)}`;
+            let redirectUrl;
+            if (action.type === 'world-time') {
+                redirectUrl = 'https://hello.concierge-anywhere.com/p/search/world-time-widget';
+            } else {
+                const baseUrl = 'https://hello.concierge-anywhere.com/p/search/info_directory_page';
+                redirectUrl = action.type === 'search'
+                    ? `${baseUrl}#keyword=${encodeURIComponent(action.value)}`
+                    : `${baseUrl}#category=${encodeURIComponent(action.value)}`;
+            }
             
             console.log('跳轉至:', redirectUrl);
             window.location.href = redirectUrl;
@@ -992,6 +1058,20 @@
             console.log('處理分類點擊，類別:', category);
             state.pendingAction = { type: 'category', value: category };
             console.log('設置 Pending Action:', state.pendingAction);
+            if (state.isVerified) {
+                console.log('已驗證，直接跳轉');
+                await redirectToRetool(state.pendingAction);
+            } else {
+                console.log('未驗證，顯示 Turnstile');
+                showTurnstile();
+            }
+        }
+
+        async function handleToolsItemClick(action) {
+            console.log('處理工具項點擊，動作:', action);
+            state.pendingAction = { type: 'world-time', value: action };
+            console.log('設置 Pending Action:', state.pendingAction);
+            elements.toolsDropdown.classList.remove('show');
             if (state.isVerified) {
                 console.log('已驗證，直接跳轉');
                 await redirectToRetool(state.pendingAction);
@@ -1102,6 +1182,26 @@
                 if (!elements.dropdownMenu.contains(e.target) && !elements.menuButton.contains(e.target)) {
                     console.log('點擊選單外區域，關閉選單');
                     elements.dropdownMenu.classList.remove('show');
+                }
+            });
+
+            // Tools Dropdown
+            elements.toolsButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('工具按鈕點擊，切換下拉選單顯示');
+                elements.toolsDropdown.classList.toggle('show');
+            });
+            elements.toolsContainer.querySelectorAll('.tools-dropdown-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    handleToolsItemClick(item.dataset.action);
+                });
+            });
+            document.addEventListener('click', (e) => {
+                if (!elements.toolsContainer.contains(e.target)) {
+                    console.log('點擊工具下拉選單外區域，關閉選單');
+                    elements.toolsDropdown.classList.remove('show');
                 }
             });
 
