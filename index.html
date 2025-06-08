@@ -543,8 +543,8 @@
         .primary_content_block_row_01_div {
             text-align: center;
             padding: 2px;
-            position: relative; /* Added for dropdown positioning */
-        } 
+            position: relative;
+        }
 
         .primary_content_block_content {
             font-size: 14px;
@@ -565,7 +565,7 @@
 
         .tools-dropdown {
             position: absolute;
-            bottom: 100%;
+            bottom: calc(100% + 5px);
             left: 50%;
             transform: translateX(-50%);
             width: 150px;
@@ -707,7 +707,7 @@
             .modal-content h3 { font-size: 1.1rem; }
             .tools-dropdown {
                 width: 120px;
-                bottom: 100%;
+                bottom: calc(100% + 5px);
                 left: 50%;
                 transform: translateX(-50%);
             }
@@ -861,6 +861,9 @@
                             <a href="#" class="tools-dropdown-item" data-action="world-time" role="menuitem">
                                 <i class="bi bi-clock"></i> 世界時間
                             </a>
+                            <a href="#" class="tools-dropdown-item" data-action="currency-calculator" role="menuitem">
+                                <i class="bi bi-currency-exchange"></i> 貨幣計算器
+                            </a>
                         </div>
                     </div>
                     <div class="primary_content_block_row_01_div">
@@ -983,15 +986,20 @@
             let redirectUrl;
             if (action.type === 'world-time') {
                 redirectUrl = 'https://hello.concierge-anywhere.com/p/search/world-time-widget';
+                console.log('跳轉至:', redirectUrl);
+                window.location.href = redirectUrl;
+            } else if (action.type === 'currency-calculator') {
+                redirectUrl = 'https://hello.concierge-anywhere.com/embedded/public/9cf4e167-8903-4c5d-b18b-1bdecc4576e5/CurrencyCalculatorWidget';
+                console.log('在新分頁開啟:', redirectUrl);
+                window.open(redirectUrl, '_blank');
             } else {
                 const baseUrl = 'https://hello.concierge-anywhere.com/p/search/info_directory_page';
                 redirectUrl = action.type === 'search'
                     ? `${baseUrl}#keyword=${encodeURIComponent(action.value)}`
                     : `${baseUrl}#category=${encodeURIComponent(action.value)}`;
+                console.log('跳轉至:', redirectUrl);
+                window.location.href = redirectUrl;
             }
-            
-            console.log('跳轉至:', redirectUrl);
-            window.location.href = redirectUrl;
         }
 
         function showTurnstile() {
@@ -1069,11 +1077,11 @@
 
         async function handleToolsItemClick(action) {
             console.log('處理工具項點擊，動作:', action);
-            state.pendingAction = { type: 'world-time', value: action };
+            state.pendingAction = { type: action, value: action };
             console.log('設置 Pending Action:', state.pendingAction);
             elements.toolsDropdown.classList.remove('show');
-            if (state.isVerified) {
-                console.log('已驗證，直接跳轉');
+            if (state.isVerified || action === 'currency-calculator') {
+                console.log('已驗證或貨幣計算器，直接跳轉');
                 await redirectToRetool(state.pendingAction);
             } else {
                 console.log('未驗證，顯示 Turnstile');
@@ -1098,8 +1106,8 @@
             let isDeleting = false;
             let isPaused = false;
             let pauseTime = 0;
-            const typingSpeed = 100; // Delay per character in milliseconds
-            const pauseDuration = 3000; // Pause time after full text
+            const typingSpeed = 100;
+            const pauseDuration = 3000;
 
             function typeWriter() {
                 if (isPaused) {
@@ -1127,7 +1135,7 @@
                 } else {
                     if (index > 0) {
                         index--;
-                        setTimeout(typeWriter, typingSpeed / 2); // Faster deletion
+                        setTimeout(typeWriter, typingSpeed / 2);
                     } else {
                         isDeleting = false;
                         setTimeout(typeWriter, typingSpeed);
@@ -1146,7 +1154,6 @@
         }
 
         function initEvents() {
-            // Search Input
             const handleSearchInput = debounce(() => {
                 elements.clearIcon.style.display = elements.searchInput.value ? 'block' : 'none';
                 elements.searchButton.classList.toggle('active', !!elements.searchInput.value.trim());
@@ -1162,12 +1169,10 @@
                 }
             });
 
-            // Category Buttons
             elements.categoryButtons.forEach(button => {
                 button.addEventListener('click', () => handleCategoryClick(button.dataset.category));
             });
 
-            // Dropdown Menu
             elements.menuButton.addEventListener('click', (e) => {
                 e.stopPropagation();
                 console.log('選單按鈕點擊，切換選單顯示');
@@ -1185,7 +1190,6 @@
                 }
             });
 
-            // Tools Dropdown
             elements.toolsButton.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -1205,7 +1209,6 @@
                 }
             });
 
-            // Tabs
             elements.tabButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     console.log('切換標籤:', button.getAttribute('data-tab'));
@@ -1222,7 +1225,6 @@
                 });
             });
 
-            // Modal
             elements.modalClose.addEventListener('click', closeErrorModal);
             elements.errorModal.addEventListener('click', (e) => {
                 if (e.target === elements.errorModal) {
