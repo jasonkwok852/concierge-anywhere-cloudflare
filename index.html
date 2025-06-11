@@ -607,7 +607,7 @@
             .header-inner { padding: 0 16px; }
             .main-content { padding: 16px 0 20px; max-width: 90%; }
             .dropdown-menu { width: 50%; right: -50%; }
-            .dropdown-menu.show { Claremontes { right: 0; }
+            .dropdown-menu.show { right: 0; }
             .button-container { gap: 0.6rem; }
             .action-button { min-width: 80px; padding: 0.4rem 0.6rem; font-size: clamp(0.65rem, 2.5vw, 0.75rem); }
             .search-container { gap: 8px; }
@@ -657,13 +657,13 @@
                         </button>
                     </div>
                     <div class="dropdown-divider"></div>
-                    <a href="https://hello.concierge-anywhere.com/p/info_directory/search" class="dropdown-item" role="menuitem">
+                    <a href="#" class="dropdown-item" data-action="info-directory" role="menuitem">
                         <i class="bi bi-book-half"></i> 資訊手冊
                     </a>
-                    <a href="https://hello.concierge-anywhere.com/p/archives_space/search" class="dropdown-item" role="menuitem">
+                    <a href="#" class="dropdown-item" data-action="archives" role="menuitem">
                         <i class="bi bi-archive-fill"></i> 檔案庫
                     </a>
-                    <a href="https://hello.concierge-anywhere.com/p/search/favorited_products_page" class="dropdown-item" role="menuitem">
+                    <a href="#" class="dropdown-item" data-action="favorited-products" role="menuitem">
                         <i class="bi bi-bag-heart-fill"></i> 精選商品
                     </a>
                     <a href="https://concierge-anywhere.com/privacy_policy" class="dropdown-item" role="menuitem">
@@ -751,7 +751,7 @@
             <div class="primary_content_block">
                 <div class="primary_content_block_row_01">
                     <div class="primary_content_block_row_01_div">
-                        <a href="https://hello.concierge-anywhere.com/p/info_directory/search">
+                        <a href="#" data-action="info-directory" class="footer-link">
                             <p class="primary_content_block_content">
                                 <i class="bi bi-book-half"></i>
                             </p>
@@ -759,7 +759,7 @@
                         </a>
                     </div>
                     <div class="primary_content_block_row_01_div">
-                        <a href="https://hello.concierge-anywhere.com/p/archives_space/search">
+                        <a href="#" data-action="archives" class="footer-link">
                             <p class="primary_content_block_content">
                                 <i class="bi bi-archive-fill"></i>
                             </p>
@@ -783,7 +783,7 @@
                         </div>
                     </div>
                     <div class="primary_content_block_row_01_div">
-                        <a href="https://hello.concierge-anywhere.com/p/search/favorited_products_page">
+                        <a href="#" data-action="favorited-products" class="footer-link">
                             <p class="primary_content_block_content">
                                 <i class="bi bi-bag-heart-fill"></i>
                             </p>
@@ -832,7 +832,9 @@
             modalClose: document.getElementById('modalClose'),
             toolsButton: document.getElementById('toolsButton'),
             toolsDropdown: document.getElementById('toolsDropdown'),
-            toolsContainer: document.getElementById('toolsContainer')
+            toolsContainer: document.getElementById('toolsContainer'),
+            dropdownItems: document.querySelectorAll('.dropdown-item[data-action]'),
+            footerLinks: document.querySelectorAll('.footer-link')
         };
 
         // 防抖函數
@@ -898,7 +900,10 @@
                 'world-time': 'https://hello.concierge-anywhere.com/p/search/world-time-widget',
                 'currency-calculator': 'https://hello.concierge-anywhere.com/embedded/public/9cf4e167-8903-4c5d-b18b-1bdecc4576e5/CurrencyCalculatorWidget',
                 'search': `https://hello.concierge-anywhere.com/p/info_directory/search#keyword=${encodeURIComponent(action.value)}`,
-                'category': `https://hello.concierge-anywhere.com/p/info_directory/search#category=${encodeURIComponent(action.value)}`
+                'category': `https://hello.concierge-anywhere.com/p/info_directory/search#category=${encodeURIComponent(action.value)}`,
+                'info-directory': 'https://hello.concierge-anywhere.com/p/info_directory/search',
+                'archives': 'https://hello.concierge-anywhere.com/p/archives_space/search',
+                'favorited-products': 'https://hello.concierge-anywhere.com/p/search/favorited_products_page'
             };
 
             const redirectUrl = urls[action.type];
@@ -970,7 +975,17 @@
         async function handleToolsItemClick(action) {
             state.pendingAction = { type: action, value: action };
             elements.toolsDropdown.classList.remove('show');
-            if (state.isVerified || action === 'currency-calculator') {
+            if (state.isVerified) {
+                await redirectToRetool(state.pendingAction);
+            } else {
+                showTurnstile();
+            }
+        }
+
+        // 處理選單和頁腳連結點擊
+        async function handleLinkClick(action) {
+            state.pendingAction = { type: action, value: action };
+            if (state.isVerified) {
                 await redirectToRetool(state.pendingAction);
             } else {
                 showTurnstile();
@@ -1085,6 +1100,20 @@
                 item.addEventListener('click', (e) => {
                     e.preventDefault();
                     handleToolsItemClick(item.dataset.action);
+                });
+            });
+
+            elements.dropdownItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    handleLinkClick(item.dataset.action);
+                });
+            });
+
+            elements.footerLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    handleLinkClick(link.dataset.action);
                 });
             });
 
