@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>測試頁面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #f5f5f5;
+            overflow: hidden;
+        }
+        h1 {
+            color: #333;
+            position: relative;
+            animation: colorChange 8s infinite;
+        }
+        h3 {
+            color: #666;
+            margin-top: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        /* Animated lines */
+        .line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, #3498db, transparent);
+            height: 2px;
+            animation: moveLine 6s linear infinite;
+        }
+        
+        /* Color animation */
+        @keyframes colorChange {
+            0% { color: #333; }
+            25% { color: #e74c3c; }
+            50% { color: #9b59b6; }
+            75% { color: #2ecc71; }
+            100% { color: #333; }
+        }
+        
+        /* Pulse animation */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Moving line animation */
+        @keyframes moveLine {
+            0% { 
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { 
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        /* Floating circles */
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-100vh) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>純粹測試</h1>
+    <h3>User Access Only</h3>
+    
+    <script>
+        // Create animated lines
+        function createLines() {
+            for (let i = 0; i < 5; i++) {
+                const line = document.createElement('div');
+                line.className = 'line';
+                line.style.width = `${Math.random() * 200 + 100}px`;
+                line.style.top = `${Math.random() * 100}vh`;
+                line.style.left = `${Math.random() * 100}vw`;
+                line.style.animationDelay = `${Math.random() * 5}s`;
+                document.body.appendChild(line);
+            }
+        }
+        
+        // Create floating circles
+        function createCircles() {
+            const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6'];
+            for (let i = 0; i < 10; i++) {
+                const circle = document.createElement('div');
+                circle.className = 'circle';
+                circle.style.width = `${Math.random() * 100 + 50}px`;
+                circle.style.height = circle.style.width;
+                circle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                circle.style.left = `${Math.random() * 100}vw`;
+                circle.style.bottom = `-${circle.style.width}`;
+                circle.style.animationDuration = `${Math.random() * 20 + 10}s`;
+                document.body.appendChild(circle);
+            }
+        }
+        
+        // Initialize animations
+        window.onload = function() {
+            createLines();
+            createCircles();
+        };
+    </script>
+</body>
+</html>
