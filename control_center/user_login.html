@@ -2,115 +2,277 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>用戶登錄 - Concierge Anywhere</title>
-    <!-- 樣式部分保持不變 -->
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <style>
-        /* 原有CSS內容 */
+        :root {
+            --main-color: #23396C;
+            --secondary-color: #3A5A9A;
+            --accent-color: #F8EF32;
+            --bg-color: #FAFAFA;
+            --border-color: #243D51;
+            --header-bg: #243D51;
+            --button-hover-color: #243D51;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
         body {
             font-family: 'Noto Sans HK', sans-serif;
+            background-color: var(--bg-color);
             margin: 0;
             padding: 0;
-            background-color: #FAFAFA;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
+
         .login-container {
+            width: 90%;
             max-width: 400px;
-            margin: 50px auto;
-            padding: 20px;
-            background: white;
+            margin: 5% auto;
+            padding: 2rem;
+            background-color: rgba(255, 255, 255, 0.9);
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        /* 其他樣式... */
+
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 12px;
+            margin: 16px 0;
+            background-color: var(--main-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .login-button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            color: #d32f2f;
+            text-align: center;
+            margin: 10px 0;
+            display: none;
+        }
+
+        #labButton {
+            background-color: var(--accent-color);
+            color: var(--header-bg);
+            border: 2px solid var(--header-bg);
+            margin-top: 20px;
+        }
+
+        #labButton:hover {
+            background-color: var(--header-bg);
+            color: var(--accent-color);
+        }
+
+        #welcomeMessage, #labAccess {
+            display: none;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <h1>用戶登錄</h1>
+        <h1 style="text-align: center; color: var(--main-color);">用戶登錄</h1>
+        
+        <!-- 登錄表單 -->
         <div id="loginForm">
-            <input type="email" id="emailInput" placeholder="電子郵件">
-            <input type="password" id="passwordInput" placeholder="密碼">
-            <button id="loginButton">登錄</button>
-            <p id="errorMessage" style="color:red;display:none;"></p>
+            <input type="email" id="emailInput" class="login-input" placeholder="電子郵件" required>
+            <input type="password" id="passwordInput" class="login-input" placeholder="密碼" required>
+            <button id="loginButton" class="login-button">
+                <i class="bi bi-box-arrow-in-right"></i> 登錄
+            </button>
+            <p id="errorMessage" class="error-message"></p>
         </div>
-        <div id="welcomeMessage" style="display:none;">
+
+        <!-- 登錄後顯示 -->
+        <div id="welcomeMessage">
             <p>歡迎，<span id="userEmail"></span></p>
-            <button id="logoutButton">登出</button>
+            <button id="logoutButton" class="login-button">
+                <i class="bi bi-box-arrow-right"></i> 登出
+            </button>
+        </div>
+
+        <!-- 實驗室訪問按鈕 -->
+        <div id="labAccess">
+            <button id="labButton" class="login-button">
+                <i class="bi bi-arrow-right-circle"></i> 進入我的實驗室
+            </button>
+            <p id="labError" class="error-message"></p>
         </div>
     </div>
 
-    <!-- Firebase 模組化 SDK -->
+    <!-- Firebase 模組 -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
         import { 
             getAuth, 
-            signInWithEmailAndPassword,
-            signOut,
-            onAuthStateChanged
+            signInWithEmailAndPassword, 
+            signOut, 
+            onAuthStateChanged,
+            GoogleAuthProvider,
+            signInWithPopup
         } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 
-        // 初始化函數
+        // 初始化Firebase
         async function initFirebase() {
             try {
-                // 從API獲取配置
-                const response = await fetch('/firebase-config');
-                const config = await response.json();
+                const response = await fetch('https://concierge-anywhere.com/firebase-config');
+                if (!response.ok) throw new Error('無法獲取Firebase配置');
                 
-                const app = initializeApp(config);
+                const firebaseConfig = await response.json();
+                const app = initializeApp(firebaseConfig);
                 const auth = getAuth(app);
                 
-                // 暴露給全局
+                // 暴露給全局使用
                 window.auth = auth;
                 return auth;
             } catch (error) {
-                console.error("初始化失敗:", error);
-                document.getElementById('errorMessage').textContent = "系統初始化失敗";
-                document.getElementById('errorMessage').style.display = 'block';
+                console.error('Firebase初始化失敗:', error);
+                showError('系統初始化失敗，請刷新頁面');
                 throw error;
             }
         }
 
+        // 顯示錯誤訊息
+        function showError(message, elementId = 'errorMessage') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
         // 登錄功能
-        async function login(email, password) {
+        async function handleLogin() {
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
+            
+            if (!email || !password) {
+                showError('請輸入電子郵件和密碼');
+                return;
+            }
+
             try {
                 const auth = window.auth || await initFirebase();
+                const loginBtn = document.getElementById('loginButton');
+                
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<i class="bi bi-hourglass"></i> 登錄中...';
+                
                 await signInWithEmailAndPassword(auth, email, password);
             } catch (error) {
-                console.error("登錄錯誤:", error);
-                const errorMsg = document.getElementById('errorMessage');
-                errorMsg.textContent = "登錄失敗: " + error.message;
-                errorMsg.style.display = 'block';
+                console.error('登錄錯誤:', error);
+                const errorMap = {
+                    'auth/invalid-email': '電子郵件格式不正確',
+                    'auth/user-not-found': '找不到此帳號',
+                    'auth/wrong-password': '密碼錯誤',
+                    'auth/too-many-requests': '嘗試次數過多，請稍後再試'
+                };
+                showError(errorMap[error.code] || '登錄失敗，請稍後再試');
+            } finally {
+                const loginBtn = document.getElementById('loginButton');
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> 登錄';
             }
         }
 
-        // 監聽登錄狀態
-        async function setupAuthListener() {
-            const auth = window.auth || await initFirebase();
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    document.getElementById('loginForm').style.display = 'none';
-                    document.getElementById('welcomeMessage').style.display = 'block';
-                    document.getElementById('userEmail').textContent = user.email;
-                } else {
-                    document.getElementById('loginForm').style.display = 'block';
-                    document.getElementById('welcomeMessage').style.display = 'none';
+        // 實驗室訪問功能
+        async function handleLabAccess() {
+            try {
+                const auth = window.auth;
+                if (!auth || !auth.currentUser) {
+                    showError('請先登入系統', 'labError');
+                    return;
                 }
-            });
+
+                const user = auth.currentUser;
+                const idToken = await user.getIdToken();
+                
+                // 跳轉到實驗室頁面並帶上token
+                window.location.href = `https://my-laboratory.pages.dev/?authToken=${encodeURIComponent(idToken)}`;
+                
+            } catch (error) {
+                console.error('實驗室訪問錯誤:', error);
+                showError('無法進入實驗室: ' + error.message, 'labError');
+            }
         }
 
-        // 事件綁定
-        document.addEventListener('DOMContentLoaded', () => {
-            setupAuthListener();
-            
-            document.getElementById('loginButton').addEventListener('click', () => {
-                const email = document.getElementById('emailInput').value;
-                const password = document.getElementById('passwordInput').value;
-                login(email, password);
-            });
-            
-            document.getElementById('logoutButton').addEventListener('click', async () => {
-                await signOut(window.auth);
-            });
+        // 登出功能
+        async function handleLogout() {
+            try {
+                const auth = window.auth;
+                if (auth) await signOut(auth);
+            } catch (error) {
+                console.error('登出錯誤:', error);
+                showError('登出失敗: ' + error.message);
+            }
+        }
+
+        // 初始化頁面
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const auth = await initFirebase();
+                
+                // 監聽登入狀態
+                onAuthStateChanged(auth, (user) => {
+                    const loginForm = document.getElementById('loginForm');
+                    const welcomeMsg = document.getElementById('welcomeMessage');
+                    const labAccess = document.getElementById('labAccess');
+                    
+                    if (user) {
+                        loginForm.style.display = 'none';
+                        welcomeMsg.style.display = 'block';
+                        labAccess.style.display = 'block';
+                        document.getElementById('userEmail').textContent = user.email;
+                    } else {
+                        loginForm.style.display = 'block';
+                        welcomeMsg.style.display = 'none';
+                        labAccess.style.display = 'none';
+                    }
+                });
+
+                // 事件監聽
+                document.getElementById('loginButton').addEventListener('click', handleLogin);
+                document.getElementById('logoutButton').addEventListener('click', handleLogout);
+                document.getElementById('labButton').addEventListener('click', handleLabAccess);
+                
+                // 回車鍵登錄
+                document.getElementById('passwordInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') handleLogin();
+                });
+
+            } catch (error) {
+                console.error('頁面初始化錯誤:', error);
+            }
         });
     </script>
 </body>
