@@ -19,14 +19,29 @@
     <!-- Firebase Modular SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
-        import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            signInWithPopup, 
+            GoogleAuthProvider, 
+            signOut, 
+            onAuthStateChanged 
+        } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 
-        // 非同步獲取 Firebase 配置
-        async function initializeFirebase() {
+        // Firebase 配置 - 請替換為您的實際配置
+const firebaseConfig = {
+  apiKey: "AIzaSyBtEeUPR3Nzvkx4N-nWxUm-x2oHhtxP14Y",
+  authDomain: "cloudflare-concierge-anywhere.firebaseapp.com",
+  projectId: "cloudflare-concierge-anywhere",
+  storageBucket: "cloudflare-concierge-anywhere.firebasestorage.app",
+  messagingSenderId: "2628861039",
+  appId: "1:2628861039:web:bf1873052440751d25219a",
+  measurementId: "G-1NDH2C02FF"
+};
+
+        // 初始化Firebase
+        function initializeFirebase() {
             try {
-                const response = await fetch('https://concierge-anywhere.com/firebase-config'); 
-                if (!response.ok) throw new Error('無法獲 a取 Firebase 配置');
-                const firebaseConfig = await response.json();
                 const app = initializeApp(firebaseConfig);
                 return getAuth(app);
             } catch (error) {
@@ -35,7 +50,7 @@
             }
         }
 
-        // 將 auth 暴露給全局腳本
+        // 將auth暴露給全局腳本
         window.initializeAuth = initializeFirebase;
     </script>
     
@@ -474,6 +489,7 @@
     </style>
 </head>
 <body>
+    <!-- 保持原有的HTML結構不變 -->
     <header>
         <div class="header-inner">
             <div class="site-brand">
@@ -692,8 +708,6 @@
                 elements.loginButton.innerHTML = '<i class="bi bi-hourglass-split"></i> 登錄中...';
                 const auth = await window.initializeAuth();
                 await signInWithEmailAndPassword(auth, email, password);
-                elements.loginButton.disabled = false;
-                elements.loginButton.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> 登錄';
             } catch (error) {
                 elements.loginButton.disabled = false;
                 elements.loginButton.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> 登錄';
@@ -732,7 +746,6 @@
             try {
                 const auth = await window.initializeAuth();
                 await signOut(auth);
-                updateUI(null);
             } catch (error) {
                 showErrorModal('登出失敗：' + error.message);
             }
@@ -742,7 +755,7 @@
         async function initAuthListener() {
             try {
                 const auth = await window.initializeAuth();
-                onAuthStateChanged(auth, user => {
+                onAuthStateChanged(auth, (user) => {
                     updateUI(user);
                 });
             } catch (error) {
@@ -756,8 +769,6 @@
                 e.stopPropagation();
                 elements.dropdownMenu.classList.toggle('show');
             });
-
-            elements.controlCenterButton.addEventListener('click', (e) => e.stopPropagation());
 
             elements.dropdownClose.addEventListener('click', () => {
                 elements.dropdownMenu.classList.remove('show');
