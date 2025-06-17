@@ -4,7 +4,11 @@ export async function onRequest(context) {
     authDomain: "concierge-anywhere.com",
     projectId: "Cloudflare-Concierge-Anywhere"
   };
-  return new Response(JSON.stringify(firebaseConfig), {
-    headers: { 'Content-Type': 'application/json' }
-  });
+  
+      return new Response(JSON.stringify(firebaseConfig), {
+        headers: { 
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*' // 如果需要CORS
+        }
+    });
 }
