@@ -90,13 +90,16 @@
             color: var(--accent-color);
         }
 
-        #welcomeMessage, #labAccess {
+        #welcomeMessage, #labError {
             display: none;
             text-align: center;
         }
     </style>
 </head>
 <body>
+    <button id="labButton" class="login-button">
+        <i class="bi bi-arrow-right-circle"></i> 進入我的實驗室
+    </button>
     <div class="login-container">
         <h1 style="text-align: center; color: var(--main-color);">用戶登錄</h1>
         
@@ -117,9 +120,6 @@
         </div>
 
         <div id="labAccess">
-            <button id="labButton" class="login-button">
-                <i class="bi bi-arrow-right-circle"></i> 進入我的實驗室
-            </button>
             <p id="labError" class="error-message"></p>
         </div>
     </div>
@@ -247,17 +247,14 @@
                 onAuthStateChanged(auth, (user) => {
                     const loginForm = document.getElementById('loginForm');
                     const welcomeMsg = document.getElementById('welcomeMessage');
-                    const labAccess = document.getElementById('labAccess');
                     
                     if (user) {
                         loginForm.style.display = 'none';
                         welcomeMsg.style.display = 'block';
-                        labAccess.style.display = 'block';
                         document.getElementById('userEmail').textContent = user.email;
                     } else {
                         loginForm.style.display = 'block';
                         welcomeMsg.style.display = 'none';
-                        labAccess.style.display = 'none';
                         sessionStorage.removeItem('firebaseIdToken');
                     }
                 });
