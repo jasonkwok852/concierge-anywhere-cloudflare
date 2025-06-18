@@ -137,7 +137,7 @@
 
         async function initFirebase() {
             try {
-                const response = await fetch('https://concierge-anywhere.com/firebase-config');
+                const response = await fetch('/firebase-config');
                 if (!response.ok) throw new Error('無法獲取Firebase配置');
                 
                 const firebaseConfig = await response.json();
@@ -206,11 +206,9 @@
                 const user = auth.currentUser;
                 const idToken = await user.getIdToken();
                 
-                // 儲存 ID Token 到 sessionStorage（臨時存儲）
                 sessionStorage.setItem('firebaseIdToken', idToken);
                 
-                // 發送測試請求以驗證 token
-                const response = await fetch('https://my-laboratory.pages.dev', {
+                const response = await fetch('/private_room/my_laboratory', {
                     headers: {
                         'Authorization': `Bearer ${idToken}`
                     }
@@ -220,8 +218,7 @@
                     throw new Error(`HTTP ${response.status}: ${await response.text()}`);
                 }
                 
-                // 驗證成功，跳轉到實驗室頁面
-                window.location.href = 'https://my-laboratory.pages.dev';
+                window.location.href = '/private_room/my_laboratory';
                 
             } catch (error) {
                 console.error('實驗室訪問錯誤:', error);
