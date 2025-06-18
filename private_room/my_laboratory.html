@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>測試頁面</title>
+    <title>我的實驗室</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,16 +24,39 @@
             margin-top: 20px;
             animation: pulse 2s infinite;
         }
-        
-        /* Animated lines */
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #23396C;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .button:hover {
+            background-color: #3A5A9A;
+        }
+        .error-message {
+            color: #d32f2f;
+            display: none;
+            margin: 10px;
+            padding: 10px;
+            background: #ffebee;
+            border-radius: 4px;
+        }
         .line {
             position: absolute;
             background: linear-gradient(90deg, transparent, #3498db, transparent);
             height: 2px;
             animation: moveLine 6s linear infinite;
         }
-        
-        /* Color animation */
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 15s infinite linear;
+        }
         @keyframes colorChange {
             0% { color: #333; }
             25% { color: #e74c3c; }
@@ -41,15 +64,11 @@
             75% { color: #2ecc71; }
             100% { color: #333; }
         }
-        
-        /* Pulse animation */
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
-        
-        /* Moving line animation */
         @keyframes moveLine {
             0% { 
                 transform: translateX(-100%);
@@ -62,15 +81,6 @@
                 opacity: 0;
             }
         }
-        
-        /* Floating circles */
-        .circle {
-            position: absolute;
-            border-radius: 50%;
-            opacity: 0.3;
-            animation: float 15s infinite linear;
-        }
-        
         @keyframes float {
             0% { transform: translateY(0) rotate(0deg); }
             100% { transform: translateY(-100vh) rotate(360deg); }
@@ -80,9 +90,56 @@
 <body>
     <h1>純粹測試</h1>
     <h3>User Access Only</h3>
-    
-    <script>
-        // Create animated lines
+    <button id="logoutButton" class="button">登出</button>
+    <p id="errorMessage" class="error-message"></p>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+
+        async function initFirebase() {
+            try {
+                const response = await fetch('/firebase-config');
+                if (!response.ok) throw new Error('無法獲取 Firebase 配置');
+                const firebaseConfig = await response.json();
+                const app = initializeApp(firebaseConfig);
+                return getAuth(app);
+            } catch (error) {
+                console.error('Firebase 初始化失敗:', error);
+                showError('頁面初始化失敗，請刷新重試');
+                throw error;
+            }
+        }
+
+        function showError(message) {
+            const element = document.getElementById('errorMessage');
+            element.textContent = message;
+            element.style.display = 'block';
+            setTimeout(() => element.style.display = 'none', 5000);
+        }
+
+        async function verifyAccess() {
+            const idToken = sessionStorage.getItem('firebaseIdToken');
+            if (!idToken) {
+                window.location.href = '/control_center/user_login';
+                return;
+            }
+
+            try {
+                const response = await fetch('/private_room/my_laboratory', {
+                    headers: { 'Authorization': `Bearer ${idToken}` }
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                }
+            } catch (error) {
+                console.error('訪問錯誤:', error);
+                showError('無法驗證訪問權限，請重新登錄');
+                sessionStorage.removeItem('firebaseIdToken');
+                window.location.href = '/control_center/user_login';
+            }
+        }
+
         function createLines() {
             for (let i = 0; i < 5; i++) {
                 const line = document.createElement('div');
@@ -94,8 +151,7 @@
                 document.body.appendChild(line);
             }
         }
-        
-        // Create floating circles
+
         function createCircles() {
             const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6'];
             for (let i = 0; i < 10; i++) {
@@ -110,12 +166,35 @@
                 document.body.appendChild(circle);
             }
         }
-        
-        // Initialize animations
-        window.onload = function() {
-            createLines();
-            createCircles();
-        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const auth = await initFirebase();
+                
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        const idToken = await user.getIdToken(true);
+                        sessionStorage.setItem('firebaseIdToken', idToken);
+                        await verifyAccess();
+                        createLines();
+                        createCircles();
+                    } else {
+                        sessionStorage.removeItem('firebaseIdToken');
+                        window.location.href = '/control_center/user_login';
+                    }
+                });
+
+                document.getElementById('logoutButton').addEventListener('click', async () => {
+                    await signOut(auth);
+                    sessionStorage.removeItem('firebaseIdToken');
+                    window.location.href = '/control_center/user_login';
+                });
+
+            } catch (error) {
+                console.error('頁面初始化錯誤:', error);
+                showError('頁面初始化失敗');
+            }
+        });
     </script>
 </body>
 </html>
