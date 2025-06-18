@@ -83,6 +83,9 @@
             color: var(--header-bg);
             border: 2px solid var(--header-bg);
             margin-top: 20px;
+            width: 200px; /* 縮小寬度 */
+            padding: 8px 16px; /* 減小內邊距 */
+            font-size: 0.9rem; /* 縮小字體 */
         }
 
         #labButton:hover {
@@ -197,33 +200,10 @@
 
         async function handleLabAccess() {
             try {
-                const auth = window.auth;
-                if (!auth || !auth.currentUser) {
-                    showError('請先登入系統', 'labError');
-                    return;
-                }
-
-                const user = auth.currentUser;
-                const idToken = await user.getIdToken();
-                
-                sessionStorage.setItem('firebaseIdToken', idToken);
-                
-                const response = await fetch('/private_room/my_laboratory', {
-                    headers: {
-                        'Authorization': `Bearer ${idToken}`
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
-                }
-                
                 window.location.href = '/private_room/my_laboratory';
-                
             } catch (error) {
                 console.error('實驗室訪問錯誤:', error);
                 showError('無法進入實驗室: ' + error.message, 'labError');
-                sessionStorage.removeItem('firebaseIdToken');
             }
         }
 
