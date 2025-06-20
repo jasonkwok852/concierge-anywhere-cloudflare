@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FirebaseUI 登入頁面</title>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
-    <!-- FirebaseUI -->
-    <script src="https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth.js"></script>
-    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth.css" />
+    <!-- Firebase SDK (CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
+    <!-- FirebaseUI (CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.css" />
     <!-- 你的 Firebase 配置 -->
     <script src="/functions/firebase-config.js"></script>
     <style>
@@ -27,10 +27,13 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
         }
         h1 {
             text-align: center;
             color: #333;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -39,7 +42,7 @@
     <div id="firebaseui-auth-container"></div>
 
     <script>
-        // 初始化 Firebase（假設 firebase-config.js 已定義 firebaseConfig）
+        // 初始化 Firebase
         firebase.initializeApp(firebaseConfig);
 
         // 初始化 FirebaseUI
@@ -52,12 +55,15 @@
                 firebase.auth.EmailAuthProvider.PROVIDER_ID,
                 firebase.auth.PhoneAuthProvider.PROVIDER_ID
             ],
-            signInSuccessUrl: '/dashboard.html', // 登入成功後的重定向頁面
+            signInSuccessUrl: '/dashboard.html', // 登入成功後重定向
             signInFlow: 'popup', // 使用彈出窗口
             callbacks: {
-                signInSuccessWithAuthResult: (authResult, redirectUrl) => {
+                signInSuccessWithAuthResult: (authResult) => {
                     console.log('登入成功:', authResult.user);
-                    return true; // 繼續重定向
+                    return true; // 繼續重定向到 signInSuccessUrl
+                },
+                signInFailure: (error) => {
+                    console.error('登入失敗:', error);
                 }
             }
         };
