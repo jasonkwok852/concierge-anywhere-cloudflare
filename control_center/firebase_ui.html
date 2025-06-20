@@ -10,8 +10,6 @@
     <!-- FirebaseUI (CDN) -->
     <script src="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.js"></script>
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.css" />
-    <!-- 你的 Firebase 配置 -->
-    <script src="/functions/firebase-config.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -35,50 +33,83 @@
             color: #333;
             margin-bottom: 20px;
         }
+        #loading {
+            text-align: center;
+            color: #666;
+        }
     </style>
 </head>
 <body>
     <h1>登入</h1>
-    <div id="firebaseui-auth-container"></div>
+    <div id="loading">正在載入配置...</div>
+    <div id="firebaseui-auth-container" style="display: none;"></div>
 
     <script>
-        // 初始化 Firebase
-        firebase.initializeApp(firebaseConfig);
-
-        // 初始化 FirebaseUI
-        const ui = new firebaseui.auth.AuthUI(firebase.auth());
-
-        // FirebaseUI 配置
-        const uiConfig = {
-            signInOptions: [
-                firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-                firebase.auth.EmailAuthProvider.PROVIDER_ID,
-                firebase.auth.PhoneAuthProvider.PROVIDER_ID
-            ],
-            signInSuccessUrl: '/dashboard.html', // 登入成功後重定向
-            signInFlow: 'popup', // 使用彈出窗口
-            callbacks: {
-                signInSuccessWithAuthResult: (authResult) => {
-                    console.log('登入成功:', authResult.user);
-                    return true; // 繼續重定向到 signInSuccessUrl
-                },
-                signInFailure: (error) => {
-                    console.error('登入失敗:', error);
+        // 動態獲取 Firebase 配置
+        async function initializeFirebase() {
+            try {
+                // 假設 Workers 端點為 /functions/firebase-config
+                // 根據你的 Cloudflare Pages 域名調整 URL
+                const response = await fetch('/functions/firebase-config', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('無法獲取 Firebase 配置: ' + response.statusText);
                 }
-            }
-        };
+                const firebaseConfig = await response.json();
 
-        // 啟動 FirebaseUI
-        ui.start('#firebaseui-auth-container', uiConfig);
+                // 初始化 Firebase
+                firebase.initializeApp(firebaseConfig);
 
-        // 監聽用戶狀態
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                console.log('用戶已登入:', user);
-            } else {
-                console.log('用戶未登入');
+                // 初始化 FirebaseUI
+                const ui = new firebaseui.auth.AuthUI(firebase.auth());
+
+                // FirebaseUI 配置
+                const uiConfig = {
+                    signInOptions: [
+                        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+                        firebase.auth.EmailAuthProvider.PROVIDER_ID,
+                        firebase.auth.PhoneAuthProvider.PROVIDER_ID
+                    ],
+                    signInSuccessUrl: '/dashboard.html', // 登入成功後重定向
+                    signInFlow: 'popup', // 使用彈出窗口
+                    callbacks: {
+                        signInSuccessWithAuthResult: (authResult) => {
+                            console.log('登入成功:', authResult.user);
+                            return true; // 繼續重定向
+                        },
+                        signInFailure: (error) => {
+                            console.error('登入失敗:', error);
+                        }
+                    }
+                };
+
+                // 隱藏載入提示並顯示 FirebaseUI
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('firebaseui-auth-container').style.display = 'block';
+
+                // 啟動 FirebaseUI
+                ui.start('#firebaseui-auth-container', uiConfig);
+
+                // 監聽用戶狀態
+                firebase.auth().onAuthStateChanged((user) => {
+                    if (user) {
+                        console.log('用戶已登入:', user);
+                    } else {
+                        console.log('用戶未登入');
+                    }
+                });
+            } catch (error) {
+                console.error('初始化失敗:', error);
+                document.getElementById('loading').textContent = '載入配置失敗，請稍後重試';
             }
-        });
+        }
+
+        // 頁面載入時執行初始化
+        window.onload = initializeFirebase;
     </script>
 </body>
 </html>
