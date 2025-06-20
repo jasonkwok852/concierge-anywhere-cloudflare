@@ -1,11 +1,78 @@
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FirebaseUI 登入頁面</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <!-- FirebaseUI -->
+    <script src="https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth.css" />
+    <!-- 你的 Firebase 配置 -->
+    <script src="/functions/firebase-config.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        #firebaseui-auth-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>登入</h1>
+    <div id="firebaseui-auth-container"></div>
 
-<!-- FirebaseUI -->
-<link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
-<script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
+    <script>
+        // 初始化 Firebase（假設 firebase-config.js 已定義 firebaseConfig）
+        firebase.initializeApp(firebaseConfig);
 
-<div id="firebaseui-auth-container"></div>
-<!-- 載入狀態 -->
-<div id="loader">Loading...</div>
+        // 初始化 FirebaseUI
+        const ui = new firebaseui.auth.AuthUI(firebase.auth());
+
+        // FirebaseUI 配置
+        const uiConfig = {
+            signInOptions: [
+                firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+                firebase.auth.EmailAuthProvider.PROVIDER_ID,
+                firebase.auth.PhoneAuthProvider.PROVIDER_ID
+            ],
+            signInSuccessUrl: '/dashboard.html', // 登入成功後的重定向頁面
+            signInFlow: 'popup', // 使用彈出窗口
+            callbacks: {
+                signInSuccessWithAuthResult: (authResult, redirectUrl) => {
+                    console.log('登入成功:', authResult.user);
+                    return true; // 繼續重定向
+                }
+            }
+        };
+
+        // 啟動 FirebaseUI
+        ui.start('#firebaseui-auth-container', uiConfig);
+
+        // 監聽用戶狀態
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                console.log('用戶已登入:', user);
+            } else {
+                console.log('用戶未登入');
+            }
+        });
+    </script>
+</body>
+</html>
