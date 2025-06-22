@@ -1,115 +1,177 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FirebaseUI 登入頁面</title>
-    <!-- Firebase SDK (CDN) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
-    <!-- FirebaseUI (CDN) -->
-    <script src="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.js"></script>
-    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.css" />
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f2f5;
-        }
-        #firebaseui-auth-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            width: 100%;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        #loading {
-            text-align: center;
-            color: #666;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase 登录系统</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Firebase UI CSS -->
+  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css">
+
+  <style>
+    /* 基础样式 */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 20px;
+  color: #333;
+}
+
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 登录容器 */
+#auth-ui-container {
+  text-align: center;
+}
+
+/* 用户信息 */
+#user-info {
+  display: none;
+  text-align: center;
+}
+
+/* 按钮样式 */
+button {
+  background: #4285f4;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 20px;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background: #3367d6;
+}
+
+#sign-out-btn {
+  background: #dc3545;
+}
+
+#sign-out-btn:hover {
+  background: #c82333;
+}
+
+/* 错误提示 */
+#error-message {
+  color: #dc3545;
+  padding: 15px;
+  background: #f8d7da;
+  border-radius: 5px;
+  display: none;
+}
+
+/* Firebase UI 自定义 */
+.firebaseui-container {
+  margin-top: 20px;
+  box-shadow: none;
+}
+
+.firebaseui-idp-button {
+  margin: 10px 0;
+  border-radius: 5px !important;
+}
+
+.hidden {
+  display: none;
+}
+  </style>
 </head>
 <body>
-    <h1>登入</h1>
-    <div id="loading">正在載入配置...</div>
-    <div id="firebaseui-auth-container" style="display: none;"></div>
+  <div class="container">
+    <div id="auth-ui-container">
+      <h1>欢迎登录</h1>
+      <div id="firebaseui-auth-container"></div>
+    </div>
+    
+    <div id="user-info" class="hidden">
+      <h2>您好, <span id="username"></span>!</h2>
+      <p>邮箱: <span id="user-email"></span></p>
+      <button id="sign-out-btn">退出登录</button>
+    </div>
+    
+    <div id="error-message" class="hidden"></div>
+  </div>
 
-    <script>
-        // 動態獲取 Firebase 配置
-        async function initializeFirebase() {
-            try {
-                // 假設 Workers 端點為 /functions/firebase-config
-                // 根據你的 Cloudflare Pages 域名調整 URL
-                const response = await fetch('/functions/firebase-config', {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error('無法獲取 Firebase 配置: ' + response.statusText);
-                }
-                const firebaseConfig = await response.json();
+  <!-- 加载Firebase UI库（必须放在模块之前） -->
+  <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
+  
+  <!-- 使用模块化代码 -->
+  <script type="module">
+    import { initFirebase, initAuthUI } from './firebase-auth.js';
+    import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js';
 
-                // 初始化 Firebase
-                firebase.initializeApp(firebaseConfig);
+    // DOM元素
+    const authContainer = document.getElementById('auth-ui-container');
+    const userInfo = document.getElementById('user-info');
+    const errorDisplay = document.getElementById('error-message');
+    const signOutBtn = document.getElementById('sign-out-btn');
 
-                // 初始化 FirebaseUI
-                const ui = new firebaseui.auth.AuthUI(firebase.auth());
+    async function main() {
+      try {
+        // 初始化Firebase
+        const auth = await initFirebase();
+        
+        // 设置Firebase UI
+        const ui = initAuthUI(auth);
+        ui.start('#firebaseui-auth-container', {
+          signInOptions: [
+            {
+              provider: 'password',
+              disableSignUp: { status: true } // 禁用注册，仅允许登录
+            },
+            'google.com'
+          ],
+          signInSuccessUrl: '/',
+          privacyPolicyUrl: '/privacy'
+        });
 
-                // FirebaseUI 配置
-                const uiConfig = {
-                    signInOptions: [
-                        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-                        firebase.auth.EmailAuthProvider.PROVIDER_ID,
-                        firebase.auth.PhoneAuthProvider.PROVIDER_ID
-                    ],
-                    signInSuccessUrl: '/dashboard.html', // 登入成功後重定向
-                    signInFlow: 'popup', // 使用彈出窗口
-                    callbacks: {
-                        signInSuccessWithAuthResult: (authResult) => {
-                            console.log('登入成功:', authResult.user);
-                            return true; // 繼續重定向
-                        },
-                        signInFailure: (error) => {
-                            console.error('登入失敗:', error);
-                        }
-                    }
-                };
+        // 监听登录状态
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            document.getElementById('username').textContent = user.displayName || user.email.split('@')[0];
+            document.getElementById('user-email').textContent = user.email;
+            authContainer.classList.add('hidden');
+            userInfo.classList.remove('hidden');
+          } else {
+            authContainer.classList.remove('hidden');
+            userInfo.classList.add('hidden');
+          }
+        });
 
-                // 隱藏載入提示並顯示 FirebaseUI
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('firebaseui-auth-container').style.display = 'block';
+        // 退出登录
+        signOutBtn.addEventListener('click', () => {
+          signOut(auth).catch(error => {
+            showError(`退出失败: ${error.message}`);
+          });
+        });
 
-                // 啟動 FirebaseUI
-                ui.start('#firebaseui-auth-container', uiConfig);
+      } catch (error) {
+        showError(error.message);
+      }
+    }
 
-                // 監聽用戶狀態
-                firebase.auth().onAuthStateChanged((user) => {
-                    if (user) {
-                        console.log('用戶已登入:', user);
-                    } else {
-                        console.log('用戶未登入');
-                    }
-                });
-            } catch (error) {
-                console.error('初始化失敗:', error);
-                document.getElementById('loading').textContent = '載入配置失敗，請稍後重試';
-            }
-        }
+    // 错误处理
+    function showError(message) {
+      errorDisplay.textContent = `错误: ${message}`;
+      errorDisplay.classList.remove('hidden');
+      authContainer.classList.add('hidden');
+      userInfo.classList.add('hidden');
+    }
 
-        // 頁面載入時執行初始化
-        window.onload = initializeFirebase;
-    </script>
+    // 启动应用
+    document.addEventListener('DOMContentLoaded', main);
+  </script>
 </body>
 </html>
