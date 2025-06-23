@@ -2,12 +2,13 @@
 export async function onRequestGet(context) {
     // 從環境變量獲取配置
     const config = {
-        apiKey: context.env.FIREBASE_WEB_API_KEY,
+        apiKey: context.env.FIREBASE_API_KEY,
         authDomain: "cloudflare-concierge-anywhere.firebaseapp.com",
         projectId: "cloudflare-concierge-anywhere",
         storageBucket: "cloudflare-concierge-anywhere.appspot.com",
         messagingSenderId: "2628861039",
-        appId: "1:2628861039:web:bf1873052440751d25219a"
+        appId: "1:2628861039:web:bf1873052440751d25219a",
+        measurementId: "G-1NDH2C02FF"
     };
 
     return new Response(JSON.stringify(config), {
@@ -17,3 +18,4 @@ export async function onRequestGet(context) {
         }
     });
 }
+
