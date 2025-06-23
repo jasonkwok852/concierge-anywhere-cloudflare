@@ -1,26 +1,26 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Firebase Authentication</title>
     <!--
-      Tailwind CSS CDN 用於快速且現代化的樣式設定。
-      這有助於建立響應式且視覺上吸引人的佈局。
+      Tailwind CSS CDN for quick and modern styling.
+      This helps create a responsive and visually appealing layout.
     -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!--
-      Google Fonts - Inter 字體，用於提供簡潔現代的字體。
-      這確保了在各種裝置上的良好可讀性。
+      Google Fonts - Inter for a clean and modern font.
+      This ensures good readability across devices.
     -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <!--
-      Firebase UI CSS 用於認證小工具的樣式設定。
-      版本 6.0.1 與 Firebase SDK v9.x 相容。
+      Firebase UI CSS for authentication widget styling.
+      Version 6.0.1 is compatible with Firebase SDK v9.x.
     -->
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
     <style>
-        /* 將 'Inter' 字體應用於整個 body，以保持一致的外觀 */
+        /* Apply 'Inter' font to the entire body for a consistent look */
         body {
             font-family: 'Inter', sans-serif;
         }
@@ -28,205 +28,205 @@
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
     <!--
-      登入表單的主要容器，位於螢幕中央。
-      使用 Tailwind 類別設定背景、內邊距、圓角、陰影、
-      寬度限制和響應式設計。
+      Main container for the login form, centered on the screen.
+      Uses Tailwind classes for background, padding, rounded corners, shadow,
+      width constraints, and responsive design.
     -->
     <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-        <!-- 頁面標題 -->
+        <!-- Page title -->
         <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">登入</h1>
 
-        <!-- 載入指示器，在獲取 Firebase 設定時顯示 -->
+        <!-- Loading indicator, shown while fetching Firebase config -->
         <div id="loading" class="text-center text-gray-600 mb-4">正在載入 Firebase 設定...</div>
 
         <!--
-          Firebase UI 認證容器。
-          這個 div 是 Firebase UI 小工具將渲染登入表單的地方。
-          初始時隱藏，載入設定後顯示。
+          Firebase UI authentication container.
+          This div is where the Firebase UI widget will render the login forms.
+          Initially hidden and shown once config is loaded.
         -->
         <div id="firebaseui-auth-container" class="hidden"></div>
 
         <!--
-          登出按鈕，預設隱藏，使用者登入後顯示。
-          使用 Tailwind 進行樣式設定，以提供清晰的動作呼籲。
+          Sign-out button, hidden by default and shown when a user is logged in.
+          Styled with Tailwind for a clear call to action.
         -->
         <button id="sign-out" class="hidden mt-6 w-full py-3 bg-red-600 text-white font-semibold rounded-md shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-75 transition duration-300">登出</button>
 
         <!--
-          使用者資訊顯示區域，預設隱藏，使用者登入後顯示。
-          顯示使用者的姓名/電子郵件、UID 和個人資料圖片（如果可用）。
+          User information display area, hidden by default and shown when a user is logged in.
+          Displays user's name/email, UID, and profile picture if available.
         -->
         <div id="user-info" class="hidden mt-6 text-center text-gray-700"></div>
     </div>
 
     <script type="module">
-        // 使用 ES 模組語法導入必要的 Firebase SDK 模組。
-        // 我們使用 Firebase v9.22.1，它與 Firebase UI 6.0.1 相容。
+        // Import necessary Firebase SDK modules using ES Modules syntax.
+        // We are using Firebase v9.22.1 which is compatible with Firebase UI 6.0.1.
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
         import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
-        // 導入認證提供者，例如電子郵件/密碼和 Google。
+        // Import authentication providers like Email/Password and Google.
         import { EmailAuthProvider, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 
-        // 獲取 DOM 元素參考，以便於操作。
+        // Get references to DOM elements for easy manipulation.
         const loadingDiv = document.getElementById('loading');
         const authContainer = document.getElementById('firebaseui-auth-container');
         const signOutButton = document.getElementById('sign-out');
         const userInfoDiv = document.getElementById('user-info');
 
-        let ui; // 全域宣告 FirebaseUI 實例，以管理其狀態。
+        let ui; // Declare FirebaseUI instance globally to manage its state.
 
         /**
-         * 從 Cloudflare Worker 動態獲取 Firebase 設定。
-         * 這透過不在前端硬編碼 API 金鑰來提高安全性。
-         * @returns {Promise<Object|null>} 解析為 Firebase 設定物件的 Promise，如果發生錯誤則為 null。
+         * Fetches Firebase configuration dynamically from the Cloudflare Worker.
+         * This enhances security by not hardcoding API keys in the frontend.
+         * @returns {Promise<Object|null>} A promise that resolves to the Firebase config object, or null if an error occurs.
          */
         async function fetchFirebaseConfig() {
             try {
-                // 向 Cloudflare Pages Functions 端點發出 fetch 請求。
-                const response = await fetch('/functions/firebase-config.js');
+                // Modified fetch path to match Cloudflare Pages Functions routing behavior.
+                // The function at `functions/firebase-config.js` is exposed at `/firebase-config`.
+                const response = await fetch('/firebase-config');
                 if (!response.ok) {
-                    // 如果 HTTP 回應狀態不是 OK (例如，404、500)，則拋出錯誤。
+                    // Throw an error if the HTTP response status is not OK (e.g., 404, 500).
                     throw new Error(`HTTP 錯誤！狀態：${response.status}`);
                 }
-                // 解析包含 Firebase 設定的 JSON 回應。
+                // Parse the JSON response containing the Firebase configuration.
                 return await response.json();
             } catch (error) {
                 console.error("獲取 Firebase 設定時發生錯誤：", error);
-                // 如果設定載入失敗，則向使用者顯示錯誤訊息。
+                // Display an error message to the user if config loading fails.
                 loadingDiv.textContent = '載入 Firebase 設定時發生錯誤。請檢查瀏覽器控制台以獲取詳細資訊。';
                 return null;
             }
         }
 
         /**
-         * 初始化 Firebase 和 FirebaseUI，並設定即時認證監聽器。
-         * 此函式協調整個認證過程。
+         * Initializes Firebase and FirebaseUI, and sets up real-time authentication listeners.
+         * This function orchestrates the entire authentication process.
          */
         async function initializeFirebaseApp() {
-            // 從 Cloudflare Worker 獲取 Firebase 設定。
+            // Fetch Firebase configuration from the Cloudflare Worker.
             const firebaseConfig = await fetchFirebaseConfig();
 
-            // 如果設定獲取失敗，則停止執行。
+            // If configuration fetching failed, stop execution.
             if (!firebaseConfig) {
                 return;
             }
 
-            // 使用獲取的設定初始化 Firebase 應用程式。
+            // Initialize Firebase app with the fetched configuration.
             const app = initializeApp(firebaseConfig);
-            // 獲取 Auth 服務實例。
+            // Get the Auth service instance.
             const auth = getAuth(app);
 
-            // 配置 FirebaseUI 進行認證。
+            // Configure FirebaseUI for authentication.
             const uiConfig = {
-                // 成功登入後要重定向到的 URL。
-                // 我們重定向到當前頁面以重新整理狀態。
+                // The URL to redirect to after successful sign-in.
+                // We redirect to the current page to refresh the state.
                 signInSuccessUrl: window.location.href,
-                // 要啟用的認證提供者清單。
-                // FirebaseUI 將自動為這些提供者渲染按鈕。
+                // List of authentication providers to enable.
+                // FirebaseUI will automatically render buttons for these.
                 signInOptions: [
-                    EmailAuthProvider.PROVIDER_ID, // 電子郵件/密碼認證
-                    GoogleAuthProvider.PROVIDER_ID, // Google 登入
-                    // 如有需要，可添加其他提供者，例如 TwitterAuthProvider.PROVIDER_ID,
+                    EmailAuthProvider.PROVIDER_ID, // Email/Password authentication
+                    GoogleAuthProvider.PROVIDER_ID, // Google Sign-In
+                    // Add other providers as needed, e.g., TwitterAuthProvider.PROVIDER_ID,
                 ],
-                // 可選：服務條款和隱私政策 URL。
-                // 請替換為您的實際 URL。
-                tosUrl: 'https://concierge-anywhere.com/terms_of_use',
-                privacyPolicyUrl: 'https://concierge-anywhere.com/privacy_policy',
+                // Optional: Terms of Service and Privacy Policy URLs.
+                // Replace with your actual URLs.
+                tosUrl: 'https://example.com/terms-of-service',
+                privacyPolicyUrl: 'https://example.com/privacy-policy',
                 callbacks: {
                     /**
-                     * 成功登入後調用的回調函式。
-                     * @param {firebase.auth.UserCredential} authResult 認證操作的結果。
-                     * @param {string} redirectUrl 要重定向到的 URL。
-                     * @returns {boolean} True 表示重定向，false 表示阻止預設重定向。
+                     * Callback invoked upon successful sign-in.
+                     * @param {firebase.auth.UserCredential} authResult The result of the authentication operation.
+                     * @param {string} redirectUrl The URL to redirect to.
+                     * @returns {boolean} True to redirect, false to prevent default redirect.
                      */
                     signInSuccessWithAuthResult: function(authResult, redirectUrl) {
-                        // 使用者成功登入。
-                        // 您可以在此處執行其他操作（如果需要）。
-                        return true; // 返回 true 以繼續重定向到 signInSuccessUrl。
+                        // User successfully signed in.
+                        // You can perform additional actions here if needed.
+                        return true; // Return true to continue with the redirect to signInSuccessUrl.
                     },
                     /**
-                     * 顯示 FirebaseUI 小工具時調用的回調函式。
-                     * 用於隱藏載入指示器並顯示認證容器。
+                     * Callback invoked when the FirebaseUI widget is displayed.
+                     * Used to hide the loading indicator and show the auth container.
                      */
                     uiShown: function() {
-                        loadingDiv.style.display = 'none'; // 隱藏載入文字
-                        authContainer.classList.remove('hidden'); // 顯示認證容器
+                        loadingDiv.style.display = 'none'; // Hide loading text
+                        authContainer.classList.remove('hidden'); // Show auth container
                     }
                 }
             };
 
-            // 初始化 FirebaseUI Auth 實例。
-            // 它需要 Firebase Auth 服務實例。
-            // 我們直接從 gstatic CDN 載入 firebaseui.auth.AuthUI 類別。
+            // Initialize the FirebaseUI Auth instance.
+            // It requires the Firebase Auth service instance.
+            // We load the firebaseui.auth.AuthUI class directly from the gstatic CDN.
             ui = new firebaseui.auth.AuthUI(auth);
 
-            // 監聽認證狀態的變化（使用者登入/登出）。
+            // Listen for changes in the authentication state (user logged in/out).
             onAuthStateChanged(auth, (user) => {
                 if (user) {
-                    // 使用者已登入。
+                    // User is signed in.
                     console.log('使用者已登入：', user.email || user.phoneNumber || user.uid);
 
-                    // 隱藏認證 UI，並顯示登出按鈕和使用者資訊。
+                    // Hide the authentication UI and show the sign-out button and user info.
                     authContainer.classList.add('hidden');
                     signOutButton.classList.remove('hidden');
                     userInfoDiv.classList.remove('hidden');
 
-                    // 顯示使用者資訊。
+                    // Display user information.
                     userInfoDiv.innerHTML = `
                         <p class="text-lg font-medium">歡迎，${user.displayName || user.email || '使用者'}！</p>
                         <p class="text-sm text-gray-500">使用者 ID: ${user.uid}</p>
                         ${user.photoURL ? `<img src="${user.photoURL}" alt="個人資料" class="w-16 h-16 rounded-full mx-auto mt-4 shadow-md">` : ''}
                     `;
-                    loadingDiv.style.display = 'none'; // 確保載入已隱藏
+                    loadingDiv.style.display = 'none'; // Ensure loading is hidden
 
-                    // 如果 FirebaseUI 實例處於活動狀態，請重設它以清除其狀態
-                    // 並防止它不必要地顯示登入表單。
+                    // If FirebaseUI instance is active, reset it to clear its state
+                    // and prevent it from showing the login form unnecessarily.
                     if (ui.isStarted()) {
                         ui.reset();
                     }
 
                 } else {
-                    // 使用者已登出。
+                    // User is signed out.
                     console.log('使用者已登出。');
 
-                    // 顯示認證 UI，並隱藏使用者資訊和登出按鈕。
+                    // Show the authentication UI and hide user info and sign-out button.
                     authContainer.classList.remove('hidden');
                     signOutButton.classList.add('hidden');
                     userInfoDiv.classList.add('hidden');
-                    userInfoDiv.innerHTML = ''; // 清除使用者資訊
+                    userInfoDiv.innerHTML = ''; // Clear user info
 
-                    // 僅當 FirebaseUI 尚未運行時才啟動它。
-                    // 這可以防止在不需要時多次呼叫 ui.start()。
+                    // Only start FirebaseUI if it's not already running.
+                    // This prevents errors if ui.start() is called multiple times without need.
                     if (!ui.isStarted()) {
                         ui.start('#firebaseui-auth-container', uiConfig);
                     }
-                    loadingDiv.style.display = 'none'; // 確保載入已隱藏
+                    loadingDiv.style.display = 'none'; // Ensure loading is hidden
                 }
             });
 
-            // 為登出按鈕添加事件監聽器。
+            // Add event listener for the sign-out button.
             signOutButton.addEventListener('click', async () => {
                 try {
-                    await signOut(auth); // 登出當前使用者。
+                    await signOut(auth); // Sign out the current user.
                     console.log('使用者已成功登出。');
                 } catch (error) {
                     console.error('登出時發生錯誤：', error);
-                    // 您可能希望在此處向使用者顯示訊息。
+                    // You might want to show a message to the user here.
                 }
             });
 
-            // 當頁面初次載入時啟動 FirebaseUI 小工具
-            // 如果沒有使用者登入。這也由 onAuthStateChanged 處理。
-            // 我們在此處呼叫它，以確保在找不到會話時立即嘗試啟動。
+            // Start the FirebaseUI widget when the page loads initially
+            // if no user is signed in. This is also handled by onAuthStateChanged.
+            // We call it here to ensure it attempts to start right away if no session is found.
             if (!auth.currentUser) {
-                loadingDiv.style.display = 'none'; // 隱藏載入文字
-                authContainer.classList.remove('hidden'); // 顯示認證容器
+                loadingDiv.style.display = 'none'; // Hide loading text
+                authContainer.classList.remove('hidden'); // Show auth container
                 ui.start('#firebaseui-auth-container', uiConfig);
             }
         }
 
-        // 確保 Firebase 應用程式初始化在 DOM 完全載入後才發生。
+        // Ensure the Firebase app initialization happens only after the DOM is fully loaded.
         document.addEventListener('DOMContentLoaded', initializeFirebaseApp);
     </script>
 </body>
-</html>
