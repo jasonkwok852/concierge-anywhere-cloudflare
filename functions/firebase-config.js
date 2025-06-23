@@ -2,7 +2,7 @@
 export async function onRequestGet(context) {
     // 從環境變量獲取配置
     const config = {
-        apiKey: context.env.FIREBASE_API_KEY,
+        apiKey: "AIzaSyBtEeUPR3Nzvkx4N-nWxUm-x2oHhtxP14Y",
         authDomain: "cloudflare-concierge-anywhere.firebaseapp.com",
         projectId: "cloudflare-concierge-anywhere",
         storageBucket: "cloudflare-concierge-anywhere.appspot.com",
