@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -81,20 +81,33 @@
          * @returns {Promise<Object|null>} A promise that resolves to the Firebase config object, or null if an error occurs.
          */
         async function fetchFirebaseConfig() {
+            console.log('--- 偵錯: fetchFirebaseConfig 開始 ---');
             try {
                 // Modified fetch path to match Cloudflare Pages Functions routing behavior.
                 // The function at `functions/firebase-config.js` is exposed at `/firebase-config`.
+                console.log('--- 偵錯: 嘗試從 /firebase-config 獲取設定 ---');
                 const response = await fetch('/firebase-config');
+                console.log('--- 偵錯: 收到回應 ---');
+                console.log('--- 偵錯: response.ok:', response.ok);
+                console.log('--- 偵錯: response.status:', response.status);
+                console.log('--- 偵錯: response.headers.get("Content-Type"):', response.headers.get("Content-Type"));
+
                 if (!response.ok) {
-                    // Throw an error if the HTTP response status is not OK (e.g., 404, 500).
-                    throw new Error(`HTTP 錯誤！狀態：${response.status}`);
+                    const errorText = await response.text(); // 嘗試讀取錯誤回應的文本
+                    console.error('--- 偵錯: HTTP 錯誤回應文本:', errorText);
+                    throw new Error(`HTTP 錯誤！狀態：${response.status} - ${errorText.substring(0, 100)}...`);
                 }
+
                 // Parse the JSON response containing the Firebase configuration.
-                return await response.json();
+                const config = await response.json();
+                console.log('--- 偵錯: 成功解析 JSON:', config);
+                console.log('--- 偵錯: fetchFirebaseConfig 結束 (成功) ---');
+                return config;
             } catch (error) {
-                console.error("獲取 Firebase 設定時發生錯誤：", error);
+                console.error("--- 偵錯: 獲取 Firebase 設定時發生錯誤：", error);
                 // Display an error message to the user if config loading fails.
-                loadingDiv.textContent = '載入 Firebase 設定時發生錯誤。請檢查瀏覽器控制台以獲取詳細資訊。';
+                loadingDiv.textContent = `載入 Firebase 設定時發生錯誤。請檢查瀏覽器控制台以獲取詳細資訊。錯誤：${error.message || error}`;
+                console.log('--- 偵錯: fetchFirebaseConfig 結束 (錯誤) ---');
                 return null;
             }
         }
@@ -104,18 +117,22 @@
          * This function orchestrates the entire authentication process.
          */
         async function initializeFirebaseApp() {
+            console.log('--- 偵錯: initializeFirebaseApp 開始 ---');
             // Fetch Firebase configuration from the Cloudflare Worker.
             const firebaseConfig = await fetchFirebaseConfig();
 
             // If configuration fetching failed, stop execution.
             if (!firebaseConfig) {
+                console.log('--- 偵錯: Firebase 設定為空，終止初始化 ---');
                 return;
             }
 
+            console.log('--- 偵錯: Firebase 設定已取得，開始初始化 Firebase App ---');
             // Initialize Firebase app with the fetched configuration.
             const app = initializeApp(firebaseConfig);
             // Get the Auth service instance.
             const auth = getAuth(app);
+            console.log('--- 偵錯: Firebase App 和 Auth 服務已初始化 ---');
 
             // Configure FirebaseUI for authentication.
             const uiConfig = {
@@ -141,8 +158,7 @@
                      * @returns {boolean} True to redirect, false to prevent default redirect.
                      */
                     signInSuccessWithAuthResult: function(authResult, redirectUrl) {
-                        // User successfully signed in.
-                        // You can perform additional actions here if needed.
+                        console.log('--- 偵錯: signInSuccessWithAuthResult 觸發 ---');
                         return true; // Return true to continue with the redirect to signInSuccessUrl.
                     },
                     /**
@@ -150,6 +166,7 @@
                      * Used to hide the loading indicator and show the auth container.
                      */
                     uiShown: function() {
+                        console.log('--- 偵錯: FirebaseUI 介面已顯示 ---');
                         loadingDiv.style.display = 'none'; // Hide loading text
                         authContainer.classList.remove('hidden'); // Show auth container
                     }
@@ -160,12 +177,14 @@
             // It requires the Firebase Auth service instance.
             // We load the firebaseui.auth.AuthUI class directly from the gstatic CDN.
             ui = new firebaseui.auth.AuthUI(auth);
+            console.log('--- 偵錯: FirebaseUI 實例已創建 ---');
 
             // Listen for changes in the authentication state (user logged in/out).
             onAuthStateChanged(auth, (user) => {
+                console.log('--- 偵錯: onAuthStateChanged 觸發，使用者狀態:', user ? '已登入' : '已登出');
                 if (user) {
                     // User is signed in.
-                    console.log('使用者已登入：', user.email || user.phoneNumber || user.uid);
+                    console.log('User signed in:', user.email || user.phoneNumber || user.uid);
 
                     // Hide the authentication UI and show the sign-out button and user info.
                     authContainer.classList.add('hidden');
@@ -183,12 +202,13 @@
                     // If FirebaseUI instance is active, reset it to clear its state
                     // and prevent it from showing the login form unnecessarily.
                     if (ui.isStarted()) {
+                        console.log('--- 偵錯: 重設 FirebaseUI ---');
                         ui.reset();
                     }
 
                 } else {
                     // User is signed out.
-                    console.log('使用者已登出。');
+                    console.log('User signed out.');
 
                     // Show the authentication UI and hide user info and sign-out button.
                     authContainer.classList.remove('hidden');
@@ -199,6 +219,7 @@
                     // Only start FirebaseUI if it's not already running.
                     // This prevents errors if ui.start() is called multiple times without need.
                     if (!ui.isStarted()) {
+                        console.log('--- 偵錯: 啟動 FirebaseUI ---');
                         ui.start('#firebaseui-auth-container', uiConfig);
                     }
                     loadingDiv.style.display = 'none'; // Ensure loading is hidden
@@ -207,6 +228,7 @@
 
             // Add event listener for the sign-out button.
             signOutButton.addEventListener('click', async () => {
+                console.log('--- 偵錯: 登出按鈕被點擊 ---');
                 try {
                     await signOut(auth); // Sign out the current user.
                     console.log('使用者已成功登出。');
@@ -219,14 +241,22 @@
             // Start the FirebaseUI widget when the page loads initially
             // if no user is signed in. This is also handled by onAuthStateChanged.
             // We call it here to ensure it attempts to start right away if no session is found.
+            // This part might trigger ui.start() even if onAuthStateChanged would do it,
+            // but the `if (!ui.isStarted())` check should prevent issues.
             if (!auth.currentUser) {
+                console.log('--- 偵錯: 頁面載入時無使用者，嘗試啟動 FirebaseUI ---');
                 loadingDiv.style.display = 'none'; // Hide loading text
                 authContainer.classList.remove('hidden'); // Show auth container
-                ui.start('#firebaseui-auth-container', uiConfig);
+                if (!ui.isStarted()) {
+                   ui.start('#firebaseui-auth-container', uiConfig);
+                }
             }
+            console.log('--- 偵錯: initializeFirebaseApp 結束 ---');
         }
 
         // Ensure the Firebase app initialization happens only after the DOM is fully loaded.
+        console.log('--- 偵錯: DOMContentLoaded 事件監聽器已設置 ---');
         document.addEventListener('DOMContentLoaded', initializeFirebaseApp);
     </script>
 </body>
+</html>
