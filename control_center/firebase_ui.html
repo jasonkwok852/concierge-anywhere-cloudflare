@@ -17,6 +17,7 @@
     <!--
       Firebase UI CSS for authentication widget styling.
       Version 6.0.1 is compatible with Firebase SDK v9.x.
+      NOTE: The main Firebase UI JavaScript will be loaded at the end of <body>.
     -->
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
     <style>
@@ -58,6 +59,12 @@
         -->
         <div id="user-info" class="hidden mt-6 text-center text-gray-700"></div>
     </div>
+
+    <!--
+      Firebase UI JavaScript SDK (Non-module script)
+      Placed here to ensure it loads and defines `window.firebaseui` before the `type="module"` script executes.
+    -->
+    <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
 
     <script type="module">
         // Import necessary Firebase SDK modules using ES Modules syntax.
@@ -175,6 +182,7 @@
 
             // Initialize the FirebaseUI Auth instance.
             // Accessing firebaseui via `window` object as it's loaded as a global script.
+            // This line will now execute after the firebase-ui-auth.js script has loaded.
             ui = new window.firebaseui.auth.AuthUI(auth);
             console.log('--- Debug: FirebaseUI instance created ---');
 
