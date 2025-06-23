@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -81,33 +81,33 @@
          * @returns {Promise<Object|null>} A promise that resolves to the Firebase config object, or null if an error occurs.
          */
         async function fetchFirebaseConfig() {
-            console.log('--- 偵錯: fetchFirebaseConfig 開始 ---');
+            console.log('--- Debug: fetchFirebaseConfig started ---');
             try {
                 // Modified fetch path to match Cloudflare Pages Functions routing behavior.
                 // The function at `functions/firebase-config.js` is exposed at `/firebase-config`.
-                console.log('--- 偵錯: 嘗試從 /firebase-config 獲取設定 ---');
+                console.log('--- Debug: Attempting to fetch config from /firebase-config ---');
                 const response = await fetch('/firebase-config');
-                console.log('--- 偵錯: 收到回應 ---');
-                console.log('--- 偵錯: response.ok:', response.ok);
-                console.log('--- 偵錯: response.status:', response.status);
-                console.log('--- 偵錯: response.headers.get("Content-Type"):', response.headers.get("Content-Type"));
+                console.log('--- Debug: Response received ---');
+                console.log('--- Debug: response.ok:', response.ok);
+                console.log('--- Debug: response.status:', response.status);
+                console.log('--- Debug: response.headers.get("Content-Type"):', response.headers.get("Content-Type"));
 
                 if (!response.ok) {
-                    const errorText = await response.text(); // 嘗試讀取錯誤回應的文本
-                    console.error('--- 偵錯: HTTP 錯誤回應文本:', errorText);
-                    throw new Error(`HTTP 錯誤！狀態：${response.status} - ${errorText.substring(0, 100)}...`);
+                    const errorText = await response.text(); // Attempt to read error response text
+                    console.error('--- Debug: HTTP Error Response Text:', errorText);
+                    throw new Error(`HTTP Error! Status: ${response.status} - ${errorText.substring(0, 100)}...`);
                 }
 
                 // Parse the JSON response containing the Firebase configuration.
                 const config = await response.json();
-                console.log('--- 偵錯: 成功解析 JSON:', config);
-                console.log('--- 偵錯: fetchFirebaseConfig 結束 (成功) ---');
+                console.log('--- Debug: Successfully parsed JSON:', config);
+                console.log('--- Debug: fetchFirebaseConfig finished (success) ---');
                 return config;
             } catch (error) {
-                console.error("--- 偵錯: 獲取 Firebase 設定時發生錯誤：", error);
+                console.error("--- Debug: Error fetching Firebase config:", error);
                 // Display an error message to the user if config loading fails.
                 loadingDiv.textContent = `載入 Firebase 設定時發生錯誤。請檢查瀏覽器控制台以獲取詳細資訊。錯誤：${error.message || error}`;
-                console.log('--- 偵錯: fetchFirebaseConfig 結束 (錯誤) ---');
+                console.log('--- Debug: fetchFirebaseConfig finished (error) ---');
                 return null;
             }
         }
@@ -117,22 +117,22 @@
          * This function orchestrates the entire authentication process.
          */
         async function initializeFirebaseApp() {
-            console.log('--- 偵錯: initializeFirebaseApp 開始 ---');
+            console.log('--- Debug: initializeFirebaseApp started ---');
             // Fetch Firebase configuration from the Cloudflare Worker.
             const firebaseConfig = await fetchFirebaseConfig();
 
             // If configuration fetching failed, stop execution.
             if (!firebaseConfig) {
-                console.log('--- 偵錯: Firebase 設定為空，終止初始化 ---');
+                console.log('--- Debug: Firebase config is null, terminating initialization ---');
                 return;
             }
 
-            console.log('--- 偵錯: Firebase 設定已取得，開始初始化 Firebase App ---');
+            console.log('--- Debug: Firebase config obtained, initializing Firebase App ---');
             // Initialize Firebase app with the fetched configuration.
             const app = initializeApp(firebaseConfig);
             // Get the Auth service instance.
             const auth = getAuth(app);
-            console.log('--- 偵錯: Firebase App 和 Auth 服務已初始化 ---');
+            console.log('--- Debug: Firebase App and Auth service initialized ---');
 
             // Configure FirebaseUI for authentication.
             const uiConfig = {
@@ -147,9 +147,9 @@
                     // Add other providers as needed, e.g., TwitterAuthProvider.PROVIDER_ID,
                 ],
                 // Optional: Terms of Service and Privacy Policy URLs.
-                // Replace with your actual URLs.
-                tosUrl: 'https://example.com/terms-of-service',
-                privacyPolicyUrl: 'https://example.com/privacy-policy',
+                // Updated to user-provided URLs.
+                tosUrl: 'https://concierge-anywhere.com/terms_of_use', // 使用者提供的服務條款 URL
+                privacyPolicyUrl: 'https://concierge-anywhere.com/privacy_policy', // 使用者提供的隱私政策 URL
                 callbacks: {
                     /**
                      * Callback invoked upon successful sign-in.
@@ -158,7 +158,7 @@
                      * @returns {boolean} True to redirect, false to prevent default redirect.
                      */
                     signInSuccessWithAuthResult: function(authResult, redirectUrl) {
-                        console.log('--- 偵錯: signInSuccessWithAuthResult 觸發 ---');
+                        console.log('--- Debug: signInSuccessWithAuthResult triggered ---');
                         return true; // Return true to continue with the redirect to signInSuccessUrl.
                     },
                     /**
@@ -166,7 +166,7 @@
                      * Used to hide the loading indicator and show the auth container.
                      */
                     uiShown: function() {
-                        console.log('--- 偵錯: FirebaseUI 介面已顯示 ---');
+                        console.log('--- Debug: FirebaseUI interface displayed ---');
                         loadingDiv.style.display = 'none'; // Hide loading text
                         authContainer.classList.remove('hidden'); // Show auth container
                     }
@@ -174,14 +174,13 @@
             };
 
             // Initialize the FirebaseUI Auth instance.
-            // It requires the Firebase Auth service instance.
-            // We load the firebaseui.auth.AuthUI class directly from the gstatic CDN.
-            ui = new firebaseui.auth.AuthUI(auth);
-            console.log('--- 偵錯: FirebaseUI 實例已創建 ---');
+            // Accessing firebaseui via `window` object as it's loaded as a global script.
+            ui = new window.firebaseui.auth.AuthUI(auth);
+            console.log('--- Debug: FirebaseUI instance created ---');
 
             // Listen for changes in the authentication state (user logged in/out).
             onAuthStateChanged(auth, (user) => {
-                console.log('--- 偵錯: onAuthStateChanged 觸發，使用者狀態:', user ? '已登入' : '已登出');
+                console.log('--- Debug: onAuthStateChanged triggered, user status:', user ? 'logged in' : 'logged out');
                 if (user) {
                     // User is signed in.
                     console.log('User signed in:', user.email || user.phoneNumber || user.uid);
@@ -202,7 +201,7 @@
                     // If FirebaseUI instance is active, reset it to clear its state
                     // and prevent it from showing the login form unnecessarily.
                     if (ui.isStarted()) {
-                        console.log('--- 偵錯: 重設 FirebaseUI ---');
+                        console.log('--- Debug: Resetting FirebaseUI ---');
                         ui.reset();
                     }
 
@@ -219,7 +218,7 @@
                     // Only start FirebaseUI if it's not already running.
                     // This prevents errors if ui.start() is called multiple times without need.
                     if (!ui.isStarted()) {
-                        console.log('--- 偵錯: 啟動 FirebaseUI ---');
+                        console.log('--- Debug: Starting FirebaseUI ---');
                         ui.start('#firebaseui-auth-container', uiConfig);
                     }
                     loadingDiv.style.display = 'none'; // Ensure loading is hidden
@@ -228,7 +227,7 @@
 
             // Add event listener for the sign-out button.
             signOutButton.addEventListener('click', async () => {
-                console.log('--- 偵錯: 登出按鈕被點擊 ---');
+                console.log('--- Debug: Sign out button clicked ---');
                 try {
                     await signOut(auth); // Sign out the current user.
                     console.log('使用者已成功登出。');
@@ -244,18 +243,18 @@
             // This part might trigger ui.start() even if onAuthStateChanged would do it,
             // but the `if (!ui.isStarted())` check should prevent issues.
             if (!auth.currentUser) {
-                console.log('--- 偵錯: 頁面載入時無使用者，嘗試啟動 FirebaseUI ---');
+                console.log('--- Debug: No user on page load, attempting to start FirebaseUI ---');
                 loadingDiv.style.display = 'none'; // Hide loading text
                 authContainer.classList.remove('hidden'); // Show auth container
                 if (!ui.isStarted()) {
                    ui.start('#firebaseui-auth-container', uiConfig);
                 }
             }
-            console.log('--- 偵錯: initializeFirebaseApp 結束 ---');
+            console.log('--- Debug: initializeFirebaseApp finished ---');
         }
 
         // Ensure the Firebase app initialization happens only after the DOM is fully loaded.
-        console.log('--- 偵錯: DOMContentLoaded 事件監聽器已設置 ---');
+        console.log('--- Debug: DOMContentLoaded event listener set ---');
         document.addEventListener('DOMContentLoaded', initializeFirebaseApp);
     </script>
 </body>
