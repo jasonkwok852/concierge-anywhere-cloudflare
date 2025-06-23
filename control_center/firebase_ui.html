@@ -1,177 +1,144 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Firebase 登录系统</title>
-  <link rel="stylesheet" href="styles.css">
-  <!-- Firebase UI CSS -->
-  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css">
-
-  <style>
-    /* 基础样式 */
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f8f9fa;
-  margin: 0;
-  padding: 20px;
-  color: #333;
-}
-
-.container {
-  max-width: 500px;
-  margin: 0 auto;
-  background: white;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* 登录容器 */
-#auth-ui-container {
-  text-align: center;
-}
-
-/* 用户信息 */
-#user-info {
-  display: none;
-  text-align: center;
-}
-
-/* 按钮样式 */
-button {
-  background: #4285f4;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  margin-top: 20px;
-  transition: background 0.3s;
-}
-
-button:hover {
-  background: #3367d6;
-}
-
-#sign-out-btn {
-  background: #dc3545;
-}
-
-#sign-out-btn:hover {
-  background: #c82333;
-}
-
-/* 错误提示 */
-#error-message {
-  color: #dc3545;
-  padding: 15px;
-  background: #f8d7da;
-  border-radius: 5px;
-  display: none;
-}
-
-/* Firebase UI 自定义 */
-.firebaseui-container {
-  margin-top: 20px;
-  box-shadow: none;
-}
-
-.firebaseui-idp-button {
-  margin: 10px 0;
-  border-radius: 5px !important;
-}
-
-.hidden {
-  display: none;
-}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Authentication</title>
+    <!-- Firebase UI CSS -->
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #firebaseui-auth-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        #sign-out {
+            display: none;
+            margin-top: 20px;
+            padding: 10px;
+            width: 100%;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #sign-out:hover {
+            background-color: #c82333;
+        }
+        #user-info {
+            text-align: center;
+            margin-top: 20px;
+        }
+        #loading {
+            text-align: center;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div id="auth-ui-container">
-      <h1>欢迎登录</h1>
-      <div id="firebaseui-auth-container"></div>
+    <div>
+        <h1>Login</h1>
+        <div id="loading">Loading...</div>
+        <div id="firebaseui-auth-container" style="display: none;"></div>
+        <button id="sign-out">Sign Out</button>
+        <div id="user-info"></div>
     </div>
-    
-    <div id="user-info" class="hidden">
-      <h2>您好, <span id="username"></span>!</h2>
-      <p>邮箱: <span id="user-email"></span></p>
-      <button id="sign-out-btn">退出登录</button>
-    </div>
-    
-    <div id="error-message" class="hidden"></div>
-  </div>
 
-  <!-- 加载Firebase UI库（必须放在模块之前） -->
-  <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
-  
-  <!-- 使用模块化代码 -->
-  <script type="module">
-    import { initFirebase, initAuthUI } from './firebase-auth.js';
-    import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js';
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
+    <!-- Firebase UI -->
+    <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
 
-    // DOM元素
-    const authContainer = document.getElementById('auth-ui-container');
-    const userInfo = document.getElementById('user-info');
-    const errorDisplay = document.getElementById('error-message');
-    const signOutBtn = document.getElementById('sign-out-btn');
+    <script>
+        // 動態獲取 Firebase 配置
+        async function fetchFirebaseConfig() {
+            try {
+                const response = await fetch('https://concierge-anywhere.com/firebase-config'); // 替換為您的 Worker URL
+                if (!response.ok) {
+                    throw new Error('Failed to fetch Firebase config');
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching Firebase config:', error);
+                document.getElementById('loading').innerText = 'Failed to load configuration';
+                return null;
+            }
+        }
 
-    async function main() {
-      try {
-        // 初始化Firebase
-        const auth = await initFirebase();
-        
-        // 设置Firebase UI
-        const ui = initAuthUI(auth);
-        ui.start('#firebaseui-auth-container', {
-          signInOptions: [
-            {
-              provider: 'password',
-              disableSignUp: { status: true } // 禁用注册，仅允许登录
-            },
-            'google.com'
-          ],
-          signInSuccessUrl: '/',
-          privacyPolicyUrl: '/privacy'
+        // 初始化 Firebase 和 FirebaseUI
+        async function initializeAuth() {
+            const firebaseConfig = await fetchFirebaseConfig();
+            if (!firebaseConfig) return;
+
+            // 初始化 Firebase
+            firebase.initializeApp(firebaseConfig);
+
+            // 初始化 FirebaseUI
+            const ui = new firebaseui.auth.AuthUI(firebase.auth());
+
+            // FirebaseUI 配置
+            const uiConfig = {
+                signInSuccessUrl: window.location.href, // 登錄成功後重定向到當前頁面
+                signInOptions: [
+                    firebase.auth.EmailAuthProvider.PROVIDER_ID,
+                    firebase.auth.GoogleAuthProvider.PROVIDER_ID
+                ],
+                tosUrl: 'https://concierge-anywhere.com/terms_of_use', // 替換為您的服務條款 URL
+                privacyPolicyUrl: 'https://concierge-anywhere.com/privacy_policy' // 替換為您的隱私政策 URL
+            };
+
+            // 啟動 FirebaseUI
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('firebaseui-auth-container').style.display = 'block';
+            ui.start('#firebaseui-auth-container', uiConfig);
+
+            // 監聽用戶狀態變化
+            firebase.auth().onAuthStateChanged((user) => {
+                const userInfo = document.getElementById('user-info');
+                const signOutButton = document.getElementById('sign-out');
+                if (user) {
+                    // 用戶已登錄
+                    userInfo.innerHTML = `Welcome, ${user.displayName || user.email}`;
+                    signOutButton.style.display = 'block';
+                    document.getElementById('firebaseui-auth-container').style.display = 'none';
+                } else {
+                    // 用戶已登出
+                    userInfo.innerHTML = '';
+                    signOutButton.style.display = 'none';
+                    document.getElementById('firebaseui-auth-container').style.display = 'block';
+                }
+            });
+        }
+
+        // 登出按鈕事件監聽
+        document.getElementById('sign-out').addEventListener('click', () => {
+            firebase.auth().signOut().then(() => {
+                console.log('User signed out');
+            }).catch((error) => {
+                console.error('Sign out error:', error);
+            });
         });
 
-        // 监听登录状态
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            document.getElementById('username').textContent = user.displayName || user.email.split('@')[0];
-            document.getElementById('user-email').textContent = user.email;
-            authContainer.classList.add('hidden');
-            userInfo.classList.remove('hidden');
-          } else {
-            authContainer.classList.remove('hidden');
-            userInfo.classList.add('hidden');
-          }
-        });
-
-        // 退出登录
-        signOutBtn.addEventListener('click', () => {
-          signOut(auth).catch(error => {
-            showError(`退出失败: ${error.message}`);
-          });
-        });
-
-      } catch (error) {
-        showError(error.message);
-      }
-    }
-
-    // 错误处理
-    function showError(message) {
-      errorDisplay.textContent = `错误: ${message}`;
-      errorDisplay.classList.remove('hidden');
-      authContainer.classList.add('hidden');
-      userInfo.classList.add('hidden');
-    }
-
-    // 启动应用
-    document.addEventListener('DOMContentLoaded', main);
-  </script>
+        // 執行初始化
+        initializeAuth();
+    </script>
 </body>
 </html>
