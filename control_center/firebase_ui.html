@@ -1,269 +1,363 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase Authentication</title>
-    <!--
-      Tailwind CSS CDN for quick and modern styling.
-      This helps create a responsive and visually appealing layout.
-    -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!--
-      Google Fonts - Inter for a clean and modern font.
-      This ensures good readability across devices.
-    -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <!--
-      Firebase UI CSS for authentication widget styling.
-      Version 6.0.1 is compatible with Firebase SDK v9.x.
-      NOTE: The main Firebase UI JavaScript will be loaded at the end of <body>.
-    -->
-    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
+    <title>用戶登錄 - Concierge Anywhere</title>
+    <!-- Google Fonts for Noto Sans HK -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <style>
-        /* Apply 'Inter' font to the entire body for a consistent look */
+        :root {
+            --main-color: #23396C;
+            --secondary-color: #3A5A9A;
+            --accent-color: #F8EF32;
+            --bg-color: #FAFAFA;
+            --border-color: #243D51;
+            --header-bg: #243D51;
+            --button-hover-color: #243D51;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Noto Sans HK', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center content vertically */
+            align-items: center; /* Center content horizontally */
+        }
+
+        .login-container {
+            width: 90%;
+            max-width: 400px;
+            margin: 20px auto; /* Adjust margin for better vertical centering */
+            padding: 2rem;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 12px;
+            margin: 16px 0;
+            background-color: var(--main-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .login-button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            color: #d32f2f;
+            text-align: center;
+            margin: 10px 0;
+            display: none;
+        }
+
+        /* Styles for the Google Sign-in button */
+        #googleLoginButton {
+            background-color: #DB4437; /* Google red */
+            margin-top: 5px;
+        }
+
+        #googleLoginButton:hover {
+            background-color: #C23321;
+        }
+
+        /* Styles for the "進入我的實驗室" button */
+        #labButton {
+            background-color: var(--accent-color);
+            color: var(--header-bg);
+            border: 2px solid var(--header-bg);
+            margin-bottom: 20px; /* Adjust margin to separate from login container */
+            width: 220px; /* Adjusted width */
+            padding: 10px 20px; /* Adjusted padding */
+            font-size: 1rem; /* Adjusted font size */
+            display: none; /* Hidden by default, shown when logged in */
+        }
+
+        #labButton:hover {
+            background-color: var(--header-bg);
+            color: var(--accent-color);
+        }
+
+        #welcomeMessage, #labAccess {
+            display: none;
+            text-align: center;
+        }
+
+        #loading { /* Style for the initial loading message */
+            text-align: center;
+            color: #666;
+            padding: 20px;
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
-    <!--
-      Main container for the login form, centered on the screen.
-      Uses Tailwind classes for background, padding, rounded corners, shadow,
-      width constraints, and responsive design.
-    -->
-    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-        <!-- Page title -->
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">登入</h1>
+<body>
+    <!-- Initial loading message, hidden once Firebase is initialized -->
+    <div id="loading">正在載入 Firebase 設定...</div>
 
-        <!-- Loading indicator, shown while fetching Firebase config -->
-        <div id="loading" class="text-center text-gray-600 mb-4">正在載入 Firebase 設定...</div>
+    <!-- "進入我的實驗室" button, shown only when logged in -->
+    <button id="labButton" class="login-button">
+        <i class="bi bi-arrow-right-circle"></i> 進入我的實驗室
+    </button>
 
-        <!--
-          Firebase UI authentication container.
-          This div is where the Firebase UI widget will render the login forms.
-          Initially hidden and shown once config is loaded.
-        -->
-        <div id="firebaseui-auth-container" class="hidden"></div>
+    <div class="login-container">
+        <h1 style="text-align: center; color: var(--main-color);">用戶登錄</h1>
+        
+        <div id="loginForm">
+            <input type="email" id="emailInput" class="login-input" placeholder="電子郵件" required>
+            <input type="password" id="passwordInput" class="login-input" placeholder="密碼" required>
+            <button id="loginButton" class="login-button">
+                <i class="bi bi-box-arrow-in-right"></i> 登錄
+            </button>
+            <!-- Google Sign-in Button -->
+            <button id="googleLoginButton" class="login-button">
+                <i class="bi bi-google"></i> 使用 Google 登錄
+            </button>
+            <p id="errorMessage" class="error-message"></p>
+        </div>
 
-        <!--
-          Sign-out button, hidden by default and shown when a user is logged in.
-          Styled with Tailwind for a clear call to action.
-        -->
-        <button id="sign-out" class="hidden mt-6 w-full py-3 bg-red-600 text-white font-semibold rounded-md shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-75 transition duration-300">登出</button>
+        <div id="welcomeMessage">
+            <p>歡迎，<span id="userEmail"></span></p>
+            <button id="logoutButton" class="login-button">
+                <i class="bi bi-box-arrow-right"></i> 登出
+            </button>
+        </div>
 
-        <!--
-          User information display area, hidden by default and shown when a user is logged in.
-          Displays user's name/email, UID, and profile picture if available.
-        -->
-        <div id="user-info" class="hidden mt-6 text-center text-gray-700"></div>
+        <div id="labAccess">
+            <p id="labError" class="error-message"></p>
+        </div>
     </div>
-
-    <!--
-      Firebase UI JavaScript SDK (Non-module script)
-      Placed here to ensure it loads and defines `window.firebaseui` before the `type="module"` script executes.
-    -->
-    <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
 
     <script type="module">
         // Import necessary Firebase SDK modules using ES Modules syntax.
-        // We are using Firebase v9.22.1 which is compatible with Firebase UI 6.0.1.
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
-        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
-        // Import authentication providers like Email/Password and Google.
-        import { EmailAuthProvider, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            signOut, 
+            onAuthStateChanged,
+            GoogleAuthProvider,
+            signInWithPopup // Required for Google Sign-In pop-up
+        } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 
-        // Get references to DOM elements for easy manipulation.
+        // Get references to DOM elements
         const loadingDiv = document.getElementById('loading');
-        const authContainer = document.getElementById('firebaseui-auth-container');
-        const signOutButton = document.getElementById('sign-out');
-        const userInfoDiv = document.getElementById('user-info');
+        const loginForm = document.getElementById('loginForm');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const labButton = document.getElementById('labButton');
+        const userEmailSpan = document.getElementById('userEmail');
+        const errorMessageDiv = document.getElementById('errorMessage');
+        const labErrorDiv = document.getElementById('labError');
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginButton = document.getElementById('loginButton');
+        const googleLoginButton = document.getElementById('googleLoginButton');
+        const logoutButton = document.getElementById('logoutButton');
 
-        let ui; // Declare FirebaseUI instance globally to manage its state.
+        let auth; // Declare auth globally within this module scope
 
         /**
-         * Fetches Firebase configuration dynamically from the Cloudflare Worker.
-         * This enhances security by not hardcoding API keys in the frontend.
-         * @returns {Promise<Object|null>} A promise that resolves to the Firebase config object, or null if an error occurs.
+         * Initializes Firebase app and auth service by fetching config from Cloudflare Function.
+         * @returns {Promise<firebase.auth.Auth>} The Firebase Auth instance.
          */
-        async function fetchFirebaseConfig() {
-            console.log('--- Debug: fetchFirebaseConfig started ---');
+        async function initFirebase() {
             try {
-                // Modified fetch path to match Cloudflare Pages Functions routing behavior.
-                // The function at `functions/firebase-config.js` is exposed at `/firebase-config`.
-                console.log('--- Debug: Attempting to fetch config from /firebase-config ---');
+                console.log('--- Debug: initFirebase started ---');
                 const response = await fetch('/firebase-config');
-                console.log('--- Debug: Response received ---');
-                console.log('--- Debug: response.ok:', response.ok);
-                console.log('--- Debug: response.status:', response.status);
-                console.log('--- Debug: response.headers.get("Content-Type"):', response.headers.get("Content-Type"));
-
                 if (!response.ok) {
-                    const errorText = await response.text(); // Attempt to read error response text
-                    console.error('--- Debug: HTTP Error Response Text:', errorText);
-                    throw new Error(`HTTP Error! Status: ${response.status} - ${errorText.substring(0, 100)}...`);
+                    const errorText = await response.text();
+                    throw new Error(`無法獲取Firebase配置: ${response.status} - ${errorText.substring(0, 100)}...`);
                 }
+                
+                const firebaseConfig = await response.json();
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app); // Assign to module-scoped auth variable
+                console.log('--- Debug: Firebase App and Auth service initialized successfully ---');
+                
+                // Hide loading message once Firebase is initialized
+                loadingDiv.style.display = 'none';
 
-                // Parse the JSON response containing the Firebase configuration.
-                const config = await response.json();
-                console.log('--- Debug: Successfully parsed JSON:', config);
-                console.log('--- Debug: fetchFirebaseConfig finished (success) ---');
-                return config;
+                return auth;
             } catch (error) {
-                console.error("--- Debug: Error fetching Firebase config:", error);
-                // Display an error message to the user if config loading fails.
-                loadingDiv.textContent = `載入 Firebase 設定時發生錯誤。請檢查瀏覽器控制台以獲取詳細資訊。錯誤：${error.message || error}`;
-                console.log('--- Debug: fetchFirebaseConfig finished (error) ---');
-                return null;
+                console.error('Firebase初始化失敗:', error);
+                showError('系統初始化失敗，請刷新頁面', 'errorMessage');
+                loadingDiv.textContent = '系統初始化失敗。'; // Update loading message to error
+                throw error;
             }
         }
 
         /**
-         * Initializes Firebase and FirebaseUI, and sets up real-time authentication listeners.
-         * This function orchestrates the entire authentication process.
+         * Displays an error message on the page.
+         * @param {string} message The error message to display.
+         * @param {string} elementId The ID of the HTML element to display the message in.
          */
-        async function initializeFirebaseApp() {
-            console.log('--- Debug: initializeFirebaseApp started ---');
-            // Fetch Firebase configuration from the Cloudflare Worker.
-            const firebaseConfig = await fetchFirebaseConfig();
+        function showError(message, elementId = 'errorMessage') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+                element.textContent = ''; // Clear message after hiding
+            }, 5000); // Message disappears after 5 seconds
+        }
 
-            // If configuration fetching failed, stop execution.
-            if (!firebaseConfig) {
-                console.log('--- Debug: Firebase config is null, terminating initialization ---');
+        /**
+         * Handles email/password login.
+         */
+        async function handleLogin() {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            if (!email || !password) {
+                showError('請輸入電子郵件和密碼');
                 return;
             }
 
-            console.log('--- Debug: Firebase config obtained, initializing Firebase App ---');
-            // Initialize Firebase app with the fetched configuration.
-            const app = initializeApp(firebaseConfig);
-            // Get the Auth service instance.
-            const auth = getAuth(app);
-            console.log('--- Debug: Firebase App and Auth service initialized ---');
+            loginButton.disabled = true;
+            loginButton.innerHTML = '<i class="bi bi-hourglass"></i> 登錄中...';
+            errorMessageDiv.style.display = 'none'; // Hide previous error messages
 
-            // Configure FirebaseUI for authentication.
-            const uiConfig = {
-                // The URL to redirect to after successful sign-in.
-                // We redirect to the current page to refresh the state.
-                signInSuccessUrl: window.location.href,
-                // List of authentication providers to enable.
-                // FirebaseUI will automatically render buttons for these.
-                signInOptions: [
-                    EmailAuthProvider.PROVIDER_ID, // Email/Password authentication
-                    GoogleAuthProvider.PROVIDER_ID, // Google Sign-In
-                    // Add other providers as needed, e.g., TwitterAuthProvider.PROVIDER_ID,
-                ],
-                // Optional: Terms of Service and Privacy Policy URLs.
-                // Updated to user-provided URLs.
-                tosUrl: 'https://concierge-anywhere.com/terms_of_use', // 使用者提供的服務條款 URL
-                privacyPolicyUrl: 'https://concierge-anywhere.com/privacy_policy', // 使用者提供的隱私政策 URL
-                callbacks: {
-                    /**
-                     * Callback invoked upon successful sign-in.
-                     * @param {firebase.auth.UserCredential} authResult The result of the authentication operation.
-                     * @param {string} redirectUrl The URL to redirect to.
-                     * @returns {boolean} True to redirect, false to prevent default redirect.
-                     */
-                    signInSuccessWithAuthResult: function(authResult, redirectUrl) {
-                        console.log('--- Debug: signInSuccessWithAuthResult triggered ---');
-                        return true; // Return true to continue with the redirect to signInSuccessUrl.
-                    },
-                    /**
-                     * Callback invoked when the FirebaseUI widget is displayed.
-                     * Used to hide the loading indicator and show the auth container.
-                     */
-                    uiShown: function() {
-                        console.log('--- Debug: FirebaseUI interface displayed ---');
-                        loadingDiv.style.display = 'none'; // Hide loading text
-                        authContainer.classList.remove('hidden'); // Show auth container
-                    }
-                }
-            };
-
-            // Initialize the FirebaseUI Auth instance.
-            // Accessing firebaseui via `window` object as it's loaded as a global script.
-            // This line will now execute after the firebase-ui-auth.js script has loaded.
-            ui = new window.firebaseui.auth.AuthUI(auth);
-            console.log('--- Debug: FirebaseUI instance created ---');
-
-            // Listen for changes in the authentication state (user logged in/out).
-            onAuthStateChanged(auth, (user) => {
-                console.log('--- Debug: onAuthStateChanged triggered, user status:', user ? 'logged in' : 'logged out');
-                if (user) {
-                    // User is signed in.
-                    console.log('User signed in:', user.email || user.phoneNumber || user.uid);
-
-                    // Hide the authentication UI and show the sign-out button and user info.
-                    authContainer.classList.add('hidden');
-                    signOutButton.classList.remove('hidden');
-                    userInfoDiv.classList.remove('hidden');
-
-                    // Display user information.
-                    userInfoDiv.innerHTML = `
-                        <p class="text-lg font-medium">歡迎，${user.displayName || user.email || '使用者'}！</p>
-                        <p class="text-sm text-gray-500">使用者 ID: ${user.uid}</p>
-                        ${user.photoURL ? `<img src="${user.photoURL}" alt="個人資料" class="w-16 h-16 rounded-full mx-auto mt-4 shadow-md">` : ''}
-                    `;
-                    loadingDiv.style.display = 'none'; // Ensure loading is hidden
-
-                    // If FirebaseUI instance is active, reset it to clear its state
-                    // and prevent it from showing the login form unnecessarily.
-                    if (ui.isStarted()) {
-                        console.log('--- Debug: Resetting FirebaseUI ---');
-                        ui.reset();
-                    }
-
-                } else {
-                    // User is signed out.
-                    console.log('User signed out.');
-
-                    // Show the authentication UI and hide user info and sign-out button.
-                    authContainer.classList.remove('hidden');
-                    signOutButton.classList.add('hidden');
-                    userInfoDiv.classList.add('hidden');
-                    userInfoDiv.innerHTML = ''; // Clear user info
-
-                    // Only start FirebaseUI if it's not already running.
-                    // This prevents errors if ui.start() is called multiple times without need.
-                    if (!ui.isStarted()) {
-                        console.log('--- Debug: Starting FirebaseUI ---');
-                        ui.start('#firebaseui-auth-container', uiConfig);
-                    }
-                    loadingDiv.style.display = 'none'; // Ensure loading is hidden
-                }
-            });
-
-            // Add event listener for the sign-out button.
-            signOutButton.addEventListener('click', async () => {
-                console.log('--- Debug: Sign out button clicked ---');
-                try {
-                    await signOut(auth); // Sign out the current user.
-                    console.log('使用者已成功登出。');
-                } catch (error) {
-                    console.error('登出時發生錯誤：', error);
-                    // You might want to show a message to the user here.
-                }
-            });
-
-            // Start the FirebaseUI widget when the page loads initially
-            // if no user is signed in. This is also handled by onAuthStateChanged.
-            // We call it here to ensure it attempts to start right away if no session is found.
-            // This part might trigger ui.start() even if onAuthStateChanged would do it,
-            // but the `if (!ui.isStarted())` check should prevent issues.
-            if (!auth.currentUser) {
-                console.log('--- Debug: No user on page load, attempting to start FirebaseUI ---');
-                loadingDiv.style.display = 'none'; // Hide loading text
-                authContainer.classList.remove('hidden'); // Show auth container
-                if (!ui.isStarted()) {
-                   ui.start('#firebaseui-auth-container', uiConfig);
-                }
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                // State change handled by onAuthStateChanged
+            } catch (error) {
+                console.error('登錄錯誤:', error);
+                const errorMap = {
+                    'auth/invalid-email': '電子郵件格式不正確',
+                    'auth/user-not-found': '找不到此帳號',
+                    'auth/wrong-password': '密碼錯誤',
+                    'auth/invalid-credential': '電子郵件或密碼不正確', // For Firebase v10+ generic credential errors
+                    'auth/too-many-requests': '嘗試次數過多，請稍後再試'
+                };
+                showError(errorMap[error.code] || '登錄失敗，請檢查電子郵件和密碼');
+            } finally {
+                loginButton.disabled = false;
+                loginButton.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> 登錄';
             }
-            console.log('--- Debug: initializeFirebaseApp finished ---');
         }
 
-        // Ensure the Firebase app initialization happens only after the DOM is fully loaded.
-        console.log('--- Debug: DOMContentLoaded event listener set ---');
-        document.addEventListener('DOMContentLoaded', initializeFirebaseApp);
+        /**
+         * Handles Google Sign-in using a pop-up.
+         */
+        async function handleGoogleLogin() {
+            const provider = new GoogleAuthProvider();
+            googleLoginButton.disabled = true;
+            googleLoginButton.innerHTML = '<i class="bi bi-hourglass"></i> 登錄中...';
+            errorMessageDiv.style.display = 'none';
+
+            try {
+                await signInWithPopup(auth, provider);
+                // State change handled by onAuthStateChanged
+            } catch (error) {
+                console.error('Google 登錄錯誤:', error);
+                let customErrorMessage = 'Google 登錄失敗，請稍後再試。';
+                if (error.code === 'auth/popup-closed-by-user') {
+                    customErrorMessage = '登錄視窗已關閉。';
+                } else if (error.code === 'auth/cancelled-popup-request') {
+                    customErrorMessage = '登錄請求已被取消或重複。';
+                }
+                showError(customErrorMessage);
+            } finally {
+                googleLoginButton.disabled = false;
+                googleLoginButton.innerHTML = '<i class="bi bi-google"></i> 使用 Google 登錄';
+            }
+        }
+
+        /**
+         * Handles redirection to the laboratory.
+         */
+        async function handleLabAccess() {
+            // In a real application, you might check user roles/permissions here
+            // before redirecting to a protected route.
+            window.location.href = '/private_room/my_laboratory';
+        }
+
+        /**
+         * Handles user logout.
+         */
+        async function handleLogout() {
+            try {
+                if (auth) {
+                    await signOut(auth);
+                    // No need to clear sessionStorage here if you're not explicitly storing token,
+                    // Firebase Auth SDK handles session management.
+                }
+            } catch (error) {
+                console.error('登出錯誤:', error);
+                showError('登出失敗: ' + error.message);
+            }
+        }
+
+        // --- Main Initialization Logic ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Initialize Firebase and get the auth instance
+                auth = await initFirebase();
+                
+                // Set up authentication state observer
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        // User is signed in
+                        console.log('User signed in:', user.email || user.displayName || user.uid);
+                        loginForm.style.display = 'none';
+                        welcomeMessage.style.display = 'block';
+                        labButton.style.display = 'flex'; // Show "進入我的實驗室" button
+                        userEmailSpan.textContent = user.email || user.displayName || user.uid;
+                    } else {
+                        // User is signed out
+                        console.log('User signed out.');
+                        loginForm.style.display = 'block';
+                        welcomeMessage.style.display = 'none';
+                        labButton.style.display = 'none'; // Hide "進入我的實驗室" button
+                    }
+                });
+
+                // Attach event listeners after Firebase is initialized
+                loginButton.addEventListener('click', handleLogin);
+                googleLoginButton.addEventListener('click', handleGoogleLogin); // Google login listener
+                logoutButton.addEventListener('click', handleLogout);
+                labButton.addEventListener('click', handleLabAccess);
+                
+                // Allow pressing Enter in password field to log in
+                passwordInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') handleLogin();
+                });
+
+            } catch (error) {
+                console.error('頁面初始化錯誤:', error);
+                // initFirebase already handles showing error on page
+            }
+        });
     </script>
 </body>
 </html>
