@@ -2,6 +2,25 @@
   "dependencies": {
     "firebase": "^9.23.0",
     "firebase-admin": "^12.7.0",
-    "firebaseui": "^6.1.0"
-  }
+    "firebaseui": "^6.1.0",
+    "jose": "^6.0.11"
+  },
+  "name": "concierge-anywhere-cloudflare",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jasonkwok852/concierge-anywhere-cloudflare.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jasonkwok852/concierge-anywhere-cloudflare/issues"
+  },
+  "homepage": "https://github.com/jasonkwok852/concierge-anywhere-cloudflare#readme",
+  "description": ""
 }
