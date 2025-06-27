@@ -166,7 +166,7 @@
             signInWithPopup 
         } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 
-        // Get references to DOM elements
+        // 獲取 DOM 元素參考
         const loadingDiv = document.getElementById('loading');
         const loginForm = document.getElementById('loginForm');
         const welcomeMessage = document.getElementById('welcomeMessage');
@@ -180,11 +180,11 @@
         const googleLoginButton = document.getElementById('googleLoginButton');
         const logoutButton = document.getElementById('logoutButton');
 
-        let auth; // Declare auth globally within this module scope
+        let auth; // 在模組範圍內宣告 auth
 
         /**
-         * Initializes Firebase app and auth service by fetching config from Cloudflare Function.
-         * @returns {Promise<firebase.auth.Auth>} The Firebase Auth instance.
+         * 透過從 Cloudflare Function 獲取設定來初始化 Firebase 應用程式和身份驗證服務。
+         * @returns {Promise<firebase.auth.Auth>} Firebase Auth 實例。
          */
         async function initFirebase() {
             try {
@@ -198,20 +198,20 @@
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app); 
                 
-                loadingDiv.style.display = 'none'; // Hide loading message once Firebase is initialized
+                loadingDiv.style.display = 'none'; // Firebase 初始化後隱藏載入訊息
                 return auth;
             } catch (error) {
                 console.error('Firebase初始化失敗:', error);
                 showError('系統初始化失敗，請刷新頁面', 'errorMessage');
-                loadingDiv.textContent = '系統初始化失敗。'; // Update loading message to error
+                loadingDiv.textContent = '系統初始化失敗。'; // 更新載入訊息為錯誤
                 throw error;
             }
         }
 
         /**
-         * Displays an error message on the page.
-         * @param {string} message The error message to display.
-         * @param {string} elementId The ID of the HTML element to display the message in.
+         * 在頁面上顯示錯誤訊息。
+         * @param {string} message 要顯示的錯誤訊息。
+         * @param {string} elementId 顯示訊息的 HTML 元素 ID。
          */
         function showError(message, elementId = 'errorMessage') {
             const element = document.getElementById(elementId);
@@ -224,7 +224,7 @@
         }
 
         /**
-         * Handles email/password login.
+         * 處理電子郵件/密碼登錄。
          */
         async function handleLogin() {
             const email = emailInput.value.trim();
@@ -259,7 +259,7 @@
         }
 
         /**
-         * Handles Google Sign-in using a pop-up.
+         * 處理使用彈出視窗的 Google 登錄。
          */
         async function handleGoogleLogin() {
             const provider = new GoogleAuthProvider();
@@ -286,10 +286,11 @@
         }
 
         /**
-         * Handles redirection to the laboratory.
-         * For Cloudflare Access protection, merely redirecting is sufficient as Access will intercept and validate.
+         * 處理重定向到實驗室。
+         * 對於 Cloudflare Access 保護，僅僅重定向就足夠了，Access 會攔截並驗證。
          */
         async function handleLabAccess() {
+            // 從 sessionStorage 獲取 Firebase ID Token
             const idToken = sessionStorage.getItem('firebaseIdToken');
             if (!idToken) {
                 showError('未找到登入憑證，請重新登入。', 'labError');
@@ -302,7 +303,7 @@
         }
 
         /**
-         * Handles user logout.
+         * 處理用戶登出。
          */
         async function handleLogout() {
             try {
@@ -316,14 +317,14 @@
             }
         }
 
-        // --- Main Initialization Logic ---
+        // --- 主要初始化邏輯 ---
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 // 初始化 Firebase 並獲取 auth 實例
                 auth = await initFirebase();
                 
                 // 設定身份驗證狀態觀察者
-                onAuthStateChanged(auth, async (user) => { // 注意這裡是 async 函數，因為要等待 getIdToken
+                onAuthStateChanged(auth, async (user) => { 
                     if (user) {
                         // 用戶已登入
                         console.log('User signed in:', user.email || user.displayName || user.uid);
@@ -332,11 +333,11 @@
                         labButton.style.display = 'flex'; // 顯示 "進入我的實驗室" 按鈕
                         userEmailSpan.textContent = user.email || user.displayName || user.uid;
 
-                        // 獲取並儲存 Firebase ID Token
+                        // 獲取並儲存 Firebase ID Token 到 sessionStorage
                         try {
                             const idToken = await user.getIdToken(); 
-                            sessionStorage.setItem('firebaseIdToken', idToken);
-                            console.log('Firebase ID Token retrieved and stored.');
+                            sessionStorage.setItem('firebaseIdToken', idToken); //
+                            console.log('Firebase ID Token retrieved and stored in sessionStorage.');
                         } catch (tokenError) {
                             console.error('獲取 Firebase ID Token 失敗:', tokenError);
                             showError('登入成功，但無法獲取身份憑證，請嘗試重新登入。', 'errorMessage');
