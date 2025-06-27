@@ -11,138 +11,8 @@
     
     <!-- 引入您的主 CSS 檔案 -->
     <link rel="stylesheet" href="project_css.css" defer />
-
-    <!-- 以下是為登入頁面定制或覆蓋的樣式，以確保與 Landing Page 設計一致性 -->
-    <style>
-        /* 繼承 project_css.css 的全局 body 樣式 */
-        body {
-            /* 額外調整以確保登入頁面內容居中 */
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            /* background-color: var(--bg-color); 已經在 project_css.css 中定義 */
-            /* margin: 0; padding: 0; 已經在 project_css.css 中定義 */
-        }
-
-        .login-container {
-            width: 90%;
-            max-width: 400px;
-            margin: 20px auto;
-            padding: 2rem;
-            background-color: rgba(255, 255, 255, 0.9); /* 半透明背景 */
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .login-input {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 1rem;
-            color: var(--main-color); /* 確保文字顏色與主題一致 */
-            background-color: rgba(255, 255, 255, 0.8); /* 稍微透明 */
-            backdrop-filter: blur(5px); /* 模糊效果 */
-        }
-
-        .login-input:focus {
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 3px rgba(58, 90, 154, 0.2);
-            outline: none;
-        }
-
-        .login-button {
-            width: 100%;
-            padding: 12px;
-            margin: 16px 0;
-            background-color: var(--main-color); /* 主要按鈕顏色 */
-            color: white;
-            border: none; /* 與 Landing Page 的 Header Button 保持一致，但這裡沒有邊框 */
-            border-radius: 6px; /* 與 project_css.css 中的按鈕圓角一致 */
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600; /* 更粗的字體 */
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            box-shadow: var(--shadow); /* 統一的陰影效果 */
-        }
-
-        .login-button:hover {
-            background-color: var(--secondary-color); /* 懸停時的顏色 */
-            transform: translateY(-2px); /* 懸停時的微動畫 */
-            box-shadow: var(--hover-shadow); /* 懸停時的陰影效果 */
-        }
-
-        .error-message {
-            color: #d32f2f; /* 錯誤信息顏色 */
-            text-align: center;
-            margin: 10px 0;
-            display: none;
-            font-size: 0.9rem;
-        }
-
-        /* Styles for the "進入我的實驗室" button - 保持其獨特風格 */
-        #labButton {
-            background-color: var(--accent-color);
-            color: var(--header-bg);
-            border: 2px solid var(--header-bg);
-            margin-bottom: 20px;
-            width: 220px; /* 保持特定寬度 */
-            padding: 10px 20px;
-            font-size: 1rem;
-            display: none; /* Hidden by default, shown when logged in */
-            border-radius: 6px; /* 與 project_css.css 中的按鈕圓角一致 */
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transition);
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            box-shadow: var(--shadow);
-        }
-
-        #labButton:hover {
-            background-color: var(--header-bg);
-            color: var(--accent-color);
-            transform: translateY(-2px); /* 懸停時的微動畫 */
-            box-shadow: var(--hover-shadow);
-        }
-
-        #welcomeMessage, #labAccess {
-            display: none;
-            text-align: center;
-            color: var(--main-color); /* 確保文字顏色與主題一致 */
-        }
-
-        #loading { /* Style for the initial loading message */
-            text-align: center;
-            color: #666;
-            padding: 20px;
-            margin-top: 50px; /* 避免與 Header 重疊 */
-        }
-
-        /* 響應式調整 */
-        @media (max-width: 767px) {
-            .login-container {
-                padding: 1.5rem;
-            }
-            .login-button, #labButton {
-                padding: 10px;
-                font-size: 0.9rem;
-            }
-            #labButton {
-                width: 100%; /* 在小螢幕下變為全寬 */
-            }
-        }
-    </style>
 </head>
-<body>
+<body class="login-page"> <!-- 新增 class "login-page" 以便在 CSS 中進行特定調整 -->
     <!-- 複製自 Landing Page 的 Header 區塊，但簡化以適應登入頁面 -->
     <header>
         <div class="header-inner">
@@ -243,13 +113,15 @@
     <script type="module">
         import { 
             initializeApp 
-        } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+        } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js'; // Updated Firebase SDK version
         import { 
             getAuth, 
             signInWithEmailAndPassword, 
             signOut, 
-            onAuthStateChanged
-        } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+            onAuthStateChanged,
+            signInAnonymously, // Added for anonymous sign-in fallback
+            signInWithCustomToken // Added for custom token sign-in
+        } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js'; // Updated Firebase SDK version
 
         // Get references to DOM elements
         const loadingDiv = document.getElementById('loading');
@@ -270,31 +142,43 @@
         const toolsContainerFooter = document.getElementById('toolsContainer_footer');
         // If there are other specific footer links/elements that need JS interaction, get references here.
 
-
         let auth; // Declare auth globally within this module scope
 
         /**
-         * Initializes Firebase app and auth service by fetching config from Cloudflare Function.
+         * Initializes Firebase app and auth service using global config from Canvas environment.
+         * Also handles initial authentication (custom token or anonymous).
          * @returns {Promise<firebase.auth.Auth>} The Firebase Auth instance.
          */
         async function initFirebase() {
             try {
-                // Adjust this endpoint if your Cloudflare Pages Function has a different path
-                const response = await fetch('/firebase-config'); 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`無法獲取Firebase配置: ${response.status} - ${errorText.substring(0, 100)}...`);
+                // Access global variables provided by the Canvas environment
+                const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+                const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                // const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; // Not directly used in this script, but good for context
+
+                if (!firebaseConfig) {
+                    throw new Error('Firebase 配置未找到。');
                 }
-                
-                const firebaseConfig = await response.json();
+
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app); 
                 
-                loadingDiv.style.display = 'none'; // Hide loading message once Firebase is initialized
+                // Perform initial authentication based on token presence
+                if (initialAuthToken) {
+                    console.log('嘗試使用自定義令牌登入...');
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    console.log('自定義令牌登入成功。');
+                } else {
+                    console.log('嘗試匿名登入...');
+                    await signInAnonymously(auth);
+                    console.log('匿名登入成功。');
+                }
+
+                loadingDiv.style.display = 'none'; // Hide loading message once Firebase is initialized and authenticated
                 return auth;
             } catch (error) {
                 console.error('Firebase初始化失敗:', error);
-                showError('系統初始化失敗，請刷新頁面', 'errorMessage');
+                showError('系統初始化失敗，請刷新頁面: ' + error.message, 'errorMessage');
                 loadingDiv.textContent = '系統初始化失敗。'; // Update loading message to error
                 throw error;
             }
@@ -334,6 +218,7 @@
             try {
                 await signInWithEmailAndPassword(auth, email, password);
                 // 登入成功後，onAuthStateChanged 會自動觸發並處理 UI 和 Token 儲存
+                console.log('電子郵件/密碼登入成功。');
             } catch (error) {
                 console.error('登錄錯誤:', error);
                 const errorMap = {
@@ -364,6 +249,7 @@
             }
             // Cloudflare Access 會自動從瀏覽器會話中檢查所需的 Access Token (基於 Firebase ID Token 驗證)。
             // 因此，這裡直接重定向到受保護路徑即可。
+            console.log('嘗試進入實驗室...');
             window.location.href = '/private_room/my_laboratory'; 
         }
 
@@ -374,6 +260,7 @@
             try {
                 if (auth) {
                     await signOut(auth);
+                    console.log('用戶已登出。');
                     // onAuthStateChanged 會處理 UI 更新和清除 localStorage
                 }
             } catch (error) {
@@ -385,14 +272,14 @@
         // --- Main Initialization Logic ---
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // 初始化 Firebase 並獲取 auth 實例
+                // 初始化 Firebase 並獲取 auth 實例，並處理初始身份驗證
                 auth = await initFirebase();
                 
                 // 設定身份驗證狀態觀察者
                 onAuthStateChanged(auth, async (user) => { // 注意這裡是 async 函數，因為要等待 getIdToken
                     if (user) {
                         // 用戶已登入
-                        console.log('User signed in:', user.email || user.displayName || user.uid);
+                        console.log('onAuthStateChanged: 用戶已登入:', user.email || user.displayName || user.uid);
                         loginForm.style.display = 'none';
                         welcomeMessage.style.display = 'block';
                         labButton.style.display = 'flex'; // 顯示 "進入我的實驗室" 按鈕
@@ -402,7 +289,7 @@
                         try {
                             const idToken = await user.getIdToken(); 
                             localStorage.setItem('firebaseIdToken', idToken);
-                            console.log('Firebase ID Token retrieved and stored in localStorage.');
+                            console.log('Firebase ID Token 已獲取並儲存到 localStorage。');
                         } catch (tokenError) {
                             console.error('獲取 Firebase ID Token 失敗:', tokenError);
                             showError('登入成功，但無法獲取身份憑證，請嘗試重新登入。', 'errorMessage');
@@ -411,7 +298,7 @@
 
                     } else {
                         // 用戶已登出
-                        console.log('User signed out.');
+                        console.log('onAuthStateChanged: 用戶已登出。');
                         loginForm.style.display = 'block';
                         welcomeMessage.style.display = 'none';
                         labButton.style.display = 'none'; // 隱藏 "進入我的實驗室" 按鈕
