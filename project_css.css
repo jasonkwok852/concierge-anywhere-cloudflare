@@ -34,10 +34,11 @@ html, body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* 將 body 設定為 flex 容器，使其子元素（header, main, footer）垂直堆疊 */
 body {
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
+    min-height: 100vh; /* 確保 body 佔滿整個視窗高度 */
 }
 
 a:link, a:visited, a:hover, a:active {
@@ -202,13 +203,14 @@ header {
     text-decoration: none;
 }
 
+/* 主內容區塊的通用樣式 */
 .main-content {
-    flex: 1;
+    flex: 1; /* 允許 main-content 佔用剩餘空間 */
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: center; /* 讓內容在主內容區塊內水平居中 */
     padding: 32px 12px 40px;
-    margin-top: 5%;
+    margin-top: 5%; /* Landing Page 的特定間距 */
     width: 100%;
     max-width: 70%;
     margin-left: auto;
@@ -580,20 +582,29 @@ footer p {
     transform: translateY(-2px);
 }
 
-/* Login Page Specific Styles */
-/* These styles were moved from user_login.html's <style> block */
-body.login-page { /* Add a class to the body for login page specific adjustments */
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+/* Login Page Specific Styles - 新增的 CSS 規則 */
+/* 讓 body 在登入頁面模式下，將其內容（Header, Main, Footer）在頁面中垂直居中 */
+body.login-page {
+    justify-content: center; /* 垂直居中 */
+    align-items: center; /* 水平居中 (雖然 main-content 自身的 max-width 會限制) */
+}
+
+/* 針對登入頁面模式下的 main-content 進行調整 */
+body.login-page .main-content {
+    margin-top: 0; /* 移除 Landing Page 的頂部間距，由 body 統一管理垂直居中 */
+    padding-top: 20px; /* 為內容新增一些頂部內邊距 */
+    padding-bottom: 20px; /* 為內容新增一些底部內邊距 */
+    justify-content: center; /* 讓 main-content 內的元素垂直居中 */
+    flex: none; /* 讓 main-content 不再擴展填滿剩餘空間，而是根據內容調整高度 */
 }
 
 .login-container {
     width: 90%;
     max-width: 400px;
-    margin: 20px auto;
+    margin-left: auto; /* 水平居中 */
+    margin-right: auto; /* 水平居中 */
+    margin-top: 20px; /* 增加與上方 labButton 的間距 */
+    margin-bottom: 20px; /* 增加與下方元素的間距 */
     padding: 2rem;
     background-color: rgba(255, 255, 255, 0.9); /* 半透明背景 */
     border-radius: 8px;
@@ -688,7 +699,7 @@ body.login-page { /* Add a class to the body for login page specific adjustments
     text-align: center;
     color: #666;
     padding: 20px;
-    margin-top: 50px; /* 避免與 Header 重疊 */
+    margin-top: 0; /* 調整為0，讓 main-content 的 justify-content 處理垂直居中 */
 }
 
 /* 響應式調整 */
@@ -705,7 +716,9 @@ body.login-page { /* Add a class to the body for login page specific adjustments
     }
     .site-icon { height: 60px; width: 150px; }
     .header-inner { padding: 0 16px; }
+    /* main-content 在小螢幕下最大寬度調整 */
     .main-content { padding: 16px 0 20px; max-width: 90%; }
+    /* 以下為 Landing Page 專有，但已移入 project_css.css 的響應式規則 */
     .dropdown-menu { width: 50%; right: -50%; }
     .dropdown-menu.show { right: 0; }
     .button-container { gap: 0.6rem; }
