@@ -8,28 +8,22 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <style>
-        :root {
-            --main-color: #23396C;
-            --secondary-color: #3A5A9A;
-            --accent-color: #F8EF32;
-            --bg-color: #FAFAFA;
-            --border-color: #243D51;
-            --header-bg: #243D51;
-            --button-hover-color: #243D51;
-            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
+    
+    <!-- 引入您的主 CSS 檔案 -->
+    <link rel="stylesheet" href="project_css.css" defer />
 
+    <!-- 以下是為登入頁面定制或覆蓋的樣式，以確保與 Landing Page 設計一致性 -->
+    <style>
+        /* 繼承 project_css.css 的全局 body 樣式 */
         body {
-            font-family: 'Noto Sans HK', sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            padding: 0;
+            /* 額外調整以確保登入頁面內容居中 */
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            /* background-color: var(--bg-color); 已經在 project_css.css 中定義 */
+            /* margin: 0; padding: 0; 已經在 project_css.css 中定義 */
         }
 
         .login-container {
@@ -37,7 +31,7 @@
             max-width: 400px;
             margin: 20px auto;
             padding: 2rem;
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(255, 255, 255, 0.9); /* 半透明背景 */
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
@@ -49,109 +43,202 @@
             border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 1rem;
+            color: var(--main-color); /* 確保文字顏色與主題一致 */
+            background-color: rgba(255, 255, 255, 0.8); /* 稍微透明 */
+            backdrop-filter: blur(5px); /* 模糊效果 */
+        }
+
+        .login-input:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(58, 90, 154, 0.2);
+            outline: none;
         }
 
         .login-button {
             width: 100%;
             padding: 12px;
             margin: 16px 0;
-            background-color: var(--main-color);
+            background-color: var(--main-color); /* 主要按鈕顏色 */
             color: white;
-            border: none;
-            border-radius: 4px;
+            border: none; /* 與 Landing Page 的 Header Button 保持一致，但這裡沒有邊框 */
+            border-radius: 6px; /* 與 project_css.css 中的按鈕圓角一致 */
             cursor: pointer;
             font-size: 1rem;
+            font-weight: 600; /* 更粗的字體 */
             transition: var(--transition);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            box-shadow: var(--shadow); /* 統一的陰影效果 */
         }
 
         .login-button:hover {
-            background-color: var(--secondary-color);
-            transform: translateY(-2px);
+            background-color: var(--secondary-color); /* 懸停時的顏色 */
+            transform: translateY(-2px); /* 懸停時的微動畫 */
+            box-shadow: var(--hover-shadow); /* 懸停時的陰影效果 */
         }
 
         .error-message {
-            color: #d32f2f;
+            color: #d32f2f; /* 錯誤信息顏色 */
             text-align: center;
             margin: 10px 0;
             display: none;
+            font-size: 0.9rem;
         }
 
-        /* Styles for the Google Sign-in button */
-        #googleLoginButton {
-            background-color: #DB4437; /* Google red */
-            margin-top: 5px;
-        }
-
-        #googleLoginButton:hover {
-            background-color: #C23321;
-        }
-
-        /* Styles for the "進入我的實驗室" button */
+        /* Styles for the "進入我的實驗室" button - 保持其獨特風格 */
         #labButton {
             background-color: var(--accent-color);
             color: var(--header-bg);
             border: 2px solid var(--header-bg);
             margin-bottom: 20px;
-            width: 220px;
+            width: 220px; /* 保持特定寬度 */
             padding: 10px 20px;
             font-size: 1rem;
             display: none; /* Hidden by default, shown when logged in */
+            border-radius: 6px; /* 與 project_css.css 中的按鈕圓角一致 */
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: var(--shadow);
         }
 
         #labButton:hover {
             background-color: var(--header-bg);
             color: var(--accent-color);
+            transform: translateY(-2px); /* 懸停時的微動畫 */
+            box-shadow: var(--hover-shadow);
         }
 
         #welcomeMessage, #labAccess {
             display: none;
             text-align: center;
+            color: var(--main-color); /* 確保文字顏色與主題一致 */
         }
 
         #loading { /* Style for the initial loading message */
             text-align: center;
             color: #666;
             padding: 20px;
+            margin-top: 50px; /* 避免與 Header 重疊 */
+        }
+
+        /* 響應式調整 */
+        @media (max-width: 767px) {
+            .login-container {
+                padding: 1.5rem;
+            }
+            .login-button, #labButton {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+            #labButton {
+                width: 100%; /* 在小螢幕下變為全寬 */
+            }
         }
     </style>
 </head>
 <body>
-    <div id="loading">正在載入 Firebase 設定...</div>
-
-    <button id="labButton" class="login-button">
-        <i class="bi bi-arrow-right-circle"></i> 進入我的實驗室
-    </button>
-
-    <div class="login-container">
-        <h1 style="text-align: center; color: var(--main-color);">用戶登錄</h1>
-        
-        <div id="loginForm">
-            <input type="email" id="emailInput" class="login-input" placeholder="電子郵件" required>
-            <input type="password" id="passwordInput" class="login-input" placeholder="密碼" required>
-            <button id="loginButton" class="login-button">
-                <i class="bi bi-box-arrow-in-right"></i> 登錄
-            </button>
-            <button id="googleLoginButton" class="login-button">
-                <i class="bi bi-google"></i> 使用 Google 登錄
-            </button>
-            <p id="errorMessage" class="error-message"></p>
+    <!-- 複製自 Landing Page 的 Header 區塊，但簡化以適應登入頁面 -->
+    <header>
+        <div class="header-inner">
+            <div class="site-brand">
+                <a href="https://concierge-anywhere.com">
+                    <img src="https://r2.concierge-anywhere.com/concierge_anywhere_icon_1000x400.png" alt="網站標誌" class="site-icon" loading="lazy" />
+                </a>
+            </div>
+            <!-- header-actions, menuButton, dropdown-menu 等在登入頁面不需要，已移除 -->
         </div>
+    </header>
 
-        <div id="welcomeMessage">
-            <p>歡迎，<span id="userEmail"></span></p>
-            <button id="logoutButton" class="login-button">
-                <i class="bi bi-box-arrow-right"></i> 登出
-            </button>
-        </div>
+    <main class="main-content">
+        <div id="loading">正在載入 Firebase 設定...</div>
 
-        <div id="labAccess">
-            <p id="labError" class="error-message"></p>
+        <!-- labButton 位於 main-content 內，但獨立於 login-container，方便佈局 -->
+        <button id="labButton" class="login-button">
+            <i class="bi bi-arrow-right-circle"></i> 進入我的實驗室
+        </button>
+
+        <div class="login-container">
+            <h1 style="text-align: center; color: var(--main-color);">用戶登錄</h1>
+            
+            <div id="loginForm">
+                <input type="email" id="emailInput" class="login-input" placeholder="電子郵件" required>
+                <input type="password" id="passwordInput" class="login-input" placeholder="密碼" required>
+                <button id="loginButton" class="login-button">
+                    <i class="bi bi-box-arrow-in-right"></i> 登錄
+                </button>
+                <p id="errorMessage" class="error-message"></p>
+            </div>
+
+            <div id="welcomeMessage">
+                <p>歡迎，<span id="userEmail"></span></p>
+                <button id="logoutButton" class="login-button">
+                    <i class="bi bi-box-arrow-right"></i> 登出
+                </button>
+            </div>
+
+            <div id="labAccess">
+                <p id="labError" class="error-message"></p>
+            </div>
         </div>
-    </div>
+    </main>
+
+    <!-- 複製自 Landing Page 的 Footer 區塊 -->
+    <footer>
+        <div class="footer-content">
+            <div class="primary_content_block">
+                <div class="primary_content_block_row_01">
+                    <div class="primary_content_block_row_01_div">
+                        <a href="https://concierge-anywhere.com/info_directory/search" class="footer-link">
+                            <p class="primary_content_block_content">
+                                <i class="bi bi-book-half"></i>
+                            </p>
+                            <p class="primary_content_block_content">資訊手冊</p>
+                        </a>
+                    </div>
+                    <div class="primary_content_block_row_01_div">
+                        <a href="https://concierge-anywhere.com/archives_space/search" class="footer-link">
+                            <p class="primary_content_block_content">
+                                <i class="bi bi-archive-fill"></i>
+                            </p>
+                            <p class="primary_content_block_content">檔案庫</p>
+                        </a>
+                    </div>
+                    <div class="primary_content_block_row_01_div" id="toolsContainer_footer"> <!-- Renamed ID to avoid conflict if toolsButton exists elsewhere -->
+                        <a href="#" id="toolsButton_footer"> <!-- Renamed ID -->
+                            <p class="primary_content_block_content">
+                                <i class="bi bi-wrench-adjustable-circle-fill"></i>
+                            </p>
+                            <p class="primary_content_block_content">實用工具</p>
+                        </a>
+                        <!-- Tools dropdown content not strictly needed in login footer, but keeping structure for consistency -->
+                        <div class="tools-dropdown" id="toolsDropdown_footer"> 
+                             <a href="https://hello.concierge-anywhere.com/p/search/world-time-widget" class="tools-dropdown-item" role="menuitem" target="_blank">
+                                <i class="bi bi-clock"></i> 世界時間
+                            </a>
+                            <a href="https://hello.concierge-anywhere.com/embedded/public/9cf4e167-8903-4c5d-b18b-1bdecc4576e5/CurrencyCalculatorWidget" class="tools-dropdown-item" role="menuitem" target="_blank">
+                                <i class="bi bi-currency-exchange"></i> 貨幣計算器
+                            </a>
+                        </div>
+                    </div>
+                    <div class="primary_content_block_row_01_div">
+                        <a href="https://hello.concierge-anywhere.com/p/search/favorited_products_page" class="footer-link">
+                            <p class="primary_content_block_content">
+                                <i class="bi bi-bag-heart-fill"></i>
+                            </p>
+                            <p class="primary_content_block_content">精選商品</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <p>Concierge Anywhere © All Rights Reserved</p>
+        </div>
+    </footer>
 
     <script type="module">
         import { 
@@ -161,9 +248,7 @@
             getAuth, 
             signInWithEmailAndPassword, 
             signOut, 
-            onAuthStateChanged,
-            GoogleAuthProvider,
-            signInWithPopup 
+            onAuthStateChanged
         } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 
         // Get references to DOM elements
@@ -177,8 +262,14 @@
         const emailInput = document.getElementById('emailInput');
         const passwordInput = document.getElementById('passwordInput');
         const loginButton = document.getElementById('loginButton');
-        const googleLoginButton = document.getElementById('googleLoginButton');
         const logoutButton = document.getElementById('logoutButton');
+
+        // Footer specific elements (added for consistency with index.html)
+        const toolsButtonFooter = document.getElementById('toolsButton_footer');
+        const toolsDropdownFooter = document.getElementById('toolsDropdown_footer');
+        const toolsContainerFooter = document.getElementById('toolsContainer_footer');
+        // If there are other specific footer links/elements that need JS interaction, get references here.
+
 
         let auth; // Declare auth globally within this module scope
 
@@ -188,7 +279,8 @@
          */
         async function initFirebase() {
             try {
-                const response = await fetch('/firebase-config'); // 調用您的 Pages Function
+                // Adjust this endpoint if your Cloudflare Pages Function has a different path
+                const response = await fetch('/firebase-config'); 
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`無法獲取Firebase配置: ${response.status} - ${errorText.substring(0, 100)}...`);
@@ -259,38 +351,12 @@
         }
 
         /**
-         * Handles Google Sign-in using a pop-up.
-         */
-        async function handleGoogleLogin() {
-            const provider = new GoogleAuthProvider();
-            googleLoginButton.disabled = true;
-            googleLoginButton.innerHTML = '<i class="bi bi-hourglass"></i> 登錄中...';
-            errorMessageDiv.style.display = 'none';
-
-            try {
-                await signInWithPopup(auth, provider);
-                // 登入成功後，onAuthStateChanged 會自動觸發並處理 UI 和 Token 儲存
-            } catch (error) {
-                console.error('Google 登錄錯誤:', error);
-                let customErrorMessage = 'Google 登錄失敗，請稍後再試。';
-                if (error.code === 'auth/popup-closed-by-user') {
-                    customErrorMessage = '登錄視窗已關閉。';
-                } else if (error.code === 'auth/cancelled-popup-request') {
-                    customErrorMessage = '登錄請求已被取消或重複。';
-                }
-                showError(customErrorMessage);
-            } finally {
-                googleLoginButton.disabled = false;
-                googleLoginButton.innerHTML = '<i class="bi bi-google"></i> 使用 Google 登錄';
-            }
-        }
-
-        /**
          * Handles redirection to the laboratory.
          * For Cloudflare Access protection, merely redirecting is sufficient as Access will intercept and validate.
          */
         async function handleLabAccess() {
-            const idToken = sessionStorage.getItem('firebaseIdToken');
+            // 從 localStorage 讀取 Firebase ID Token
+            const idToken = localStorage.getItem('firebaseIdToken'); 
             if (!idToken) {
                 showError('未找到登入憑證，請重新登入。', 'labError');
                 await signOut(auth); // 如果沒有 token，強制登出
@@ -308,7 +374,7 @@
             try {
                 if (auth) {
                     await signOut(auth);
-                    // onAuthStateChanged 會處理 UI 更新和清除 sessionStorage
+                    // onAuthStateChanged 會處理 UI 更新和清除 localStorage
                 }
             } catch (error) {
                 console.error('登出錯誤:', error);
@@ -332,11 +398,11 @@
                         labButton.style.display = 'flex'; // 顯示 "進入我的實驗室" 按鈕
                         userEmailSpan.textContent = user.email || user.displayName || user.uid;
 
-                        // 獲取並儲存 Firebase ID Token
+                        // 獲取並儲存 Firebase ID Token 到 localStorage
                         try {
                             const idToken = await user.getIdToken(); 
-                            sessionStorage.setItem('firebaseIdToken', idToken);
-                            console.log('Firebase ID Token retrieved and stored.');
+                            localStorage.setItem('firebaseIdToken', idToken);
+                            console.log('Firebase ID Token retrieved and stored in localStorage.');
                         } catch (tokenError) {
                             console.error('獲取 Firebase ID Token 失敗:', tokenError);
                             showError('登入成功，但無法獲取身份憑證，請嘗試重新登入。', 'errorMessage');
@@ -349,13 +415,13 @@
                         loginForm.style.display = 'block';
                         welcomeMessage.style.display = 'none';
                         labButton.style.display = 'none'; // 隱藏 "進入我的實驗室" 按鈕
-                        sessionStorage.removeItem('firebaseIdToken'); // 登出時清除儲存的 Token
+                        // 登出時清除儲存的 Token 從 localStorage
+                        localStorage.removeItem('firebaseIdToken'); 
                     }
                 });
 
                 // 綁定事件監聽器
                 loginButton.addEventListener('click', handleLogin);
-                googleLoginButton.addEventListener('click', handleGoogleLogin);
                 logoutButton.addEventListener('click', handleLogout);
                 labButton.addEventListener('click', handleLabAccess);
                 
@@ -363,6 +429,21 @@
                 passwordInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') handleLogin();
                 });
+
+                // Footer tools dropdown functionality (similar to index.html)
+                if (toolsButtonFooter && toolsDropdownFooter) {
+                    toolsButtonFooter.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toolsDropdownFooter.classList.toggle('show');
+                    });
+
+                    document.addEventListener('click', (e) => {
+                        if (toolsContainerFooter && !toolsContainerFooter.contains(e.target)) {
+                            toolsDropdownFooter.classList.remove('show');
+                        }
+                    });
+                }
 
             } catch (error) {
                 console.error('頁面初始化錯誤:', error);
