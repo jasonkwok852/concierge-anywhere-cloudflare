@@ -580,7 +580,129 @@ footer p {
     transform: translateY(-2px);
 }
 
+/* Login Page Specific Styles */
+/* These styles were moved from user_login.html's <style> block */
+body.login-page { /* Add a class to the body for login page specific adjustments */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-container {
+    width: 90%;
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0.9); /* 半透明背景 */
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.login-input {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+    color: var(--main-color); /* 確保文字顏色與主題一致 */
+    background-color: rgba(255, 255, 255, 0.8); /* 稍微透明 */
+    backdrop-filter: blur(5px); /* 模糊效果 */
+}
+
+.login-input:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(58, 90, 154, 0.2);
+    outline: none;
+}
+
+.login-button {
+    width: 100%;
+    padding: 12px;
+    margin: 16px 0;
+    background-color: var(--main-color); /* 主要按鈕顏色 */
+    color: white;
+    border: none;
+    border-radius: 6px; /* 與 project_css.css 中的按鈕圓角一致 */
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600; /* 更粗的字體 */
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: var(--shadow); /* 統一的陰影效果 */
+}
+
+.login-button:hover {
+    background-color: var(--secondary-color); /* 懸停時的顏色 */
+    transform: translateY(-2px); /* 懸停時的微動畫 */
+    box-shadow: var(--hover-shadow); /* 懸停時的陰影效果 */
+}
+
+.error-message {
+    color: #d32f2f; /* 錯誤信息顏色 */
+    text-align: center;
+    margin: 10px 0;
+    display: none;
+    font-size: 0.9rem;
+}
+
+/* Styles for the "進入我的實驗室" button - 保持其獨特風格 */
+#labButton {
+    background-color: var(--accent-color);
+    color: var(--header-bg);
+    border: 2px solid var(--header-bg);
+    margin-bottom: 20px;
+    width: 220px; /* 保持特定寬度 */
+    padding: 10px 20px;
+    font-size: 1rem;
+    display: none; /* Hidden by default, shown when logged in */
+    border-radius: 6px; /* 與 project_css.css 中的按鈕圓角一致 */
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: var(--shadow);
+}
+
+#labButton:hover {
+    background-color: var(--header-bg);
+    color: var(--accent-color);
+    transform: translateY(-2px); /* 懸停時的微動畫 */
+    box-shadow: var(--hover-shadow);
+}
+
+#welcomeMessage, #labAccess {
+    display: none;
+    text-align: center;
+    color: var(--main-color); /* 確保文字顏色與主題一致 */
+}
+
+#loading { /* Style for the initial loading message */
+    text-align: center;
+    color: #666;
+    padding: 20px;
+    margin-top: 50px; /* 避免與 Header 重疊 */
+}
+
+/* 響應式調整 */
 @media (max-width: 767px) {
+    .login-container {
+        padding: 1.5rem;
+    }
+    .login-button, #labButton {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+    #labButton {
+        width: 100%; /* 在小螢幕下變為全寬 */
+    }
     .site-icon { height: 60px; width: 150px; }
     .header-inner { padding: 0 16px; }
     .main-content { padding: 16px 0 20px; max-width: 90%; }
