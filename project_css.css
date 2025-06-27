@@ -210,7 +210,7 @@ header {
     flex-direction: column;
     align-items: center; /* 讓內容在主內容區塊內水平居中 */
     padding: 32px 12px 40px;
-    margin-top: 5%; /* Landing Page 的特定間距 */
+    /* 移除 Landing Page 的特定頂部間距，由登入頁面專用樣式處理 */
     width: 100%;
     max-width: 70%;
     margin-left: auto;
@@ -583,19 +583,36 @@ footer p {
 }
 
 /* Login Page Specific Styles - 新增的 CSS 規則 */
-/* 讓 body 在登入頁面模式下，將其內容（Header, Main, Footer）在頁面中垂直居中 */
+/* 讓 body 在登入頁面模式下，將其內容（Header, Main, Footer）垂直堆疊並填充高度 */
 body.login-page {
-    justify-content: center; /* 垂直居中 */
-    align-items: center; /* 水平居中 (雖然 main-content 自身的 max-width 會限制) */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    /* 不直接在這裡設置 justify-content: center，讓 main-content 負責其子元素的垂直居中 */
 }
 
 /* 針對登入頁面模式下的 main-content 進行調整 */
 body.login-page .main-content {
-    margin-top: 0; /* 移除 Landing Page 的頂部間距，由 body 統一管理垂直居中 */
-    padding-top: 20px; /* 為內容新增一些頂部內邊距 */
-    padding-bottom: 20px; /* 為內容新增一些底部內邊距 */
+    flex: 1; /* 允許 main-content 佔用可用的垂直空間 */
+    display: flex;
+    flex-direction: column;
     justify-content: center; /* 讓 main-content 內的元素垂直居中 */
-    flex: none; /* 讓 main-content 不再擴展填滿剩餘空間，而是根據內容調整高度 */
+    align-items: center; /* 讓 main-content 內的元素水平居中 */
+    padding: 20px 12px; /* 內容區域的統一內邊距 */
+    width: 100%;
+    max-width: 70%; /* 保持內容的最大寬度 */
+    margin: 0 auto; /* 水平居中 main-content 本身 */
+}
+
+/* 確保 #loading 和 #labButton 的邊距調整，以配合 main-content 的居中佈局 */
+#loading {
+    margin-top: 0; 
+    margin-bottom: 20px; /* 在 loading 和 labButton/login-container 之間留出空間 */
+}
+
+#labButton {
+    margin-top: 0; 
+    margin-bottom: 20px; /* 在 labButton 和 login-container 之間留出空間 */
 }
 
 .login-container {
@@ -603,8 +620,7 @@ body.login-page .main-content {
     max-width: 400px;
     margin-left: auto; /* 水平居中 */
     margin-right: auto; /* 水平居中 */
-    margin-top: 20px; /* 增加與上方 labButton 的間距 */
-    margin-bottom: 20px; /* 增加與下方元素的間距 */
+    /* 移除特定的 margin-top 和 margin-bottom，讓 main-content 的 flex 屬性處理間距 */
     padding: 2rem;
     background-color: rgba(255, 255, 255, 0.9); /* 半透明背景 */
     border-radius: 8px;
@@ -667,7 +683,7 @@ body.login-page .main-content {
     background-color: var(--accent-color);
     color: var(--header-bg);
     border: 2px solid var(--header-bg);
-    margin-bottom: 20px;
+    /* margin-bottom: 20px; -- 由上面 main-content 的 justify-content 和 labButton 的 margin-bottom 統一控制*/
     width: 220px; /* 保持特定寬度 */
     padding: 10px 20px;
     font-size: 1rem;
@@ -699,7 +715,7 @@ body.login-page .main-content {
     text-align: center;
     color: #666;
     padding: 20px;
-    margin-top: 0; /* 調整為0，讓 main-content 的 justify-content 處理垂直居中 */
+    /* margin-top: 0; -- 由上面 main-content 的 justify-content 處理垂直居中 */
 }
 
 /* 響應式調整 */
