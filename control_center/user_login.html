@@ -316,8 +316,8 @@
                         sessionStorage.setItem('retoolAuthToken', data.firebaseIdToken); // 儲存 Retool 需要的 token
                     }
                     
-                    // 如果 Worker 驗證成功，並且您想繼續導向到 `/private_room/my_laboratory`
-                    window.location.href = '/private_room/my_laboratory'; 
+                    // 如果 Worker 驗證成功，並且您想繼續導向到
+                    window.location.href = 'https://smit66476835.retool.com/p/info_directory/search';
 
                 } else {
                     const errorText = await workerResponse.text();
