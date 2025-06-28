@@ -182,6 +182,9 @@
 
         let auth; // 在模組範圍內宣告 auth
 
+        // ** 新增 Worker URL 常數 **
+        const WORKER_VERIFY_URL = 'https://firebase-jwt-verify-worker.smit66476835.workers.dev/'; //
+
         /**
          * 透過從 Cloudflare Function 獲取設定來初始化 Firebase 應用程式和身份驗證服務。
          * @returns {Promise<firebase.auth.Auth>} Firebase Auth 實例。
@@ -286,20 +289,54 @@
         }
 
         /**
-         * 處理重定向到實驗室。
-         * 對於 Cloudflare Access 保護，僅僅重定向就足夠了，Access 會攔截並驗證。
+         * 處理從 Worker 進行驗證並重定向。
+         * 將 Firebase ID Token 發送到 Worker，並根據 Worker 的回應進行跳轉。
          */
         async function handleLabAccess() {
-            // 從 sessionStorage 獲取 Firebase ID Token
-            const idToken = sessionStorage.getItem('firebaseIdToken');
-            if (!idToken) {
-                showError('未找到登入憑證，請重新登入。', 'labError');
-                await signOut(auth); // 如果沒有 token，強制登出
-                return;
+            const idToken = sessionStorage.getItem('firebaseIdToken'); //
+            if (!idToken) { //
+                showError('未找到登入憑證，請重新登入。', 'labError'); //
+                await signOut(auth); //
+                return; //
             }
-            // Cloudflare Access 會自動從瀏覽器會話中檢查所需的 Access Token (基於 Firebase ID Token 驗證)。
-            // 因此，這裡直接重定向到受保護路徑即可。
-            window.location.href = '/private_room/my_laboratory'; 
+
+            labButton.disabled = true; //
+            labButton.innerHTML = '<i class="bi bi-hourglass"></i> 正在驗證...'; //
+            labErrorDiv.style.display = 'none'; //
+
+            try { //
+                const response = await fetch(WORKER_VERIFY_URL, { //
+                    method: 'POST', //
+                    headers: { //
+                        'Authorization': `Bearer ${idToken}`, //
+                        'Content-Type': 'application/json' //
+                    }, //
+                    mode: 'cors' // 確保發送 CORS 請求 //
+                }); //
+
+                if (response.ok) { //
+                    // 期望 Worker 返回 200 OK 和 JSON 數據
+                    const data = await response.json(); //
+                    if (data.redirectUrl) { //
+                        console.log("Worker suggests redirect to:", data.redirectUrl); //
+                        window.location.href = data.redirectUrl; // 手動執行頁面跳轉 //
+                    } else { //
+                        showError("驗證服務回應異常，缺少重定向 URL。", 'labError'); //
+                        console.error("Worker response missing redirect URL:", data); //
+                    } //
+                } else { //
+                    // 如果 Worker 返回非 200 狀態碼
+                    const errorText = await response.text(); //
+                    console.error('請求 Worker 失敗，狀態碼:', response.status, '訊息:', errorText); //
+                    showError(`驗證失敗: ${response.status} - ${errorText.substring(0, 100)}...`, 'labError'); //
+                } //
+            } catch (error) { //
+                console.error('請求 Worker 失敗:', error); //
+                showError('網路請求失敗，請檢查連線或稍後再試。', 'labError'); //
+            } finally { //
+                labButton.disabled = false; //
+                labButton.innerHTML = '<i class="bi bi-arrow-right-circle"></i> 進入我的實驗室'; //
+            } //
         }
 
         /**
