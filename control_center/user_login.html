@@ -224,8 +224,9 @@
 
     <script type="module">
         import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-        // 請保留您現有的 Firebase 配置導入方式，例如：
-        import { firebaseConfig } from './functions/firebase-config.js'; 
+        
+        // 此處已根據您的資訊調整為絕對路徑
+        import { firebaseConfig } from '/firebase-config.js'; 
 
         let auth;
 
