@@ -1,3 +1,6 @@
+在使用者嘗試存取實驗室時發生錯誤。`handleLabAccess` 函式負責此操作，並回報了「Error: Invalid request」（錯誤：無效請求）。這表示傳送至 `https://firebase-jwt-verify-worker.smit66476835.workers.dev` 端點的請求格式不正確或缺少必要資訊，導致伺服器回傳了「400 Bad Request」（400 錯誤請求）的回應。儘管使用者成功登入，但後續取得實驗室存取的步驟因這個無效請求而失敗。
+
+```html
 <!DOCTYPE html>
 <html lang="zh-HK">
 <head>
@@ -119,7 +122,6 @@
     </style>
 </head>
 <body>
-    <!-- 加载屏幕 -->
     <div id="loading-screen">
         <h2>系統初始化中</h2>
         <div class="status-item">
@@ -138,7 +140,6 @@
         <button id="retry-btn" style="display: none;">重試</button>
     </div>
 
-    <!-- 主内容 (初始隐藏) -->
     <div id="main-content" style="display: none;">
         <button id="labButton" class="login-button" style="display: none;">
             <i class="bi bi-arrow-right-circle"></i> 進入我的實驗室
@@ -165,7 +166,6 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
@@ -384,19 +384,21 @@
                 const idToken = await App.currentUser.getIdToken();
                 debugLog('Sending token to worker');
                 
+                // 更換為正確的 CORS 允許的 URL，例如您的 Cloudflare Worker 域名
                 const response = await fetch('https://firebase-jwt-verify-worker.smit66476835.workers.dev', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${idToken}`,
                         'Content-Type': 'application/json',
-                        'Origin': 'https://concierge-anywhere.com'
+                        'Origin': 'https://concierge-anywhere.com' // 確保這個 Origin 與您的前端域名匹配
                     },
                     credentials: 'omit'
                 });
 
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.error || '驗證失敗');
+                    // 更明確的錯誤訊息
+                    throw new Error(errorData.error || `驗證失敗: ${response.status} ${response.statusText}`);
                 }
 
                 const data = await response.json();
