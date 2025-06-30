@@ -154,8 +154,8 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
     <script>
         const loadingDiv = document.getElementById('loading');
         const loginForm = document.getElementById('loginForm');
@@ -181,6 +181,7 @@
                 }
                 
                 const firebaseConfig = await response.json();
+                // 這裡將使用 10.12.2 版本的全局 firebase 物件
                 const app = firebase.initializeApp(firebaseConfig);
                 auth = firebase.auth();
                 
@@ -236,6 +237,7 @@
         }
 
         async function handleGoogleLogin() {
+            // 這裡將使用 10.12.2 版本的全局 firebase 物件
             const provider = new firebase.auth.GoogleAuthProvider();
             googleLoginButton.disabled = true;
             googleLoginButton.innerHTML = '<i class="bi bi-hourglass"></i> 登錄中...';
@@ -282,7 +284,7 @@
             labErrorDiv.style.display = 'none';
 
             try {
-                // Cloudflare Worker URL 已更新
+                // Cloudflare Worker URL 保持不變，已是您要求的 URL
                 const workerResponse = await fetch('https://firebase-jwt-verify-worker.smit66476835.workers.dev/', {
                     method: 'POST',
                     headers: {
@@ -299,7 +301,7 @@
                         sessionStorage.setItem('retoolAuthToken', data.firebaseIdToken);
                     }
                     
-                    // 目的地 URL 已更新
+                    // 目的地 URL 保持不變
                     window.location.href = 'https://concierge-anywhere.com/private_room/my_laboratory';
 
                 } else {
