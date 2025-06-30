@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <style>
-        /* ... (CSS 樣式與您提供的保持不變) ... */
         :root {
             --main-color: #23396C;
             --secondary-color: #3A5A9A;
@@ -81,17 +80,6 @@
             display: none;
         }
 
-        /* Styles for the Google Sign-in button */
-        #googleLoginButton {
-            background-color: #DB4437; /* Google red */
-            margin-top: 5px;
-        }
-
-        #googleLoginButton:hover {
-            background-color: #C23321;
-        }
-
-        /* Styles for the "進入我的實驗室" button */
         #labButton {
             background-color: var(--accent-color);
             color: var(--header-bg);
@@ -100,7 +88,7 @@
             width: 220px;
             padding: 10px 20px;
             font-size: 1rem;
-            display: none; /* Hidden by default, shown when logged in */
+            display: none;
         }
 
         #labButton:hover {
@@ -113,7 +101,7 @@
             text-align: center;
         }
 
-        #loading { /* Style for the initial loading message */
+        #loading {
             text-align: center;
             color: #666;
             padding: 20px;
@@ -135,9 +123,6 @@
             <input type="password" id="passwordInput" class="login-input" placeholder="密碼" required>
             <button id="loginButton" class="login-button">
                 <i class="bi bi-box-arrow-in-right"></i> 登錄
-            </button>
-            <button id="googleLoginButton" class="login-button">
-                <i class="bi bi-google"></i> 使用 Google 登錄
             </button>
             <p id="errorMessage" class="error-message"></p>
         </div>
@@ -162,9 +147,7 @@
             getAuth, 
             signInWithEmailAndPassword, 
             signOut, 
-            onAuthStateChanged,
-            GoogleAuthProvider,
-            signInWithPopup 
+            onAuthStateChanged
         } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 
         const loadingDiv = document.getElementById('loading');
@@ -177,14 +160,12 @@
         const emailInput = document.getElementById('emailInput');
         const passwordInput = document.getElementById('passwordInput');
         const loginButton = document.getElementById('loginButton');
-        const googleLoginButton = document.getElementById('googleLoginButton');
         const logoutButton = document.getElementById('logoutButton');
 
         let auth;
 
         async function initFirebase() {
             try {
-                // 使用您原有的 fetch 方式來獲取 Firebase 配置
                 const response = await fetch('/firebase-config');
                 if (!response.ok) {
                     const errorText = await response.text();
@@ -246,29 +227,6 @@
             }
         }
 
-        async function handleGoogleLogin() {
-            const provider = new GoogleAuthProvider();
-            googleLoginButton.disabled = true;
-            googleLoginButton.innerHTML = '<i class="bi bi-hourglass"></i> 登錄中...';
-            errorMessageDiv.style.display = 'none';
-
-            try {
-                await signInWithPopup(auth, provider);
-            } catch (error) {
-                console.error('Google 登錄錯誤:', error);
-                let customErrorMessage = 'Google 登錄失敗，請稍後再試。';
-                if (error.code === 'auth/popup-closed-by-user') {
-                    customErrorMessage = '登錄視窗已關閉。';
-                } else if (error.code === 'auth/cancelled-popup-request') {
-                    customErrorMessage = '登錄請求已被取消或重複。';
-                }
-                showError(customErrorMessage);
-            } finally {
-                googleLoginButton.disabled = false;
-                googleLoginButton.innerHTML = '<i class="bi bi-google"></i> 使用 Google 登錄';
-            }
-        }
-
         async function handleLogout() {
             try {
                 if (auth) {
@@ -280,14 +238,11 @@
             }
         }
 
-        /**
-         * 【修改點】處理重定向到實驗室，現在包含向 Worker 發送 JWT。
-         */
         async function handleLabAccess() {
             const idToken = sessionStorage.getItem('firebaseIdToken');
             if (!idToken) {
                 showError('未找到登入憑證，請重新登入。', 'labError');
-                await signOut(auth); // 如果沒有 token，強制登出
+                await signOut(auth);
                 return;
             }
 
@@ -296,39 +251,25 @@
             labErrorDiv.style.display = 'none';
 
             try {
-                // 【關鍵修改】向您的 Cloudflare Worker 發送 POST 請求以驗證 JWT
-                // 請將 'https://firebase-jwt-verify-worker.smit66476835.workers.dev' 替換為您的 Worker 實際 URL
-                const workerResponse = await fetch('https://firebase-jwt-verify-worker.smit66476835.workers.dev', {
+                const workerResponse = await fetch('https://your-worker-url.workers.dev', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${idToken}`, // 將 Firebase ID Token 放入 Authorization 標頭
-                        'Content-Type': 'application/json' // 雖然 Worker 不讀取 body，但這是良好的實踐
-                    },
-                    // 如果 Worker 預期有請求體，可以在這裡添加 body: JSON.stringify({...})
+                        'Authorization': `Bearer ${idToken}`,
+                        'Content-Type': 'application/json'
+                    }
                 });
 
                 if (workerResponse.ok) {
                     const data = await workerResponse.json();
-                    console.log('Worker 驗證成功:', data);
-                    
-                    // 根據 Worker 返回的 private_room_token（或您定義的其他憑證）處理
-                    if (data.firebaseIdToken) { // 假設 Worker 返回新的或驗證過的 token
-                        sessionStorage.setItem('retoolAuthToken', data.firebaseIdToken); // 儲存 Retool 需要的 token
-                    }
-                    
-                    // 如果 Worker 驗證成功，並且您想繼續導向到
-                    window.location.href = 'https://smit66476835.retool.com/p/info_directory/search';
-
+                    window.location.href = data.redirectUrl || 'https://concierge-anywhere.com/private_room/my_laboratory';
                 } else {
-                    const errorText = await workerResponse.text();
-                    console.error('Worker 驗證失敗:', workerResponse.status, errorText);
-                    showError(`訪問失敗: ${errorText || 'JWT 驗證失敗'}`, 'labError');
-                    // 如果驗證失敗，可能需要強制登出或提示用戶重新登錄
+                    const errorData = await workerResponse.json();
+                    showError(`訪問失敗: ${errorData.error || '驗證錯誤'}`, 'labError');
                     await signOut(auth);
                 }
             } catch (error) {
-                console.error('請求 Worker 失敗:', error);
-                showError('無法連接服務，請檢查網絡或稍後再試。', 'labError');
+                console.error('請求失敗:', error);
+                showError('網絡錯誤，請稍後再試。', 'labError');
             } finally {
                 labButton.disabled = false;
                 labButton.innerHTML = '<i class="bi bi-arrow-right-circle"></i> 進入我的實驗室';
@@ -344,7 +285,7 @@
                         console.log('User signed in:', user.email || user.displayName || user.uid);
                         loginForm.style.display = 'none';
                         welcomeMessage.style.display = 'block';
-                        labButton.style.display = 'flex'; // 使用 flex 確保圖標和文字對齊
+                        labButton.style.display = 'flex';
                         userEmailSpan.textContent = user.email || user.displayName || user.uid;
 
                         try {
@@ -363,12 +304,10 @@
                         welcomeMessage.style.display = 'none';
                         labButton.style.display = 'none';
                         sessionStorage.removeItem('firebaseIdToken');
-                        sessionStorage.removeItem('retoolAuthToken'); // 在登出時清除 Retool token
                     }
                 });
 
                 loginButton.addEventListener('click', handleLogin);
-                googleLoginButton.addEventListener('click', handleGoogleLogin);
                 logoutButton.addEventListener('click', handleLogout);
                 labButton.addEventListener('click', handleLabAccess);
                 
