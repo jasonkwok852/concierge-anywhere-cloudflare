@@ -282,8 +282,8 @@
             labErrorDiv.style.display = 'none';
 
             try {
-                // Cloudflare Worker URL 保持不變，因為它已設定為處理這個路徑
-                const workerResponse = await fetch('https://concierge-anywhere.com/firebase-jwt-verify-worker', {
+                // Cloudflare Worker URL 已更新
+                const workerResponse = await fetch('https://firebase-jwt-verify-worker.smit66476835.workers.dev/', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${idToken}`,
@@ -299,7 +299,7 @@
                         sessionStorage.setItem('retoolAuthToken', data.firebaseIdToken);
                     }
                     
-                    // 【目的地 URL 修改】從 retool.com 改為 concierge-anywhere.com
+                    // 目的地 URL 已更新
                     window.location.href = 'https://concierge-anywhere.com/private_room/my_laboratory';
 
                 } else {
