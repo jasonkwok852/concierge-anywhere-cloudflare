@@ -174,6 +174,7 @@
 
         async function initFirebase() {
             try {
+                // 從 /firebase-config 獲取配置，確保該端點返回正確的 JSON
                 const response = await fetch('/firebase-config');
                 if (!response.ok) {
                     const errorText = await response.text();
@@ -181,7 +182,7 @@
                 }
                 
                 const firebaseConfig = await response.json();
-                // 這裡將使用 10.12.2 版本的全局 firebase 物件
+                // 使用全局的 firebase 物件來初始化和獲取 auth 實例
                 const app = firebase.initializeApp(firebaseConfig);
                 auth = firebase.auth();
                 
@@ -189,9 +190,10 @@
                 return auth;
             } catch (error) {
                 console.error('Firebase初始化失敗:', error);
-                showError('系統初始化失敗，請刷新頁面', 'errorMessage');
+                // 顯示更友善的錯誤訊息給用戶
+                showError('系統初始化失敗，請刷新頁面或稍後再試。', 'errorMessage');
                 loadingDiv.textContent = '系統初始化失敗。';
-                throw error;
+                throw error; // 重新拋出錯誤以便調試
             }
         }
 
@@ -237,7 +239,6 @@
         }
 
         async function handleGoogleLogin() {
-            // 這裡將使用 10.12.2 版本的全局 firebase 物件
             const provider = new firebase.auth.GoogleAuthProvider();
             googleLoginButton.disabled = true;
             googleLoginButton.innerHTML = '<i class="bi bi-hourglass"></i> 登錄中...';
@@ -284,7 +285,7 @@
             labErrorDiv.style.display = 'none';
 
             try {
-                // Cloudflare Worker URL 保持不變，已是您要求的 URL
+                // Cloudflare Worker URL 保持為您指定的 workers.dev 網址
                 const workerResponse = await fetch('https://firebase-jwt-verify-worker.smit66476835.workers.dev/', {
                     method: 'POST',
                     headers: {
@@ -301,7 +302,7 @@
                         sessionStorage.setItem('retoolAuthToken', data.firebaseIdToken);
                     }
                     
-                    // 目的地 URL 保持不變
+                    // 目的地 URL 保持為您指定的 concierge-anywhere.com 網址
                     window.location.href = 'https://concierge-anywhere.com/private_room/my_laboratory';
 
                 } else {
@@ -321,14 +322,15 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                auth = await initFirebase();
+                auth = await initFirebase(); // 等待 Firebase 初始化完成
                 
+                // 監聽 Firebase 認證狀態變化
                 auth.onAuthStateChanged(async (user) => {
                     if (user) {
                         console.log('User signed in:', user.email || user.displayName || user.uid);
                         loginForm.style.display = 'none';
                         welcomeMessage.style.display = 'block';
-                        labButton.style.display = 'flex';
+                        labButton.style.display = 'flex'; // 顯示進入實驗室按鈕
                         userEmailSpan.textContent = user.email || user.displayName || user.uid;
 
                         try {
@@ -338,19 +340,20 @@
                         } catch (tokenError) {
                             console.error('獲取 Firebase ID Token 失敗:', tokenError);
                             showError('登入成功，但無法獲取身份憑證，請嘗試重新登入。', 'errorMessage');
-                            await auth.signOut();
+                            await auth.signOut(); // 獲取 token 失敗則強制登出
                         }
 
                     } else {
                         console.log('User signed out.');
                         loginForm.style.display = 'block';
                         welcomeMessage.style.display = 'none';
-                        labButton.style.display = 'none';
+                        labButton.style.display = 'none'; // 隱藏進入實驗室按鈕
                         sessionStorage.removeItem('firebaseIdToken');
                         sessionStorage.removeItem('retoolAuthToken');
                     }
                 });
 
+                // 綁定事件監聽器
                 loginButton.addEventListener('click', handleLogin);
                 googleLoginButton.addEventListener('click', handleGoogleLogin);
                 logoutButton.addEventListener('click', handleLogout);
@@ -361,7 +364,8 @@
                 });
 
             } catch (error) {
-                console.error('頁面初始化錯誤:', error);
+                console.error('頁面初始化錯誤 (DOMContentLoaded):', error);
+                // 這裡的錯誤會被 initFirebase 捕捉並顯示，因此可能不需要額外處理，但保留以便追蹤
             }
         });
     </script>
