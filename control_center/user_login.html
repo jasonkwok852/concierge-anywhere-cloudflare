@@ -1,77 +1,311 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
 <head>
-    <!-- 保持原有的 head 內容不變 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用戶登錄 - Concierge Anywhere</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <style>
-        /* 保持原有的 CSS 樣式不變 */
+        :root {
+            --main-color: #23396C;
+            --secondary-color: #3A5A9A;
+            --accent-color: #F8EF32;
+            --bg-color: #FAFAFA;
+            --border-color: #243D51;
+            --header-bg: #243D51;
+            --button-hover-color: #243D51;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        body {
+            font-family: 'Noto Sans HK', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-container {
+            width: 90%;
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 2rem;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .login-button {
+            width: 100%;
+            padding: 12px;
+            margin: 16px 0;
+            background-color: var(--main-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .login-button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        .error-message {
+            color: #d32f2f;
+            text-align: center;
+            margin: 10px 0;
+            display: none;
+        }
+        #labButton {
+            background-color: var(--accent-color);
+            color: var(--header-bg);
+            border: 2px solid var(--header-bg);
+            margin-bottom: 20px;
+            width: 220px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            display: none;
+        }
+        #labButton:hover {
+            background-color: var(--header-bg);
+            color: var(--accent-color);
+        }
+        #welcomeMessage, #labAccess {
+            display: none;
+            text-align: center;
+        }
+        #loading {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+        #debugPanel {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f5f5f5;
+        }
     </style>
 </head>
 <body>
-    <!-- 保持原有的 HTML 結構不變 -->
+    <div id="loading">
+        正在載入 Firebase 設定...
+        <div id="debugPanel">
+            <button onclick="testFirebaseConfig()">測試配置</button>
+            <pre id="debugOutput"></pre>
+        </div>
+    </div>
 
-    <!-- 修改後的腳本部分 -->
-    <script type="module">
-        // 正確導入 Firebase 模組
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-        import { 
-            getAuth, 
-            signInWithEmailAndPassword, 
-            GoogleAuthProvider,
-            signInWithPopup,
-            signOut,
-            onAuthStateChanged 
-        } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    <button id="labButton" class="login-button">
+        <i class="bi bi-arrow-right-circle"></i> 進入我的實驗室
+    </button>
 
-        // DOM 元素獲取保持不變
+    <div class="login-container">
+        <h1 style="text-align: center; color: var(--main-color);">用戶登錄</h1>
+        <div id="loginForm">
+            <input type="email" id="emailInput" class="login-input" placeholder="電子郵件" required>
+            <input type="password" id="passwordInput" class="login-input" placeholder="密碼" required>
+            <button id="loginButton" class="login-button">
+                <i class="bi bi-box-arrow-in-right"></i> 登錄
+            </button>
+            <p id="errorMessage" class="error-message"></p>
+        </div>
+        <div id="welcomeMessage">
+            <p>歡迎，<span id="userEmail"></span></p>
+            <button id="logoutButton" class="login-button">
+                <i class="bi bi-box-arrow-right"></i> 登出
+            </button>
+        </div>
+        <div id="labAccess">
+            <p id="labError" class="error-message"></p>
+        </div>
+    </div>
+
+    <!-- 使用兼容版 Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script>
+        // 硬編碼 Firebase 配置（替換為您的實際配置）
+        const firebaseConfig = {
+            apiKey: "AIzaSyABCDEFGHIJKLMNOPQRSTUVWXYZ12345678",
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef1234567890"
+        };
+
+        // 初始化 Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // DOM 元素
         const loadingDiv = document.getElementById('loading');
-        // ... 其他 DOM 元素獲取 ...
+        const loginForm = document.getElementById('loginForm');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const labButton = document.getElementById('labButton');
+        const userEmailSpan = document.getElementById('userEmail');
+        const errorMessageDiv = document.getElementById('errorMessage');
+        const labErrorDiv = document.getElementById('labError');
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginButton = document.getElementById('loginButton');
+        const logoutButton = document.getElementById('logoutButton');
+        const debugOutput = document.getElementById('debugOutput');
 
-        let auth;
-
-        async function initFirebase() {
+        // 測試 Firebase 配置
+        window.testFirebaseConfig = async function() {
             try {
-                // 1. 直接使用硬編碼的 Firebase 配置（測試用）
-                const firebaseConfig = {
-                    apiKey: "YOUR_API_KEY",
-                    authDomain: "YOUR_PROJECT.firebaseapp.com",
-                    projectId: "YOUR_PROJECT",
-                    storageBucket: "YOUR_PROJECT.appspot.com",
-                    messagingSenderId: "YOUR_SENDER_ID",
-                    appId: "YOUR_APP_ID"
-                };
-
-                // 2. 使用現代模組化語法初始化
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                
-                loadingDiv.style.display = 'none';
-                return auth;
+                debugOutput.textContent = "測試 Firebase 配置中...";
+                const result = await auth.signInWithEmailAndPassword("test@example.com", "testpassword");
+                debugOutput.textContent = "配置有效！錯誤預期：\n" + JSON.stringify({
+                    code: "auth/invalid-email",
+                    message: "這表示配置正確但測試憑證無效"
+                }, null, 2);
             } catch (error) {
-                console.error('Firebase初始化失敗:', error);
-                loadingDiv.innerHTML = `
-                    <p style="color: red;">Firebase 初始化失敗</p>
-                    <p>${error.message}</p>
-                    <button onclick="location.reload()">重新載入</button>
-                `;
-                throw error;
+                debugOutput.textContent = "配置測試完成：\n" + 
+                    `Firebase 初始化成功\n` +
+                    `預期錯誤（因使用測試憑證）：\n` +
+                    `Code: ${error.code}\n` +
+                    `Message: ${error.message}\n\n` +
+                    "實際配置對象：\n" + 
+                    JSON.stringify(firebaseConfig, null, 2);
+            }
+        };
+
+        function showError(message, elementId = 'errorMessage') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+                element.textContent = '';
+            }, 5000);
+        }
+
+        async function handleLogin() {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            if (!email || !password) {
+                showError('請輸入電子郵件和密碼');
+                return;
+            }
+
+            loginButton.disabled = true;
+            loginButton.innerHTML = '<i class="bi bi-hourglass"></i> 登錄中...';
+            errorMessageDiv.style.display = 'none';
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+            } catch (error) {
+                console.error('登錄錯誤:', error);
+                const errorMap = {
+                    'auth/invalid-email': '電子郵件格式不正確',
+                    'auth/user-not-found': '找不到此帳號',
+                    'auth/wrong-password': '密碼錯誤',
+                    'auth/invalid-credential': '電子郵件或密碼不正確',
+                    'auth/too-many-requests': '嘗試次數過多，請稍後再試'
+                };
+                showError(errorMap[error.code] || '登錄失敗，請檢查電子郵件和密碼');
+            } finally {
+                loginButton.disabled = false;
+                loginButton.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> 登錄';
             }
         }
 
-        // 保持其他函數不變 (showError, handleLogin, handleGoogleLogin, handleLogout, handleLabAccess)
-
-        document.addEventListener('DOMContentLoaded', async () => {
+        async function handleLogout() {
             try {
-                auth = await initFirebase();
-                
-                onAuthStateChanged(auth, async (user) => {
-                    // 保持原有的狀態監聽邏輯
+                await auth.signOut();
+            } catch (error) {
+                console.error('登出錯誤:', error);
+                showError('登出失敗: ' + error.message);
+            }
+        }
+
+        async function handleLabAccess() {
+            const user = auth.currentUser;
+            if (!user) {
+                showError('請先登入', 'labError');
+                return;
+            }
+
+            labButton.disabled = true;
+            labButton.innerHTML = '<i class="bi bi-hourglass"></i> 驗證中...';
+            labErrorDiv.style.display = 'none';
+
+            try {
+                const idToken = await user.getIdToken();
+                const workerResponse = await fetch('https://firebase-jwt-verify-worker.smit66476835.workers.dev', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${idToken}`,
+                        'Content-Type': 'application/json'
+                    }
                 });
 
-                // 保持原有的事件監聽器綁定
+                if (!workerResponse.ok) {
+                    const error = await workerResponse.text();
+                    throw new Error(error || 'Worker 驗證失敗');
+                }
+
+                const { redirectUrl } = await workerResponse.json();
+                window.location.href = redirectUrl || 'https://concierge-anywhere.com/private_room/my_laboratory';
             } catch (error) {
-                console.error('頁面初始化錯誤:', error);
+                console.error('實驗室訪問錯誤:', error);
+                showError(`無法進入實驗室: ${error.message}`, 'labError');
+            } finally {
+                labButton.disabled = false;
+                labButton.innerHTML = '<i class="bi bi-arrow-right-circle"></i> 進入我的實驗室';
+            }
+        }
+
+        // 初始化監聽
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                console.log('用戶已登入:', user.email);
+                loginForm.style.display = 'none';
+                welcomeMessage.style.display = 'block';
+                labButton.style.display = 'flex';
+                userEmailSpan.textContent = user.email;
+                loadingDiv.style.display = 'none';
+            } else {
+                console.log('用戶未登入');
+                loginForm.style.display = 'block';
+                welcomeMessage.style.display = 'none';
+                labButton.style.display = 'none';
+                loadingDiv.style.display = 'none';
             }
         });
+
+        // 事件綁定
+        loginButton.addEventListener('click', handleLogin);
+        logoutButton.addEventListener('click', handleLogout);
+        labButton.addEventListener('click', handleLabAccess);
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+
+        // 隱藏加載狀態（Firebase 已初始化）
+        loadingDiv.querySelector('#debugPanel').style.display = 'block';
     </script>
 </body>
 </html>
