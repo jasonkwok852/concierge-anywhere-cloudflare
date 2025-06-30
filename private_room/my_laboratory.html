@@ -1,200 +1,347 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的實驗室</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            text-align: center;
-            background-color: #f5f5f5;
-            overflow: hidden;
-        }
-        h1 {
-            color: #333;
-            position: relative;
-            animation: colorChange 8s infinite;
-        }
-        h3 {
-            color: #666;
-            margin-top: 20px;
-            animation: pulse 2s infinite;
-        }
-        .button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #23396C;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 10px;
-        }
-        .button:hover {
-            background-color: #3A5A9A;
-        }
-        .error-message {
-            color: #d32f2f;
-            display: none;
-            margin: 10px;
-            padding: 10px;
-            background: #ffebee;
-            border-radius: 4px;
-        }
-        .line {
-            position: absolute;
-            background: linear-gradient(90deg, transparent, #3498db, transparent);
-            height: 2px;
-            animation: moveLine 6s linear infinite;
-        }
-        .circle {
-            position: absolute;
-            border-radius: 50%;
-            opacity: 0.3;
-            animation: float 15s infinite linear;
-        }
-        @keyframes colorChange {
-            0% { color: #333; }
-            25% { color: #e74c3c; }
-            50% { color: #9b59b6; }
-            75% { color: #2ecc71; }
-            100% { color: #333; }
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        @keyframes moveLine {
-            0% { 
-                transform: translateX(-100%);
-                opacity: 0;
-            }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { 
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-        @keyframes float {
-            0% { transform: translateY(0) rotate(0deg); }
-            100% { transform: translateY(-100vh) rotate(360deg); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>動態線條背景效果</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #fff;
+      color: #0f172a;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .dark body {
+      background-color: #0a0a0a;
+      color: #fff;
+    }
+
+    .container {
+      position: relative;
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .background-paths {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .background-paths svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      text-align: center;
+    }
+
+    .title {
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: 800;
+      margin-bottom: 2rem;
+      line-height: 1.1;
+      letter-spacing: -0.05em;
+    }
+
+    .word {
+      display: inline-block;
+      margin-right: 1rem;
+    }
+
+    .letter {
+      display: inline-block;
+      background: linear-gradient(to right, #0f172a, #334155);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .dark .letter {
+      background: linear-gradient(to right, #fff, rgba(255, 255, 255, 0.8));
+    }
+
+    .button-container {
+      display: inline-block;
+      position: relative;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(255, 255, 255, 0.1));
+      padding: 1px;
+      border-radius: 1.15rem;
+      backdrop-filter: blur(12px);
+      overflow: hidden;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      transition: box-shadow 0.3s ease;
+    }
+
+    .dark .button-container {
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.1));
+    }
+
+    .button-container:hover {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 2rem;
+      font-size: 1.125rem;
+      font-weight: 600;
+      border-radius: 1.15rem;
+      background-color: rgba(255, 255, 255, 0.95);
+      color: #000;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(12px);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .dark .button {
+      background-color: rgba(0, 0, 0, 0.95);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .dark .button:hover {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }
+
+    .button-text {
+      opacity: 0.9;
+      transition: opacity 0.3s ease;
+    }
+
+    .button:hover .button-text {
+      opacity: 1;
+    }
+
+    .button-arrow {
+      margin-left: 0.75rem;
+      opacity: 0.7;
+      transition: all 0.3s ease;
+    }
+
+    .button:hover .button-arrow {
+      opacity: 1;
+      transform: translateX(6px);
+    }
+
+    /* 暗黑模式切換按鈕樣式 */
+    .theme-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 8px 16px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      z-index: 100;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .dark .theme-toggle {
+      background: #333;
+      color: #fff;
+      border-color: #555;
+    }
+  </style>
 </head>
 <body>
-    <h1>純粹測試</h1>
-    <h3>User Access Only</h3>
-    <button id="logoutButton" class="button">登出</button>
-    <p id="errorMessage" class="error-message"></p>
+  <div class="container">
+    <div class="background-paths" id="backgroundPaths"></div>
+    
+    <div class="content">
+      <h1 class="title" id="animatedTitle">Dynamic Paths</h1>
+      
+      <div class="button-container">
+        <button class="button">
+          <span class="button-text">Explore More</span>
+          <span class="button-arrow">→</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
-        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+  <button class="theme-toggle">切換暗黑模式</button>
 
-        async function initFirebase() {
-            try {
-                const response = await fetch('/firebase-config');
-                if (!response.ok) throw new Error('無法獲取 Firebase 配置');
-                const firebaseConfig = await response.json();
-                const app = initializeApp(firebaseConfig);
-                return getAuth(app);
-            } catch (error) {
-                console.error('Firebase 初始化失敗:', error);
-                showError('頁面初始化失敗，請刷新重試');
-                throw error;
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 創建更複雜的動態背景路徑
+      function createDynamicPaths() {
+        const container = document.getElementById('backgroundPaths');
+        container.innerHTML = '';
+        
+        // 創建SVG元素
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", "0 0 1000 1000");
+        svg.setAttribute("preserveAspectRatio", "xMidYMid slice");
+        svg.style.width = '100%';
+        svg.style.height = '100%';
+        
+        // 創建多組路徑
+        const pathGroups = [
+          { count: 24, position: 1, color: '#3b82f6', baseWidth: 0.3 },
+          { count: 18, position: -1, color: '#10b981', baseWidth: 0.4 },
+          { count: 12, position: 0.5, color: '#8b5cf6', baseWidth: 0.5 }
+        ];
+        
+        pathGroups.forEach(group => {
+          for (let i = 0; i < group.count; i++) {
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            
+            // 創建波浪形路徑
+            const amplitude = 50 + i * 5;
+            const frequency = 0.02 + i * 0.001;
+            const length = 1200;
+            let d = `M ${-100} ${500 + i * 20}`;
+            
+            for (let x = -100; x <= length; x += 10) {
+              const y = 500 + i * 20 + amplitude * Math.sin(x * frequency + i * 0.2) * 
+                        Math.sin(x * 0.01) * group.position;
+              d += ` L ${x} ${y}`;
             }
-        }
-
-        function showError(message) {
-            const element = document.getElementById('errorMessage');
-            element.textContent = message;
-            element.style.display = 'block';
-            setTimeout(() => element.style.display = 'none', 5000);
-        }
-
-        async function verifyAccess() {
-            const idToken = sessionStorage.getItem('firebaseIdToken');
-            if (!idToken) {
-                window.location.href = '/control_center/user_login';
-                return;
+            
+            path.setAttribute("d", d);
+            path.setAttribute("stroke", group.color);
+            path.setAttribute("stroke-width", group.baseWidth + i * 0.05);
+            path.setAttribute("stroke-opacity", 0.1 + i * 0.02);
+            path.setAttribute("fill", "none");
+            path.setAttribute("stroke-linecap", "round");
+            
+            // 初始狀態
+            gsap.set(path, {
+              attr: { "stroke-dasharray": "10, 1000" },
+              opacity: 0
+            });
+            
+            // 動畫效果 - 繪製線條
+            gsap.to(path, {
+              duration: 15 + Math.random() * 10,
+              attr: { "stroke-dasharray": "1000, 0" },
+              opacity: 0.6,
+              ease: "sine.inOut"
+            });
+            
+            // 動畫效果 - 波浪運動
+            gsap.to(path, {
+              duration: 20 + Math.random() * 15,
+              attr: { "stroke-dashoffset": 100 },
+              repeat: -1,
+              ease: "none"
+            });
+            
+            // 動畫效果 - 淡入淡出
+            gsap.to(path, {
+              duration: 10 + Math.random() * 8,
+              opacity: 0.2,
+              yoyo: true,
+              repeat: -1,
+              ease: "sine.inOut"
+            });
+            
+            // 動畫效果 - 顏色變化
+            if (i % 3 === 0) {
+              gsap.to(path, {
+                duration: 25 + Math.random() * 15,
+                attr: { "stroke": `hsl(${Math.random() * 60 + 180}, 80%, 60%)` },
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut"
+              });
             }
-
-            try {
-                const response = await fetch('/private_room/my_laboratory', {
-                    headers: { 'Authorization': `Bearer ${idToken}` }
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
-                }
-            } catch (error) {
-                console.error('訪問錯誤:', error);
-                showError('無法驗證訪問權限，請重新登錄');
-                sessionStorage.removeItem('firebaseIdToken');
-                window.location.href = '/control_center/user_login';
-            }
-        }
-
-        function createLines() {
-            for (let i = 0; i < 5; i++) {
-                const line = document.createElement('div');
-                line.className = 'line';
-                line.style.width = `${Math.random() * 200 + 100}px`;
-                line.style.top = `${Math.random() * 100}vh`;
-                line.style.left = `${Math.random() * 100}vw`;
-                line.style.animationDelay = `${Math.random() * 5}s`;
-                document.body.appendChild(line);
-            }
-        }
-
-        function createCircles() {
-            const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6'];
-            for (let i = 0; i < 10; i++) {
-                const circle = document.createElement('div');
-                circle.className = 'circle';
-                circle.style.width = `${Math.random() * 100 + 50}px`;
-                circle.style.height = circle.style.width;
-                circle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                circle.style.left = `${Math.random() * 100}vw`;
-                circle.style.bottom = `-${circle.style.width}`;
-                circle.style.animationDuration = `${Math.random() * 20 + 10}s`;
-                document.body.appendChild(circle);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const auth = await initFirebase();
-                
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        const idToken = await user.getIdToken(true);
-                        sessionStorage.setItem('firebaseIdToken', idToken);
-                        await verifyAccess();
-                        createLines();
-                        createCircles();
-                    } else {
-                        sessionStorage.removeItem('firebaseIdToken');
-                        window.location.href = '/control_center/user_login';
-                    }
-                });
-
-                document.getElementById('logoutButton').addEventListener('click', async () => {
-                    await signOut(auth);
-                    sessionStorage.removeItem('firebaseIdToken');
-                    window.location.href = '/control_center/user_login';
-                });
-
-            } catch (error) {
-                console.error('頁面初始化錯誤:', error);
-                showError('頁面初始化失敗');
-            }
+            
+            svg.appendChild(path);
+          }
         });
-    </script>
+        
+        container.appendChild(svg);
+      }
+      
+      // 初始化背景路徑
+      createDynamicPaths();
+      
+      // 每30秒重新生成路徑，創造變化
+      setInterval(createDynamicPaths, 30000);
+      
+      // 文字動畫
+      const animateText = () => {
+        const title = document.getElementById('animatedTitle');
+        const text = "Dynamic Paths";
+        title.innerHTML = '';
+        
+        const words = text.split(' ');
+        
+        words.forEach((word, wordIndex) => {
+          const wordSpan = document.createElement('span');
+          wordSpan.classList.add('word');
+          
+          const letters = word.split('');
+          letters.forEach((letter, letterIndex) => {
+            const letterSpan = document.createElement('span');
+            letterSpan.classList.add('letter');
+            letterSpan.textContent = letter;
+            
+            gsap.set(letterSpan, {
+              y: 100,
+              opacity: 0,
+              rotation: 20
+            });
+            
+            gsap.to(letterSpan, {
+              y: 0,
+              opacity: 1,
+              rotation: 0,
+              delay: wordIndex * 0.1 + letterIndex * 0.03,
+              duration: 1,
+              ease: "back.out(3)"
+            });
+            
+            wordSpan.appendChild(letterSpan);
+          });
+          
+          title.appendChild(wordSpan);
+        });
+      };
+      
+      animateText();
+      
+      // 暗黑模式切換
+      const themeToggle = document.querySelector('.theme-toggle');
+      themeToggle.addEventListener('click', function() {
+        document.body.classList.toggle('dark');
+        
+        // 重新生成背景路徑以適應新主題
+        createDynamicPaths();
+      });
+    });
+  </script>
 </body>
 </html>
