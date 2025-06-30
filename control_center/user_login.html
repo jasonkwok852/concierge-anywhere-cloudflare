@@ -1,6 +1,3 @@
-在使用者嘗試存取實驗室時發生錯誤。`handleLabAccess` 函式負責此操作，並回報了「Error: Invalid request」（錯誤：無效請求）。這表示傳送至 `https://firebase-jwt-verify-worker.smit66476835.workers.dev` 端點的請求格式不正確或缺少必要資訊，導致伺服器回傳了「400 Bad Request」（400 錯誤請求）的回應。儘管使用者成功登入，但後續取得實驗室存取的步驟因這個無效請求而失敗。
-
-```html
 <!DOCTYPE html>
 <html lang="zh-HK">
 <head>
