@@ -119,7 +119,7 @@
     </style>
 </head>
 <body>
-    <!-- 加载屏幕 -->
+    <!-- 加載屏幕 -->
     <div id="loading-screen">
         <h2>系統初始化中</h2>
         <div class="status-item">
@@ -138,7 +138,7 @@
         <button id="retry-btn" style="display: none;">重試</button>
     </div>
 
-    <!-- 主内容 (初始隐藏) -->
+    <!-- 主內容 (初始隱藏) -->
     <div id="main-content" style="display: none;">
         <button id="labButton" class="login-button" style="display: none;">
             <i class="bi bi-arrow-right-circle"></i> 進入我的實驗室
@@ -170,13 +170,13 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
     <script>
-        // 调试模式
+        // 調試模式
         const DEBUG = true;
         function debugLog(...args) {
             if (DEBUG) console.log('[DEBUG]', ...args);
         }
 
-        // 状态管理
+        // 狀態管理
         const App = {
             auth: null,
             currentUser: null,
@@ -207,7 +207,7 @@
             }
         };
 
-        // 更新状态指示器
+        // 更新狀態指示器
         function updateStatus(step, status) {
             const icons = {
                 loading: '⏳',
@@ -217,7 +217,7 @@
             UI.loading[`${step}Status`].textContent = icons[status];
         }
 
-        // 显示错误
+        // 顯示錯誤
         function showError(message, isFatal = false) {
             UI.loading.error.textContent = message;
             UI.loading.error.style.display = 'block';
@@ -225,7 +225,7 @@
             debugLog('Error:', message);
         }
 
-        // 显示表单错误
+        // 顯示表單錯誤
         function showFormError(message) {
             UI.main.formError.textContent = message;
             UI.main.formError.style.display = 'block';
@@ -237,14 +237,14 @@
         // 初始化 Firebase
         async function initializeFirebase() {
             try {
-                // 1. 检查SDK是否加载
+                // 1. 檢查SDK是否加載
                 if (typeof firebase === 'undefined') {
-                    throw new Error('Firebase SDK 未加载');
+                    throw new Error('Firebase SDK 未加載');
                 }
                 updateStatus('sdk', 'success');
                 debugLog('Firebase SDK loaded');
 
-                // 2. 获取配置
+                // 2. 獲取配置
                 updateStatus('config', 'loading');
                 const configResponse = await fetch('https://concierge-anywhere.com/firebase-config', {
                     cache: 'no-store',
@@ -254,21 +254,21 @@
                 });
 
                 if (!configResponse.ok) {
-                    throw new Error(`配置请求失败: HTTP ${configResponse.status}`);
+                    throw new Error(`配置請求失敗: HTTP ${configResponse.status}`);
                 }
 
                 const firebaseConfig = await configResponse.json();
                 updateStatus('config', 'success');
                 debugLog('Config loaded:', firebaseConfig);
 
-                // 3. 初始化应用
+                // 3. 初始化應用
                 updateStatus('init', 'loading');
                 const app = firebase.initializeApp(firebaseConfig);
                 App.auth = firebase.auth();
                 App.initialized = true;
                 updateStatus('init', 'success');
 
-                // 切换到主界面
+                // 切換到主界面
                 UI.loading.screen.style.display = 'none';
                 UI.main.content.style.display = 'block';
                 debugLog('Firebase initialized');
@@ -277,13 +277,13 @@
 
             } catch (error) {
                 updateStatus('init', 'error');
-                showError(`初始化失败: ${error.message}`, true);
+                showError(`初始化失敗: ${error.message}`, true);
                 debugLog('Initialization error:', error);
                 throw error;
             }
         }
 
-        // 处理登录
+        // 處理登錄
         async function handleLogin() {
             if (!App.initialized) {
                 showFormError('系統未準備好，請稍後重試');
@@ -293,7 +293,7 @@
             const email = UI.main.emailInput.value.trim();
             const password = UI.main.passwordInput.value.trim();
 
-            // 输入验证
+            // 輸入驗證
             if (!email || !password) {
                 showFormError('請輸入電子郵件和密碼');
                 return;
@@ -312,7 +312,7 @@
                 const userCredential = await App.auth.signInWithEmailAndPassword(email, password);
                 debugLog('Login success:', userCredential.user.email);
                 
-                // 获取ID Token用于后续请求
+                // 獲取ID Token用於後續請求
                 const idToken = await userCredential.user.getIdToken();
                 sessionStorage.setItem('firebaseIdToken', idToken);
 
@@ -332,7 +332,7 @@
             }
         }
 
-        // 处理登出
+        // 處理登出
         async function handleLogout() {
             try {
                 await App.auth.signOut();
@@ -343,7 +343,7 @@
             }
         }
 
-        // 处理实验室访问
+        // 處理實驗室訪問 (已修改)
         async function handleLabAccess() {
             if (!App.currentUser) {
                 showFormError('請先登入');
@@ -361,29 +361,42 @@
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${idToken}`,
-                        'Content-Type': 'application/json'
-                    }
+                        'Content-Type': 'application/json',
+                        'Origin': 'https://concierge-anywhere.com'
+                    },
+                    credentials: 'omit'
                 });
 
                 if (!response.ok) {
-                    const error = await response.text();
-                    throw new Error(error || '驗證失敗');
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || '驗證失敗');
                 }
 
-                const { redirectUrl } = await response.json();
-                debugLog('Redirecting to:', redirectUrl);
-                window.location.href = redirectUrl || 'https://concierge-anywhere.com/private_room/my_laboratory';
+                const data = await response.json();
+                debugLog('Response data:', data);
+                
+                if (!data.redirectUrl) {
+                    throw new Error('未收到有效的重定向URL');
+                }
+
+                debugLog('Redirecting to:', data.redirectUrl);
+                window.location.href = data.redirectUrl;
 
             } catch (error) {
                 debugLog('Lab access error:', error);
                 showFormError(`無法進入實驗室: ${error.message}`);
+                
+                // 檢查是否是CORS錯誤
+                if (error.message.includes('Failed to fetch') || error.message.includes('CORS')) {
+                    showFormError('網絡請求被阻止，請檢查瀏覽器控制台獲取詳細信息');
+                }
             } finally {
                 UI.main.labButton.disabled = false;
                 UI.main.labButton.innerHTML = '<i class="bi bi-arrow-right-circle"></i> 進入我的實驗室';
             }
         }
 
-        // 设置认证状态监听
+        // 設置認證狀態監聽
         function setupAuthListener() {
             App.auth.onAuthStateChanged(user => {
                 App.currentUser = user;
@@ -393,16 +406,22 @@
                     UI.main.welcomeMessage.style.display = 'block';
                     UI.main.labButton.style.display = 'flex';
                     UI.main.userEmail.textContent = user.email;
+                    
+                    // 自動嘗試獲取新的ID Token
+                    user.getIdToken(true).then(token => {
+                        sessionStorage.setItem('firebaseIdToken', token);
+                    });
                 } else {
                     debugLog('User signed out');
                     UI.main.loginForm.style.display = 'block';
                     UI.main.welcomeMessage.style.display = 'none';
                     UI.main.labButton.style.display = 'none';
+                    sessionStorage.removeItem('firebaseIdToken');
                 }
             });
         }
 
-        // 事件绑定 (使用事件委托确保可靠性)
+        // 事件綁定 (使用事件委托確保可靠性)
         document.addEventListener('click', function(e) {
             if (e.target.id === 'loginButton' || e.target.closest('#loginButton')) {
                 handleLogin();
@@ -415,17 +434,17 @@
             }
         });
 
-        // 回车键登录
+        // 回車鍵登錄
         UI.main.passwordInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleLogin();
         });
 
-        // 重试按钮
+        // 重試按鈕
         UI.loading.retryBtn.addEventListener('click', () => {
             location.reload();
         });
 
-        // 启动应用
+        // 啟動應用
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 debugLog('DOM fully loaded');
