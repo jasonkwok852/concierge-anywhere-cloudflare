@@ -154,9 +154,18 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
-    <script>
+    <script type="module">
+        // 從 Firebase SDK CDN URL 導入所需的模組化函數
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            GoogleAuthProvider, 
+            signInWithPopup, 
+            signOut, 
+            onAuthStateChanged 
+        } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
         const loadingDiv = document.getElementById('loading');
         const loginForm = document.getElementById('loginForm');
         const welcomeMessage = document.getElementById('welcomeMessage');
@@ -170,7 +179,7 @@
         const googleLoginButton = document.getElementById('googleLoginButton');
         const logoutButton = document.getElementById('logoutButton');
 
-        let auth;
+        let auth; // 將 auth 宣告為模組作用域變數
 
         async function initFirebase() {
             try {
@@ -182,18 +191,19 @@
                 }
                 
                 const firebaseConfig = await response.json();
-                // 使用全局的 firebase 物件來初始化和獲取 auth 實例
-                const app = firebase.initializeApp(firebaseConfig);
-                auth = firebase.auth();
+                
+                // 使用模組化導入的 initializeApp 函數
+                const app = initializeApp(firebaseConfig);
+                // 使用模組化導入的 getAuth 函數
+                auth = getAuth(app);
                 
                 loadingDiv.style.display = 'none';
                 return auth;
             } catch (error) {
                 console.error('Firebase初始化失敗:', error);
-                // 顯示更友善的錯誤訊息給用戶
                 showError('系統初始化失敗，請刷新頁面或稍後再試。', 'errorMessage');
                 loadingDiv.textContent = '系統初始化失敗。';
-                throw error; // 重新拋出錯誤以便調試
+                throw error;
             }
         }
 
@@ -205,7 +215,7 @@
             setTimeout(() => {
                 element.style.display = 'none';
                 element.textContent = '';
-            }, 5000); // 訊息顯示 5 秒後消失
+            }, 5000);
         }
 
         // 處理郵箱/密碼登錄
@@ -223,7 +233,8 @@
             errorMessageDiv.style.display = 'none';
 
             try {
-                await auth.signInWithEmailAndPassword(email, password);
+                // 使用模組化導入的 signInWithEmailAndPassword 函數
+                await signInWithEmailAndPassword(auth, email, password);
             } catch (error) {
                 console.error('登錄錯誤:', error);
                 const errorMap = {
@@ -242,13 +253,15 @@
 
         // 處理 Google 登錄
         async function handleGoogleLogin() {
-            const provider = new firebase.auth.GoogleAuthProvider();
+            // 使用模組化導入的 GoogleAuthProvider 類別
+            const provider = new GoogleAuthProvider();
             googleLoginButton.disabled = true;
             googleLoginButton.innerHTML = '<i class="bi bi-hourglass"></i> 登錄中...';
             errorMessageDiv.style.display = 'none';
 
             try {
-                await auth.signInWithPopup(provider);
+                // 使用模組化導入的 signInWithPopup 函數
+                await signInWithPopup(auth, provider);
             } catch (error) {
                 console.error('Google 登錄錯誤:', error);
                 let customErrorMessage = 'Google 登錄失敗，請稍後再試。';
@@ -268,7 +281,8 @@
         async function handleLogout() {
             try {
                 if (auth) {
-                    await auth.signOut();
+                    // 使用模組化導入的 signOut 函數
+                    await signOut(auth);
                 }
             } catch (error) {
                 console.error('登出錯誤:', error);
@@ -281,70 +295,63 @@
             const idToken = sessionStorage.getItem('firebaseIdToken');
             if (!idToken) {
                 showError('未找到登入憑證，請重新登入。', 'labError');
-                await auth.signOut(); // 強制登出以清除無效狀態
+                // 使用模組化導入的 signOut 函數
+                await signOut(auth); 
                 return;
             }
 
-            // 禁用按鈕並顯示加載狀態
             labButton.disabled = true;
             labButton.innerHTML = '<i class="bi bi-hourglass"></i> 驗證中...';
             labErrorDiv.style.display = 'none';
 
             try {
-                // 向 Cloudflare Worker 發送 POST 請求
                 const workerResponse = await fetch('https://firebase-jwt-verify-worker.smit66476835.workers.dev/', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${idToken}`, // 將 Firebase ID Token 放入 Authorization 標頭
+                        'Authorization': `Bearer ${idToken}`, 
                         'Content-Type': 'application/json' 
                     },
-                    // Worker 現在從 Authorization header 讀取令牌，無需在 body 中傳遞
                 });
 
                 if (workerResponse.ok) {
-                    // 如果 Worker 返回成功響應 (HTTP 200 OK)
                     const data = await workerResponse.json();
                     console.log('Worker 驗證成功:', data);
                     
-                    // Worker 返回 serviceToken，將其儲存到 sessionStorage 供 Retool 使用
                     if (data.serviceToken) { 
                         sessionStorage.setItem('retoolAuthToken', data.serviceToken); 
                     } else {
                         console.warn('Worker response did not contain serviceToken.');
                     }
                     
-                    // 使用 Worker 返回的 redirectUrl 進行頁面跳轉 (成功時的目的地 URL)
                     if (data.redirectUrl) {
                         window.location.href = data.redirectUrl;
                     } else {
                         console.error('Worker response missing redirectUrl for success.');
                         showError('Worker response missing redirect URL for success.', 'labError');
-                        await auth.signOut(); // 如果沒有成功重定向 URL，則強制登出
+                        // 使用模組化導入的 signOut 函數
+                        await signOut(auth); 
                     }
 
                 } else {
-                    // 如果 Worker 返回非 200 狀態碼 (例如 401 Unauthorized, 500 Internal Server Error)
-                    const errorData = await workerResponse.json(); // 嘗試解析 JSON 錯誤響應
+                    const errorData = await workerResponse.json(); 
                     const errorMsg = errorData.error || `Error: ${workerResponse.status}`;
                     console.error('Worker 驗證失敗:', workerResponse.status, errorData);
                     showError(`訪問失敗: ${errorMsg}`, 'labError');
                     
-                    // 使用 Worker 返回的 redirectUrl 進行頁面跳轉 (失敗時的目的地 URL)
                     if (errorData.redirectUrl) {
                         window.location.href = errorData.redirectUrl;
                     } else {
-                        // 如果 Worker 沒有提供失敗重定向 URL，則默認跳轉回登錄頁
                         window.location.href = 'https://concierge-anywhere.com/control_center/user_login';
                     }
-                    await auth.signOut(); // 驗證失敗後強制登出
+                    // 使用模組化導入的 signOut 函數
+                    await signOut(auth); 
                 }
             } catch (error) {
-                // 處理網絡請求本身的錯誤 (例如斷網、Worker URL 無效等)
                 console.error('請求 Worker 失敗 (網絡錯誤或解析錯誤):', error);
                 showError('無法連接服務，請檢查網絡或稍後再試。', 'labError');
-                await auth.signOut(); // 請求失敗則強制登出
+                // 使用模組化導入的 signOut 函數
+                await signOut(auth); 
             } finally {
-                // 無論成功或失敗，最後都恢復按鈕狀態
                 labButton.disabled = false;
                 labButton.innerHTML = '<i class="bi bi-arrow-right-circle"></i> 進入我的實驗室';
             }
@@ -353,47 +360,43 @@
         // DOM 內容加載完成後初始化 Firebase 並綁定事件監聽器
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                auth = await initFirebase(); // 等待 Firebase 初始化完成
+                auth = await initFirebase(); 
                 
-                // 監聽 Firebase 認證狀態變化
-                auth.onAuthStateChanged(async (user) => {
+                // 使用模組化導入的 onAuthStateChanged 函數
+                onAuthStateChanged(auth, async (user) => {
                     if (user) {
-                        // 用戶已登錄
                         console.log('User signed in:', user.email || user.displayName || user.uid);
                         loginForm.style.display = 'none';
                         welcomeMessage.style.display = 'block';
-                        labButton.style.display = 'flex'; // 顯示進入實驗室按鈕
+                        labButton.style.display = 'flex'; 
                         userEmailSpan.textContent = user.email || user.displayName || user.uid;
 
                         try {
-                            // 獲取並儲存 Firebase ID Token
                             const idToken = await user.getIdToken();
                             sessionStorage.setItem('firebaseIdToken', idToken);
                             console.log('Firebase ID Token retrieved and stored in sessionStorage.');
                         } catch (tokenError) {
                             console.error('獲取 Firebase ID Token 失敗:', tokenError);
                             showError('登入成功，但無法獲取身份憑證，請嘗試重新登入。', 'errorMessage');
-                            await auth.signOut(); // 獲取 token 失敗則強制登出
+                            // 使用模組化導入的 signOut 函數
+                            await signOut(auth);
                         }
 
                     } else {
-                        // 用戶已登出
                         console.log('User signed out.');
                         loginForm.style.display = 'block';
                         welcomeMessage.style.display = 'none';
-                        labButton.style.display = 'none'; // 隱藏進入實驗室按鈕
-                        sessionStorage.removeItem('firebaseIdToken'); // 清除 sessionStorage 中的 token
-                        sessionStorage.removeItem('retoolAuthToken'); // 在登出時也清除 Retool token
+                        labButton.style.display = 'none'; 
+                        sessionStorage.removeItem('firebaseIdToken');
+                        sessionStorage.removeItem('retoolAuthToken'); 
                     }
                 });
 
-                // 綁定事件監聽器到按鈕
                 loginButton.addEventListener('click', handleLogin);
                 googleLoginButton.addEventListener('click', handleGoogleLogin);
                 logoutButton.addEventListener('click', handleLogout);
                 labButton.addEventListener('click', handleLabAccess);
                 
-                // 允許在密碼輸入框按 Enter 鍵觸發登錄
                 passwordInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') handleLogin();
                 });
