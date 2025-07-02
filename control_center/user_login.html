@@ -167,20 +167,17 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
     <script>
-        // 調試模式
         const DEBUG = true;
         function debugLog(...args) {
             if (DEBUG) console.log('[DEBUG]', ...args);
         }
 
-        // 狀態管理
         const App = {
             auth: null,
             currentUser: null,
             initialized: false
         };
 
-        // 安全獲取DOM元素
         function getElementSafe(id) {
             const element = document.getElementById(id);
             if (!element) {
@@ -189,7 +186,6 @@
             return element;
         }
 
-        // DOM 元素
         const UI = {
             loading: {
                 screen: getElementSafe('loading-screen'),
@@ -213,7 +209,6 @@
             }
         };
 
-        // 更新狀態指示器
         function updateStatus(step, status) {
             const icons = {
                 loading: '⏳',
@@ -228,7 +223,6 @@
             }
         }
 
-        // 顯示錯誤
         function showError(message, isFatal = false) {
             if (UI.loading.error) {
                 UI.loading.error.textContent = message;
@@ -240,7 +234,6 @@
             debugLog('Error:', message);
         }
 
-        // 顯示表單錯誤
         function showFormError(message) {
             if (UI.main.formError) {
                 UI.main.formError.textContent = message;
@@ -253,17 +246,14 @@
             }
         }
 
-        // 初始化 Firebase
         async function initializeFirebase() {
             try {
-                // 1. 檢查SDK是否加載
                 if (typeof firebase === 'undefined') {
                     throw new Error('Firebase SDK 未加載');
                 }
                 updateStatus('sdk', 'success');
                 debugLog('Firebase SDK loaded');
 
-                // 2. 獲取配置
                 updateStatus('config', 'loading');
                 const configResponse = await fetch('https://concierge-anywhere.com/firebase-config', {
                     cache: 'no-store',
@@ -280,14 +270,12 @@
                 updateStatus('config', 'success');
                 debugLog('Config loaded:', firebaseConfig);
 
-                // 3. 初始化應用
                 updateStatus('init', 'loading');
                 const app = firebase.initializeApp(firebaseConfig);
                 App.auth = firebase.auth();
                 App.initialized = true;
                 updateStatus('init', 'success');
 
-                // 切換到主界面
                 if (UI.loading.screen) UI.loading.screen.style.display = 'none';
                 if (UI.main.content) UI.main.content.style.display = 'block';
                 debugLog('Firebase initialized');
@@ -302,7 +290,6 @@
             }
         }
 
-        // 處理登錄
         async function handleLogin() {
             if (!App.initialized) {
                 showFormError('系統未準備好，請稍後重試');
@@ -312,7 +299,6 @@
             const email = UI.main.emailInput ? UI.main.emailInput.value.trim() : '';
             const password = UI.main.passwordInput ? UI.main.passwordInput.value.trim() : '';
 
-            // 輸入驗證
             if (!email || !password) {
                 showFormError('請輸入電子郵件和密碼');
                 return;
@@ -354,7 +340,6 @@
             }
         }
 
-        // 處理登出
         async function handleLogout() {
             try {
                 await App.auth.signOut();
@@ -365,7 +350,6 @@
             }
         }
 
-        // 處理實驗室訪問
         async function handleLabAccess() {
             if (!App.currentUser) {
                 showFormError('請先登入');
@@ -381,19 +365,16 @@
                 const idToken = await App.currentUser.getIdToken();
                 debugLog('Sending token to worker');
                 
-                // --- 開始修改 ---
                 const response = await fetch('https://firebase-jwt-verify-worker.smit66476835.workers.dev', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${idToken}`, // 如果 Worker 也在標頭中驗證，可以保留
+                        'Authorization': `Bearer ${idToken}`,
                         'Content-Type': 'application/json',
                         'Origin': 'https://concierge-anywhere.com'
                     },
-                    // 將 idToken 作為 JSON 主體發送
                     body: JSON.stringify({ idToken: idToken }),
                     credentials: 'omit'
                 });
-                // --- 結束修改 ---
 
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
@@ -425,7 +406,6 @@
             }
         }
 
-        // 設置認證狀態監聽
         function setupAuthListener() {
             App.auth.onAuthStateChanged(user => {
                 App.currentUser = user;
@@ -444,23 +424,19 @@
             });
         }
 
-        // 設置事件監聽器
         function setupEventListeners() {
-            // 重試按鈕
             if (UI.loading.retryBtn) {
                 UI.loading.retryBtn.addEventListener('click', () => {
                     location.reload();
                 });
             }
 
-            // 密碼輸入框回車事件
             if (UI.main.passwordInput) {
                 UI.main.passwordInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') handleLogin();
                 });
             }
 
-            // 使用事件委託處理按鈕點擊
             document.addEventListener('click', function(e) {
                 if (!UI.main.loginButton || !UI.main.logoutButton || !UI.main.labButton) return;
                 
@@ -476,7 +452,6 @@
             });
         }
 
-        // 啟動應用
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 debugLog('DOM fully loaded');
