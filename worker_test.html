@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worker Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        button { padding: 10px 20px; margin: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <button onclick="testWorker()">Worker Test</button>
+
+    <script>
+        async function testWorker() {
+            try {
+                const response = await fetch('https://test-access-service-token-worker.smit66476835.workers.dev');
+                const result = await response.text();
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write(`
+                    <html>
+                    <head><title>Worker Test Result</title></head>
+                    <body>
+                        <h2>Worker Test Result</h2>
+                        <p>${result}</p>
+                    </body>
+                    </html>
+                `);
+            } catch (error) {
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write(`
+                    <html>
+                    <head><title>Worker Test Error</title></head>
+                    <body>
+                        <h2>Worker Test Error</h2>
+                        <p>Error: ${error.message}</p>
+                    </body>
+                    </html>
+                `);
+            }
+        }
+    </script>
+</body>
+</html>
