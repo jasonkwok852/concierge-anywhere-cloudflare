@@ -268,17 +268,12 @@
         async function handleLogout() {
             try {
                 await signOut(auth);
-                // onAuthStateChanged 會處理 UI 更新
             } catch (error) {
                 console.error('登出失敗:', error);
                 showError('登出失敗，請稍後再試。', 'errorMessage');
             }
         }
 
-        /**
-         * 處理重定向到實驗室，現在包含向 Worker 發送 JWT。
-         * Worker 將處理代理並返回目標頁面的內容。
-         */
         async function handleLabAccess() {
             const idToken = sessionStorage.getItem('firebaseIdToken');
             if (!idToken) {
@@ -291,11 +286,9 @@
             labButton.innerHTML = '<i class="bi bi-hourglass"></i> 驗證中...';
             labErrorDiv.style.display = 'none';
 
-            // 設定您期望的最終目的地 URL
             const finalDestinationUrl = 'https://concierge-anywhere.com/private_room/my_laboratory';
 
             try {
-                // 向您的 Cloudflare Worker 發送 GET 請求以驗證 JWT
                 const workerResponse = await fetch('https://firebase-jwt-verify-worker.smit66476835.workers.dev', {
                     method: 'GET', 
                     headers: {
@@ -304,10 +297,7 @@
                 });
 
                 if (workerResponse.ok) {
-                    // 如果 Worker 成功響應 (200 OK)，表示它已成功驗證 JWT 並內部成功訪問了目標。
-                    // 此時，由前端執行導航到最終目的地 URL。
-                    window.location.href = finalDestinationUrl; // <-- 關鍵修改在這裡
-
+                    window.location.href = finalDestinationUrl; 
                 } else {
                     let errorMessage = '未知錯誤';
                     const contentType = workerResponse.headers.get('Content-Type');
