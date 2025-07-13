@@ -300,8 +300,24 @@
                     window.location.href = 'https://firebase-jwt-verify-worker.smit66476835.workers.dev/';
 
                 } else {
-                    const errorData = await workerResponse.json();
-                    const errorMessage = errorData.message || errorData.error || '未知錯誤';
+                    let errorMessage = '未知錯誤';
+                    // 嘗試判斷響應是否為 JSON
+                    const contentType = workerResponse.headers.get('Content-Type');
+                    if (contentType && contentType.includes('application/json')) {
+                        try {
+                            const errorData = await workerResponse.json();
+                            errorMessage = errorData.message || errorData.error || `Worker 返回 JSON 錯誤 (狀態碼: ${workerResponse.status})`;
+                        } catch (jsonError) {
+                            // 如果預期是 JSON 但解析失敗
+                            console.error('Worker 返回非預期 JSON 格式:', jsonError);
+                            errorMessage = `服務器錯誤 (狀態碼: ${workerResponse.status})：無法解析響應內容。`;
+                        }
+                    } else {
+                        // 如果不是 JSON，嘗試讀取為文本
+                        const errorText = await workerResponse.text();
+                        errorMessage = `服務器錯誤 (狀態碼: ${workerResponse.status})：${errorText.substring(0, 200) || '無響應內容'}`; // 截斷避免過長
+                    }
+                    
                     console.error('Worker 驗證或代理失敗:', workerResponse.status, errorMessage);
                     showError(`訪問失敗: ${errorMessage}`, 'labError');
                     // 如果驗證失敗，強制登出
