@@ -282,16 +282,13 @@
             labErrorDiv.style.display = 'none';
 
             try {
-                // 向您的 Cloudflare Worker 發送 POST 請求以驗證 JWT
-                // Worker 將會代理請求並返回私有實驗室的內容
+                // 向您的 Cloudflare Worker 發送 GET 請求以驗證 JWT 並獲取頁面內容
                 const workerResponse = await fetch('https://firebase-jwt-verify-worker.smit66476835.workers.dev', {
-                    method: 'POST',
+                    method: 'GET', // <-- 將方法從 'POST' 改為 'GET'
                     headers: {
-                        'Authorization': `Bearer ${idToken}`, // 將 Firebase ID Token 放入 Authorization 標頭
-                        'Content-Type': 'application/json' 
+                        'Authorization': `Bearer ${idToken}` // JWT 仍需傳遞
+                        // 'Content-Type': 'application/json' // GET 請求通常不需要 Content-Type
                     },
-                    // 如果有需要傳遞額外 body 給代理的目標URL，可以在這裡添加
-                    // body: JSON.stringify({ /* your data */ }) 
                 });
 
                 if (workerResponse.ok) {
@@ -301,26 +298,22 @@
 
                 } else {
                     let errorMessage = '未知錯誤';
-                    // 嘗試判斷響應是否為 JSON
                     const contentType = workerResponse.headers.get('Content-Type');
                     if (contentType && contentType.includes('application/json')) {
                         try {
                             const errorData = await workerResponse.json();
                             errorMessage = errorData.message || errorData.error || `Worker 返回 JSON 錯誤 (狀態碼: ${workerResponse.status})`;
                         } catch (jsonError) {
-                            // 如果預期是 JSON 但解析失敗
                             console.error('Worker 返回非預期 JSON 格式:', jsonError);
                             errorMessage = `服務器錯誤 (狀態碼: ${workerResponse.status})：無法解析響應內容。`;
                         }
                     } else {
-                        // 如果不是 JSON，嘗試讀取為文本
                         const errorText = await workerResponse.text();
-                        errorMessage = `服務器錯誤 (狀態碼: ${workerResponse.status})：${errorText.substring(0, 200) || '無響應內容'}`; // 截斷避免過長
+                        errorMessage = `服務器錯誤 (狀態碼: ${workerResponse.status})：${errorText.substring(0, 200) || '無響應內容'}`;
                     }
                     
                     console.error('Worker 驗證或代理失敗:', workerResponse.status, errorMessage);
                     showError(`訪問失敗: ${errorMessage}`, 'labError');
-                    // 如果驗證失敗，強制登出
                     await signOut(auth);
                 }
             } catch (error) {
@@ -329,17 +322,6 @@
             } finally {
                 labButton.disabled = false;
                 labButton.innerHTML = '<i class="bi bi-arrow-right-circle"></i> 進入我的實驗室';
-            }
-        }
-
-        async function handleLogout() {
-            try {
-                if (auth) {
-                    await signOut(auth);
-                }
-            } catch (error) {
-                console.error('登出錯誤:', error);
-                showError('登出失敗: ' + error.message);
             }
         }
 
