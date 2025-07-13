@@ -267,6 +267,7 @@
 
         /**
          * 處理重定向到實驗室，現在包含向 Worker 發送 JWT。
+         * Worker 將處理代理並返回目標頁面的內容。
          */
         async function handleLabAccess() {
             const idToken = sessionStorage.getItem('firebaseIdToken');
@@ -282,23 +283,26 @@
 
             try {
                 // 向您的 Cloudflare Worker 發送 POST 請求以驗證 JWT
+                // Worker 將會代理請求並返回私有實驗室的內容
                 const workerResponse = await fetch('https://firebase-jwt-verify-worker.smit66476835.workers.dev', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${idToken}`, // 將 Firebase ID Token 放入 Authorization 標頭
                         'Content-Type': 'application/json' 
                     },
+                    // 如果有需要傳遞額外 body 給代理的目標URL，可以在這裡添加
+                    // body: JSON.stringify({ /* your data */ }) 
                 });
 
                 if (workerResponse.ok) {
-                    const data = await workerResponse.json();
-                    console.log('Worker 驗證成功:', data.message);
-                    // Worker 驗證成功後，由前端執行重定向
-                    window.location.href = 'https://concierge-anywhere.com/private_room/my_laboratory'; // 目的地 URL
+                    // 如果 Worker 成功響應 (200 OK)，表示它已成功代理並返回了內容。
+                    // 直接導航到 Worker 的 URL，讓瀏覽器處理 Worker 返回的內容。
+                    window.location.href = 'https://firebase-jwt-verify-worker.smit66476835.workers.dev/';
+
                 } else {
                     const errorData = await workerResponse.json();
                     const errorMessage = errorData.message || errorData.error || '未知錯誤';
-                    console.error('Worker 驗證失敗:', workerResponse.status, errorMessage);
+                    console.error('Worker 驗證或代理失敗:', workerResponse.status, errorMessage);
                     showError(`訪問失敗: ${errorMessage}`, 'labError');
                     // 如果驗證失敗，強制登出
                     await signOut(auth);
