@@ -265,7 +265,6 @@
             }
         }
 
-        // --- 新增 handleLogout 函數 ---
         async function handleLogout() {
             try {
                 await signOut(auth);
@@ -275,7 +274,6 @@
                 showError('登出失敗，請稍後再試。', 'errorMessage');
             }
         }
-        // --- 結束新增 handleLogout 函數 ---
 
         /**
          * 處理重定向到實驗室，現在包含向 Worker 發送 JWT。
@@ -293,21 +291,22 @@
             labButton.innerHTML = '<i class="bi bi-hourglass"></i> 驗證中...';
             labErrorDiv.style.display = 'none';
 
+            // 設定您期望的最終目的地 URL
+            const finalDestinationUrl = 'https://concierge-anywhere.com/private_room/my_laboratory';
+
             try {
-                // 向您的 Cloudflare Worker 發送 GET 請求以驗證 JWT 並獲取頁面內容
+                // 向您的 Cloudflare Worker 發送 GET 請求以驗證 JWT
                 const workerResponse = await fetch('https://firebase-jwt-verify-worker.smit66476835.workers.dev', {
-                    method: 'GET', // <-- 將方法從 'POST' 改為 'GET'
+                    method: 'GET', 
                     headers: {
-                        'Authorization': `Bearer ${idToken}` // JWT 仍需傳遞
-                        // 'Content-Type': 'application/json' // GET 請求通常不需要 Content-Type
+                        'Authorization': `Bearer ${idToken}` 
                     },
                 });
 
                 if (workerResponse.ok) {
-                    // 如果 Worker 成功響應 (200 OK)，表示它已成功代理並返回了內容。
-                    // 直接導航到 Worker 的 URL，讓瀏覽器處理 Worker 返回的內容。
-                    // 這裡的導航會替換整個頁面內容為 Worker 代理獲取的頁面。
-                    window.location.href = 'https://firebase-jwt-verify-worker.smit66476835.workers.dev/';
+                    // 如果 Worker 成功響應 (200 OK)，表示它已成功驗證 JWT 並內部成功訪問了目標。
+                    // 此時，由前端執行導航到最終目的地 URL。
+                    window.location.href = finalDestinationUrl; // <-- 關鍵修改在這裡
 
                 } else {
                     let errorMessage = '未知錯誤';
@@ -327,7 +326,7 @@
                     
                     console.error('Worker 驗證或代理失敗:', workerResponse.status, errorMessage);
                     showError(`訪問失敗: ${errorMessage}`, 'labError');
-                    await signOut(auth); // 驗證失敗時自動登出
+                    await signOut(auth); 
                 }
             } catch (error) {
                 console.error('請求 Worker 失敗:', error);
@@ -371,7 +370,7 @@
 
                 loginButton.addEventListener('click', handleLogin);
                 googleLoginButton.addEventListener('click', handleGoogleLogin);
-                logoutButton.addEventListener('click', handleLogout); // 現在 handleLogout 已定義
+                logoutButton.addEventListener('click', handleLogout); 
                 labButton.addEventListener('click', handleLabAccess);
                 
                 passwordInput.addEventListener('keypress', (e) => {
@@ -380,7 +379,6 @@
 
             } catch (error) {
                 console.error('頁面初始化錯誤:', error);
-                // 這裡的錯誤應該會被 initFirebase 捕獲並顯示
             }
         });
     </script>
