@@ -24,131 +24,170 @@
             font-family: 'Noto Sans HK', sans-serif;
             background-color: var(--bg-color);
             margin: 0;
-            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            color: var(--main-color);
+            line-height: 1.6;
         }
 
-        .login-container {
-            width: 90%;
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
             max-width: 400px;
-            margin: 20px auto;
-            padding: 2rem;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .login-input {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
+            text-align: center;
             border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 1rem;
         }
 
-        .login-button {
+        h2 {
+            color: var(--main-color);
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--secondary-color);
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 12px 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color var(--transition);
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+
+        button {
             width: 100%;
             padding: 12px;
-            margin: 16px 0;
-            background-color: var(--main-color);
-            color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: 700;
             cursor: pointer;
-            font-size: 1rem;
-            transition: var(--transition);
+            transition: background-color var(--transition), color var(--transition);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
         }
 
-        .login-button:hover {
+        .login-btn {
+            background-color: var(--main-color);
+            color: #fff;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            background-color: var(--button-hover-color);
+        }
+
+        .google-login-btn {
+            background-color: #db4437; /* Google red */
+            color: #fff;
+            margin-top: 15px;
+        }
+
+        .google-login-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .logout-btn {
+            background-color: #f44336; /* Red for logout */
+            color: #fff;
+            margin-top: 20px;
+        }
+
+        .logout-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        .lab-btn {
             background-color: var(--secondary-color);
-            transform: translateY(-2px);
+            color: #fff;
+            margin-top: 20px;
+        }
+
+        .lab-btn:hover {
+            background-color: var(--button-hover-color);
         }
 
         .error-message {
-            color: #d32f2f;
-            text-align: center;
-            margin: 10px 0;
+            color: #d9534f;
+            margin-top: 10px;
+            font-size: 14px;
             display: none;
         }
 
-        #googleLoginButton {
-            background-color: #DB4437;
-            margin-top: 5px;
+        .success-message {
+            color: #5cb85c;
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
         }
 
-        #googleLoginButton:hover {
-            background-color: #C23321;
+        #welcomeMessage, #labButton {
+            display: none;
+            flex-direction: column;
+            align-items: center;
         }
 
-        #labButton {
-            background-color: var(--accent-color);
-            color: var(--header-bg);
-            border: 2px solid var(--header-bg);
+        #welcomeMessage p {
+            font-size: 18px;
+            font-weight: 500;
             margin-bottom: 20px;
-            width: 220px;
-            padding: 10px 20px;
-            font-size: 1rem;
-            display: none;
         }
 
-        #labButton:hover {
-            background-color: var(--header-bg);
+        #userEmail {
+            font-weight: 700;
             color: var(--accent-color);
-        }
-
-        #welcomeMessage, #labAccess {
-            display: none;
-            text-align: center;
-        }
-
-        #loading {
-            text-align: center;
-            color: #666;
-            padding: 20px;
         }
     </style>
 </head>
 <body>
-    <div id="loading">正在載入 Firebase 設定...</div>
-
-    <button id="labButton" class="login-button">
-        <i class="bi bi-arrow-right-circle"></i> 進入我的實驗室
-    </button>
-
-    <div class="login-container">
-        <h1 style="text-align: center; color: var(--main-color);">用戶登錄</h1>
-        
+    <div class="container">
         <div id="loginForm">
-            <input type="email" id="emailInput" class="login-input" placeholder="電子郵件" required>
-            <input type="password" id="passwordInput" class="login-input" placeholder="密碼" required>
-            <button id="loginButton" class="login-button">
-                <i class="bi bi-box-arrow-in-right"></i> 登錄
-            </button>
-            <button id="googleLoginButton" class="login-button">
-                <i class="bi bi-google"></i> 使用 Google 登錄
-            </button>
-            <p id="errorMessage" class="error-message"></p>
+            <h2>用戶登錄</h2>
+            <div class="input-group">
+                <label for="email">電子郵件</label>
+                <input type="email" id="email" placeholder="輸入您的電子郵件">
+            </div>
+            <div class="input-group">
+                <label for="password">密碼</label>
+                <input type="password" id="password" placeholder="輸入您的密碼">
+            </div>
+            <p id="loginError" class="error-message"></p>
+            <button id="loginButton" class="login-btn"><i class="bi bi-box-arrow-in-right"></i> 登錄</button>
+            <button id="googleLoginButton" class="google-login-btn"><i class="bi bi-google"></i> 使用 Google 登錄</button>
         </div>
 
         <div id="welcomeMessage">
-            <p>歡迎，<span id="userEmail"></span></p>
-            <button id="logoutButton" class="login-button">
-                <i class="bi bi-box-arrow-right"></i> 登出
-            </button>
-        </div>
-
-        <div id="labAccess">
+            <p>歡迎您，<span id="userEmail"></span>！</p>
+            <button id="logoutButton" class="logout-btn"><i class="bi bi-box-arrow-right"></i> 登出</button>
             <p id="labError" class="error-message"></p>
         </div>
+        
+        <button id="labButton" class="lab-btn"><i class="bi bi-arrow-right-circle"></i> 進入我的實驗室</button>
     </div>
 
     <script type="module">
@@ -164,75 +203,72 @@
             signInWithPopup 
         } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 
-        const loadingDiv = document.getElementById('loading');
-        const loginForm = document.getElementById('loginForm');
-        const welcomeMessage = document.getElementById('welcomeMessage');
-        const labButton = document.getElementById('labButton');
-        const userEmailSpan = document.getElementById('userEmail');
-        const errorMessageDiv = document.getElementById('errorMessage');
-        const labErrorDiv = document.getElementById('labError');
-        const emailInput = document.getElementById('emailInput');
-        const passwordInput = document.getElementById('passwordInput');
-        const loginButton = document.getElementById('loginButton');
-        const googleLoginButton = document.getElementById('googleLoginButton');
-        const logoutButton = document.getElementById('logoutButton');
+        // Firebase 配置 - 請替換為您的實際配置
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY", // 替換為您的 API Key
+            authDomain: "cloudflare-concierge-anywhere.firebaseapp.com",
+            projectId: "cloudflare-concierge-anywhere", // 您的 Firebase 專案 ID
+            storageBucket: "cloudflare-concierge-anywhere.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
 
         let auth;
 
-        async function initFirebase() {
-            try {
-                const response = await fetch('/firebase-config');
-                if (!response.ok) {
-                    throw new Error('無法獲取Firebase配置');
-                }
-                
-                const firebaseConfig = await response.json();
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app); 
-                
-                loadingDiv.style.display = 'none';
-                return auth;
-            } catch (error) {
-                console.error('Firebase初始化失敗:', error);
-                showError('系統初始化失敗，請刷新頁面');
-                loadingDiv.textContent = '系統初始化失敗。';
-                throw error;
-            }
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginButton = document.getElementById('loginButton');
+        const googleLoginButton = document.getElementById('googleLoginButton');
+        const logoutButton = document.getElementById('logoutButton');
+        const labButton = document.getElementById('labButton');
+        const loginForm = document.getElementById('loginForm');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const userEmailSpan = document.getElementById('userEmail');
+        const loginErrorDiv = document.getElementById('loginError');
+        const labErrorDiv = document.getElementById('labError');
+
+        function showError(message, elementId) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
         }
 
-        function showError(message, elementId = 'errorMessage') {
-            const element = document.getElementById(elementId);
-            element.textContent = message;
-            element.style.display = 'block';
-            setTimeout(() => {
-                element.style.display = 'none';
-            }, 5000);
+        function clearErrors() {
+            loginErrorDiv.style.display = 'none';
+            labErrorDiv.style.display = 'none';
+        }
+
+        async function initFirebase() {
+            const app = initializeApp(firebaseConfig);
+            return getAuth(app);
         }
 
         async function handleLogin() {
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
-            
+            clearErrors();
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
             if (!email || !password) {
-                showError('請輸入電子郵件和密碼');
+                showError('請輸入電子郵件和密碼', 'loginError');
                 return;
             }
 
-            loginButton.disabled = true;
-            loginButton.innerHTML = '<i class="bi bi-hourglass"></i> 登錄中...';
-            errorMessageDiv.style.display = 'none';
-
             try {
+                loginButton.disabled = true;
+                loginButton.innerHTML = '<i class="bi bi-hourglass"></i> 登錄中...';
                 await signInWithEmailAndPassword(auth, email, password);
+                // onAuthStateChanged 會處理 UI 更新
             } catch (error) {
-                console.error('登錄錯誤:', error);
-                const errorMap = {
-                    'auth/invalid-email': '電子郵件格式不正確',
-                    'auth/user-not-found': '找不到此帳號',
-                    'auth/wrong-password': '密碼錯誤',
-                    'auth/invalid-credential': '電子郵件或密碼不正確'
-                };
-                showError(errorMap[error.code] || '登錄失敗，請檢查電子郵件和密碼');
+                console.error('登錄失敗:', error);
+                let errorMessage = '登錄失敗，請檢查您的電子郵件和密碼。';
+                if (error.code === 'auth/wrong-password') {
+                    errorMessage = '密碼錯誤。';
+                } else if (error.code === 'auth/user-not-found') {
+                    errorMessage = '用戶不存在。';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = '無效的電子郵件格式。';
+                }
+                showError(errorMessage, 'loginError');
             } finally {
                 loginButton.disabled = false;
                 loginButton.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> 登錄';
@@ -240,16 +276,16 @@
         }
 
         async function handleGoogleLogin() {
-            const provider = new GoogleAuthProvider();
-            googleLoginButton.disabled = true;
-            googleLoginButton.innerHTML = '<i class="bi bi-hourglass"></i> 登錄中...';
-            errorMessageDiv.style.display = 'none';
-
+            clearErrors();
             try {
+                googleLoginButton.disabled = true;
+                googleLoginButton.innerHTML = '<i class="bi bi-hourglass"></i> 登錄中...';
+                const provider = new GoogleAuthProvider();
                 await signInWithPopup(auth, provider);
+                // onAuthStateChanged 會處理 UI 更新
             } catch (error) {
-                console.error('Google 登錄錯誤:', error);
-                showError('Google 登錄失敗，請稍後再試');
+                console.error('Google 登錄失敗:', error);
+                showError('Google 登錄失敗，請重試。', 'loginError');
             } finally {
                 googleLoginButton.disabled = false;
                 googleLoginButton.innerHTML = '<i class="bi bi-google"></i> 使用 Google 登錄';
@@ -259,9 +295,11 @@
         async function handleLogout() {
             try {
                 await signOut(auth);
+                // onAuthStateChanged 會處理 UI 更新
+                console.log('用戶已登出');
             } catch (error) {
                 console.error('登出失敗:', error);
-                showError('登出失敗，請稍後再試');
+                alert('登出失敗，請重試。');
             }
         }
 
@@ -280,7 +318,7 @@
                 const idToken = await user.getIdToken();
                 console.log('獲取到的ID Token:', idToken.substring(0, 20) + '...');
 
-                // 使用新的端點進行驗證
+                // 調用您的驗證 Worker
                 const response = await fetch('https://firebase-jwt-verify-worker.smit66476835.workers.dev/verify-token', {
                     method: 'POST',
                     headers: {
@@ -295,13 +333,14 @@
                 const result = await response.json();
                 console.log('驗證結果:', result);
 
+                // 根據 Worker 返回的 verified 狀態進行導航
                 if (response.ok && result.verified) {
-                    // 使用新開頁面方式避免 CORS 限制
-                    window.open(result.redirect_url, '_self');
+                    // 使用 Worker 返回的 redirect_url 進行導航
+                    window.open(result.redirect_url, '_self'); 
                 } else {
                     showError(result.message || '驗證失敗', 'labError');
                     if (response.status === 401) {
-                        await signOut(auth);
+                        await signOut(auth); // 如果是認證失敗，自動登出
                     }
                 }
             } catch (error) {
