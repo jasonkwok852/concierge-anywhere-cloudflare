@@ -203,15 +203,8 @@
             signInWithPopup 
         } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 
-        // Firebase 配置 - 請替換為您的實際配置
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY", // 替換為您的 API Key
-            authDomain: "cloudflare-concierge-anywhere.firebaseapp.com",
-            projectId: "cloudflare-concierge-anywhere", // 您的 Firebase 專案 ID
-            storageBucket: "cloudflare-concierge-anywhere.appspot.com",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
+        // 從指定 URL 動態載入 Firebase 配置
+        const FIREBASE_CONFIG_URL = 'https://concierge-anywhere.com/firebase-config';
 
         let auth;
 
@@ -239,8 +232,19 @@
         }
 
         async function initFirebase() {
-            const app = initializeApp(firebaseConfig);
-            return getAuth(app);
+            try {
+                const response = await fetch(FIREBASE_CONFIG_URL);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch Firebase config: ${response.statusText}`);
+                }
+                const firebaseConfig = await response.json();
+                const app = initializeApp(firebaseConfig);
+                return getAuth(app);
+            } catch (error) {
+                console.error('初始化 Firebase 失敗:', error);
+                showError('無法載入 Firebase 配置，請稍後再試。', 'loginError');
+                throw error; // 重新拋出錯誤，阻止後續操作
+            }
         }
 
         async function handleLogin() {
@@ -354,7 +358,7 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                auth = await initFirebase();
+                auth = await initFirebase(); // 動態獲取配置後初始化 Firebase
                 
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
@@ -382,6 +386,7 @@
 
             } catch (error) {
                 console.error('頁面初始化錯誤:', error);
+                // 這裡可以選擇是否顯示一個全局錯誤訊息，如果 initFirebase 失敗
             }
         });
     </script>
