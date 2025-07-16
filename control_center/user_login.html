@@ -102,15 +102,7 @@
             background-color: var(--button-hover-color);
         }
 
-        .google-login-btn {
-            background-color: #db4437; /* Google red */
-            color: #fff;
-            margin-top: 15px;
-        }
-
-        .google-login-btn:hover {
-            background-color: #c0392b;
-        }
+        /* 移除了 .google-login-btn 相關樣式，因為按鈕已刪除 */
 
         .logout-btn {
             background-color: #f44336; /* Red for logout */
@@ -178,8 +170,7 @@
             </div>
             <p id="loginError" class="error-message"></p>
             <button id="loginButton" class="login-btn"><i class="bi bi-box-arrow-in-right"></i> 登錄</button>
-            <button id="googleLoginButton" class="google-login-btn"><i class="bi bi-google"></i> 使用 Google 登錄</button>
-        </div>
+            </div>
 
         <div id="welcomeMessage">
             <p>歡迎您，<span id="userEmail"></span>！</p>
@@ -198,9 +189,8 @@
             getAuth, 
             signInWithEmailAndPassword, 
             signOut, 
-            onAuthStateChanged,
-            GoogleAuthProvider,
-            signInWithPopup 
+            onAuthStateChanged
+            // 移除了 GoogleAuthProvider, signInWithPopup
         } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 
         // 從指定 URL 動態載入 Firebase 配置
@@ -211,7 +201,7 @@
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
         const loginButton = document.getElementById('loginButton');
-        const googleLoginButton = document.getElementById('googleLoginButton');
+        // 移除了 googleLoginButton 相關的宣告
         const logoutButton = document.getElementById('logoutButton');
         const labButton = document.getElementById('labButton');
         const loginForm = document.getElementById('loginForm');
@@ -279,22 +269,7 @@
             }
         }
 
-        async function handleGoogleLogin() {
-            clearErrors();
-            try {
-                googleLoginButton.disabled = true;
-                googleLoginButton.innerHTML = '<i class="bi bi-hourglass"></i> 登錄中...';
-                const provider = new GoogleAuthProvider();
-                await signInWithPopup(auth, provider);
-                // onAuthStateChanged 會處理 UI 更新
-            } catch (error) {
-                console.error('Google 登錄失敗:', error);
-                showError('Google 登錄失敗，請重試。', 'loginError');
-            } finally {
-                googleLoginButton.disabled = false;
-                googleLoginButton.innerHTML = '<i class="bi bi-google"></i> 使用 Google 登錄';
-            }
-        }
+        // 已刪除 handleGoogleLogin 函數
 
         async function handleLogout() {
             try {
@@ -376,7 +351,7 @@
                 });
 
                 loginButton.addEventListener('click', handleLogin);
-                googleLoginButton.addEventListener('click', handleGoogleLogin);
+                // 移除了 googleLoginButton 的事件監聽器
                 logoutButton.addEventListener('click', handleLogout);
                 labButton.addEventListener('click', handleLabAccess);
                 
