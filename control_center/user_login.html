@@ -288,7 +288,7 @@
                 const idToken = await user.getIdToken();
                 console.log('獲取到的ID Token:', idToken.substring(0, 20) + '...');
 
-                const response = await fetch('https://concierge-anywhere.com/functions/firebase_jwt_verify/verify-and-set-cookie', {
+                const response = await fetch('https://concierge-anywhere.com/firebase_jwt_verify', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
