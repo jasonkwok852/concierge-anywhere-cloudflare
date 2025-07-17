@@ -169,6 +169,7 @@
         const errorMessage = document.getElementById('errorMessage');
         const FIREBASE_CONFIG_URL = 'https://concierge-anywhere.com/firebase_config';
         const VERIFY_URL = 'https://concierge-anywhere.com/firebase_jwt_verify';
+        const LAB_URL = 'https://concierge-anywhere.com/control_center/private_room';
 
         async function initFirebase() {
             try {
@@ -200,7 +201,12 @@
             hideError();
 
             try {
-                await signInWithEmailAndPassword(auth, email, password);
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const idToken = await userCredential.user.getIdToken();
+                
+                // 設置 Cookie
+                document.cookie = `firebase_jwt=${idToken}; path=/; max-age=3600; secure; samesite=lax`;
+                
             } catch (error) {
                 console.error("登入失敗:", error);
                 handleLoginError(error);
@@ -232,6 +238,9 @@
         }
 
         function handleLogout() {
+            // 清除 Cookie
+            document.cookie = 'firebase_jwt=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            
             signOut(auth).catch(error => {
                 console.error("登出失敗:", error);
                 showError('登出時發生錯誤');
@@ -246,38 +255,15 @@
             }
             
             labButton.disabled = true;
-            labButton.innerHTML = '<span class="spinner"></span> 驗證中...';
+            labButton.innerHTML = '<span class="spinner"></span> 進入中...';
             hideError();
 
             try {
-                const idToken = await user.getIdToken();
-                const response = await fetch(VERIFY_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${idToken}`
-                    },
-                    body: JSON.stringify({ idToken })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || '驗證請求失敗');
-                }
-
-                const result = await response.json();
-                
-                if (result.verified && result.redirect_url) {
-                    window.location.href = result.redirect_url;
-                } else {
-                    throw new Error(result.message || '驗證失敗');
-                }
+                // 直接跳轉到實驗室頁面，由後端驗證 Cookie
+                window.location.href = LAB_URL;
             } catch (error) {
                 console.error('實驗室存取錯誤:', error);
-                showError(error.message || '無法進入實驗室');
-                
-                // 如果驗證失敗，強制登出以清除可能無效的狀態
-                handleLogout();
+                showError('無法進入實驗室');
             } finally {
                 labButton.disabled = false;
                 labButton.innerHTML = '<i class="bi bi-arrow-right-circle"></i> 進入我的實驗室';
@@ -293,9 +279,27 @@
             errorMessage.style.display = 'none';
         }
 
+        function checkExistingSession() {
+            const cookies = document.cookie.split(';');
+            const tokenCookie = cookies.find(c => c.trim().startsWith('firebase_jwt='));
+            
+            if (tokenCookie) {
+                const token = tokenCookie.split('=')[1];
+                if (token) {
+                    // 如果有有效的 Cookie，顯示歡迎訊息
+                    loginForm.style.display = 'none';
+                    welcomeMessage.style.display = 'block';
+                    userEmailSpan.textContent = '用戶'; // 從 Cookie 無法獲取 email，需從後端獲取
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 auth = await initFirebase();
+                
+                // 檢查現有會話
+                checkExistingSession();
                 
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
