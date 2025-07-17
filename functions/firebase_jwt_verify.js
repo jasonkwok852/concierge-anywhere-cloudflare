@@ -63,7 +63,7 @@ export const onRequest = async ({ request, env, next }) => {
         });
     }
 
-    if (path === '/functions/firebase_jwt_verify/verify-and-set-cookie' && request.method === 'POST') {
+    if (path === '/firebase_jwt_verify' && request.method === 'POST') {
         try {
             const { idToken } = await request.json();
             if (!idToken) {
