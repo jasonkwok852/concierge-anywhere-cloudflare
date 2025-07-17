@@ -8,11 +8,96 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    
     <link rel="stylesheet" href="https://concierge-anywhere.com/project_css.css" />
-
-    <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-auth-compat.js"></script>
+    
+    <style>
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .login-container {
+            max-width: 500px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .login-btn, .logout-btn, .lab-btn {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .login-btn {
+            background-color: #23396C;
+            color: white;
+        }
+        
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .lab-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .error-message {
+            color: #dc3545;
+            margin: 1rem 0;
+            display: none;
+        }
+        
+        .welcomeMessage {
+            display: none;
+            text-align: center;
+        }
+        
+        #userEmailSpan {
+            color: #23396C;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -35,7 +120,6 @@
         <div class="login-container">
             <div class="login-form" id="loginForm">
                 <h2>用戶登入</h2>
-                <div id="firebaseui-auth-container"></div>
                 <div class="input-group">
                     <label for="emailInput">電郵地址</label>
                     <input type="email" id="emailInput" placeholder="請輸入電郵地址" required>
@@ -84,7 +168,6 @@
         const labButton = document.getElementById('labButton');
         const errorMessage = document.getElementById('errorMessage');
         const FIREBASE_CONFIG_URL = 'https://concierge-anywhere.com/firebase_config';
-        // 將驗證 URL 更新為同網域的路徑
         const VERIFY_URL = 'https://concierge-anywhere.com/firebase_jwt_verify';
 
         async function initFirebase() {
@@ -98,15 +181,17 @@
                 return getAuth(app);
             } catch (error) {
                 console.error("Firebase 初始化錯誤:", error);
+                showError('無法初始化登入系統，請刷新頁面重試');
                 throw error;
             }
         }
 
         async function handleLogin() {
-            const email = emailInput.value;
+            const email = emailInput.value.trim();
             const password = passwordInput.value;
+            
             if (!email || !password) {
-                showError('請輸入電郵和密碼。');
+                showError('請輸入電郵和密碼');
                 return;
             }
 
@@ -118,61 +203,81 @@
                 await signInWithEmailAndPassword(auth, email, password);
             } catch (error) {
                 console.error("登入失敗:", error);
-                switch (error.code) {
-                    case 'auth/invalid-email':
-                    case 'auth/user-not-found':
-                    case 'auth/wrong-password':
-                        showError('電郵或密碼錯誤。');
-                        break;
-                    case 'auth/user-disabled':
-                        showError('此用戶帳戶已被禁用。');
-                        break;
-                    default:
-                        showError('登入失敗，請稍後再試。');
-                        break;
-                }
+                handleLoginError(error);
             } finally {
                 loginButton.disabled = false;
                 loginButton.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> 登入';
             }
         }
 
+        function handleLoginError(error) {
+            switch (error.code) {
+                case 'auth/invalid-email':
+                    showError('無效的電郵地址格式');
+                    break;
+                case 'auth/user-not-found':
+                case 'auth/wrong-password':
+                    showError('電郵或密碼錯誤');
+                    break;
+                case 'auth/user-disabled':
+                    showError('此帳戶已被停用');
+                    break;
+                case 'auth/too-many-requests':
+                    showError('嘗試次數過多，請稍後再試');
+                    break;
+                default:
+                    showError('登入失敗，請稍後再試');
+                    break;
+            }
+        }
+
         function handleLogout() {
-            signOut(auth);
+            signOut(auth).catch(error => {
+                console.error("登出失敗:", error);
+                showError('登出時發生錯誤');
+            });
         }
 
         async function handleLabAccess() {
             const user = auth.currentUser;
             if (!user) {
-                showError('用戶未登錄。');
+                showError('請先登入系統');
                 return;
             }
             
             labButton.disabled = true;
             labButton.innerHTML = '<span class="spinner"></span> 驗證中...';
+            hideError();
 
             try {
                 const idToken = await user.getIdToken();
-                // 請求發送到新的同網域 URL
                 const response = await fetch(VERIFY_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${idToken}`
-                    }
+                    },
+                    body: JSON.stringify({ idToken })
                 });
 
-                const result = await response.json();
-
-                if (response.ok && result.verified) {
-                    window.location.href = result.redirect_url;
-                } else {
-                    showError(result.message || 'Token 驗證失敗');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || '驗證請求失敗');
                 }
 
+                const result = await response.json();
+                
+                if (result.verified && result.redirect_url) {
+                    window.location.href = result.redirect_url;
+                } else {
+                    throw new Error(result.message || '驗證失敗');
+                }
             } catch (error) {
                 console.error('實驗室存取錯誤:', error);
-                showError('無法驗證您的身份。');
+                showError(error.message || '無法進入實驗室');
+                
+                // 如果驗證失敗，強制登出以清除可能無效的狀態
+                handleLogout();
             } finally {
                 labButton.disabled = false;
                 labButton.innerHTML = '<i class="bi bi-arrow-right-circle"></i> 進入我的實驗室';
@@ -197,26 +302,32 @@
                         console.log('用戶已登錄:', user.email);
                         loginForm.style.display = 'none';
                         welcomeMessage.style.display = 'block';
-                        labButton.style.display = 'flex';
-                        userEmailSpan.textContent = user.email || user.displayName || '用戶';
+                        userEmailSpan.textContent = user.email || '用戶';
+                        
+                        // 檢查電子郵件是否驗證
+                        if (!user.emailVerified) {
+                            showError('請先驗證您的電子郵件地址');
+                        }
                     } else {
                         console.log('用戶未登錄');
                         loginForm.style.display = 'block';
                         welcomeMessage.style.display = 'none';
-                        labButton.style.display = 'none';
                     }
                 });
 
+                // 事件監聽器
                 loginButton.addEventListener('click', handleLogin);
                 logoutButton.addEventListener('click', handleLogout);
                 labButton.addEventListener('click', handleLabAccess);
                 
+                // 回車鍵登入
                 passwordInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') handleLogin();
                 });
 
             } catch (error) {
                 console.error('頁面初始化錯誤:', error);
+                showError('系統初始化失敗，請刷新頁面');
             }
         });
     </script>
