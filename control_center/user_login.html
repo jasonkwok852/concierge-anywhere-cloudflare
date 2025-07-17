@@ -8,155 +8,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <style>
-        :root {
-            --main-color: #23396C;
-            --secondary-color: #3A5A9A;
-            --accent-color: #F8EF32;
-            --bg-color: #FAFAFA;
-            --border-color: #243D51;
-            --header-bg: #243D51;
-            --button-hover-color: #243D51;
-            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-
-        body {
-            font-family: 'Noto Sans HK', sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: var(--main-color);
-            line-height: 1.6;
-        }
-
-        .container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-        }
-
-        h2 {
-            color: var(--main-color);
-            margin-bottom: 25px;
-            font-weight: 700;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--secondary-color);
-        }
-
-        input[type="email"],
-        input[type="password"] {
-            width: calc(100% - 20px);
-            padding: 12px 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-            transition: border-color var(--transition);
-        }
-
-        input[type="email"]:focus,
-        input[type="password"]:focus {
-            border-color: var(--accent-color);
-            outline: none;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 5px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background-color var(--transition), color var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .login-btn {
-            background-color: var(--main-color);
-            color: #fff;
-            margin-top: 10px;
-        }
-
-        .login-btn:hover {
-            background-color: var(--button-hover-color);
-        }
-
-        .logout-btn {
-            background-color: #f44336;
-            color: #fff;
-            margin-top: 20px;
-        }
-
-        .logout-btn:hover {
-            background-color: #d32f2f;
-        }
-
-        .lab-btn {
-            background-color: var(--secondary-color);
-            color: #fff;
-            margin-top: 20px;
-        }
-
-        .lab-btn:hover {
-            background-color: var(--button-hover-color);
-        }
-
-        .error-message {
-            color: #d9534f;
-            margin-top: 10px;
-            font-size: 14px;
-            display: none;
-        }
-
-        .success-message {
-            color: #5cb85c;
-            margin-top: 10px;
-            font-size: 14px;
-            display: none;
-        }
-
-        #welcomeMessage, #labButton {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        #welcomeMessage p {
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 20px;
-        }
-
-        #userEmail {
-            font-weight: 700;
-            color: var(--accent-color);
-        }
-    </style>
+    <link rel="stylesheet" href="project_css.css">
 </head>
 <body>
-    <div class="container">
-        <div id="loginForm">
+    <div class="login-container">
+        <div id="loginForm" class="login-form">
             <h2>用戶登錄</h2>
             <div class="input-group">
                 <label for="email">電子郵件</label>
@@ -170,7 +26,7 @@
             <button id="loginButton" class="login-btn"><i class="bi bi-box-arrow-in-right"></i> 登錄</button>
             </div>
 
-        <div id="welcomeMessage">
+        <div id="welcomeMessage" class="welcomeMessage">
             <p>歡迎您，<span id="userEmail"></span>！</p>
             <button id="logoutButton" class="logout-btn"><i class="bi bi-box-arrow-right"></i> 登出</button>
             <p id="labError" class="error-message"></p>
