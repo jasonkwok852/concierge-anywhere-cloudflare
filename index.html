@@ -244,11 +244,11 @@
                 elements.dropdownMenu.classList.remove('show');
             });
 
-            document.addEventListener('click', (e) => {
-                if (!elements.dropdownMenu.contains(e.target) {
-                    elements.dropdownMenu.classList.remove('show');
-                }
-            });
+document.addEventListener('click', (e) => {
+    if (!elements.dropdownMenu.contains(e.target)) {
+        elements.dropdownMenu.classList.remove('show');
+    }
+});
         }
 
         function init() {
