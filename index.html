@@ -4,204 +4,64 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="顧客服務工作的好助手。免費分享常用電話號碼,有用資訊,內容持續更新。" />
-    <meta name="keywords" content="顧客服務,常用電話號碼,實用資訊,旅遊資訊,失物認領,交通資訊,航空公司,機場" />
-    <meta name="robots" content="index, follow" />
     <title>Concierge Anywhere</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&family=Archivo+Black&display=swap" rel="stylesheet" defer />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet" />
     
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" defer />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
     
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     
-    <link rel="stylesheet" href="https://concierge-anywhere.com/project_css.css" defer />
-    
+    <link rel="stylesheet" href="project_css.css" />
 </head>
 <body>
     <header>
         <div class="header-inner">
             <div class="site-brand">
                 <a href="https://concierge-anywhere.com">
-                    <img src="https://r2.concierge-anywhere.com/concierge_anywhere_icon_150x60.png" alt="網站標誌" class="site-icon" loading="lazy" />
+                    <img src="https://r2.concierge-anywhere.com/concierge_anywhere_icon_1000x400.png" alt="網站標誌" width="200" height="80" loading="lazy" />
                 </a>
-            </div>
-            <div class="header-actions">
-                <a href="https://concierge-anywhere.com/control_center/user_login" target="_blank">
-                    <button class="header-button" id="controlCenterButton" aria-label="控制中心">
-                        <i class="bi bi-gear-fill"></i>
-                    </button>
-                </a>
-                <button class="header-button" id="menuButton" aria-label="開啟選單">
-                    <i class="bi bi-list"></i> <span>選單</span>
-                </button>
-                <div class="dropdown-menu" id="dropdownMenu" role="menu">
-                    <div class="dropdown-title" aria-label="選單">
-                        <span><i class="bi bi-list" style="color: #23396C;"></i> 選單</span>
-                        <button class="dropdown-close" id="dropdownClose" aria-label="關閉選單">
-                            <i class="bi bi-arrow-right" style="color: #23396C;"></i>
-                        </button>
-                    </div>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item" data-action="info-directory" role="menuitem">
-                        <i class="bi bi-book-half"></i> 資訊手冊
-                    </a>
-                    <a href="#" class="dropdown-item" data-action="archives" role="menuitem">
-                        <i class="bi bi-archive-fill"></i> 檔案庫
-                    </a>
-                    <a href="#" class="dropdown-item" data-action="favorited-products" role="menuitem">
-                        <i class="bi bi-bag-heart-fill"></i> 精選商品
-                    </a>
-                    <a href="https://concierge-anywhere.com/privacy_policy" class="dropdown-item" role="menuitem">
-                        <i class="bi bi-info-circle-fill"></i> 私隱政策
-                    </a>
-                    <a href="https://concierge-anywhere.com/terms_of_use" class="dropdown-item" role="menuitem">
-                        <i class="bi bi-info-circle-fill"></i> 使用條款
-                    </a>
-                    <a href="https://concierge-anywhere.com/private_room/my_laboratory" class="dropdown-item" role="menuitem" target="_blank">
-                        <i class="bi bi-flask-fill"></i> 實驗室
-                    </a>
-                    <a href="https://concierge-anywhere.com/control_center/my_laboratory" class="dropdown-item" role="menuitem" target="_blank">
-                        <i class="bi bi-exclamation-triangle-fill"></i> 報告錯漏
-                    </a>
-                </div>
             </div>
         </div>
     </header>
 
     <main class="main-content">
-        <h1 class="title"><span id="typing" class="typing-text" aria-label="顧客服務工作的好助手"></span></h1>
-        <div class="timer-container" aria-label="目前時間與日期">
-            <div class="time" id="time" aria-live="polite" role="timer"></div>
-            <div class="date" id="date" aria-live="polite"></div>
+        <h1 class="title"><span id="typing" class="typing-text"></span></h1>
+        <div class="timer-container">
+            <div class="time" id="time"></div>
+            <div class="date" id="date"></div>
         </div>
 
-        <div class="tab-container">
-            <div class="tab-header">
-                <button class="tab-button active" data-tab="tab1" aria-selected="true">
-                    <i class="bi bi-book-half"></i> 資訊手冊
-                </button>
-                <button class="tab-button" data-tab="tab2" aria-selected="false">
-                    <i class="bi bi-archive-fill"></i> 檔案庫
-                </button>
+        <div class="search-container">
+            <div class="search-input-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="輸入搜尋關鍵字" />
+                <button class="clear-icon" id="clearIcon">×</button>
             </div>
-            
-            <div class="tab-content active" id="tab1">
-                <div class="search-container">
-                    <div class="search-input-container">
-                        <input type="text" id="searchInput" class="search-input" placeholder="輸入『主標題』或『副標題』或『附加說明』的內容" aria-label="搜尋關鍵字" />
-                        <button class="clear-icon" id="clearIcon" aria-label="清除搜尋輸入">×</button>
-                    </div>
-                    <div class="search-button-container">
-                        <button id="searchButton" class="search-button" aria-label="搜尋">
-                            <i class="bi bi-search" aria-hidden="true"></i> <span class="button-text">搜尋</span>
-                        </button>
-                    </div>
-                </div>
-                <div class="button-container">
-                    <button class="action-button" data-category="航空公司" aria-label="航空公司資訊">
-                        <i class="bi bi-airplane" aria-hidden="true"></i> 航空公司
-                    </button>
-                    <button class="action-button" data-category="各地機場" aria-label="各地機場資訊">
-                        <i class="bi bi-building" aria-hidden="true"></i> 各地機場
-                    </button>
-                    <button class="action-button" data-category="實用資訊" aria-label="實用資訊">
-                        <i class="bi bi-info-circle" aria-hidden="true"></i> 實用資訊
-                    </button>
-                    <button class="action-button" data-category="失物認領" aria-label="失物認領資訊">
-                        <i class="bi bi-bag-check" aria-hidden="true"></i> 失物認領
-                    </button>
-                    <button class="action-button" data-category="交通相關" aria-label="交通相關資訊">
-                        <i class="bi bi-bus-front" aria-hidden="true"></i> 交通相關
-                    </button>
-                </div>
-            </div>
-            
-            <div class="tab-content" id="tab2">
-                <p style="text-align: center; margin-top: 20px;">檔案庫內容將在此顯示</p>
+            <div class="search-button-container">
+                <button id="searchButton" class="search-button">
+                    <i class="bi bi-search"></i> 搜尋
+                </button>
             </div>
         </div>
 
         <div class="turnstile-container" id="turnstileContainer">
             <div class="cf-turnstile" data-sitekey="0x4AAAAAAAQOrX6jyaqqHxdp" data-callback="onTurnstileSuccess"></div>
         </div>
-
-        <div class="modal" id="errorModal">
-            <div class="modal-content">
-                <h3>Cloudflare Turnstile 驗證出錯</h3>
-                <p id="errorMessage">驗證失敗，請稍後再試或聯繫支援。</p>
-                <button class="modal-close" id="modalClose">關閉</button>
-            </div>
-        </div>
     </main>
-
-    <footer>
-        <div class="footer-content">
-            <div class="primary_content_block">
-                <div class="primary_content_block_row_01">
-                    <div class="primary_content_block_row_01_div">
-                        <a href="#" data-action="info-directory" class="footer-link">
-                            <p class="primary_content_block_content">
-                                <i class="bi bi-book-half"></i>
-                            </p>
-                            <p class="primary_content_block_content">資訊手冊</p>
-                        </a>
-                    </div>
-                    <div class="primary_content_block_row_01_div">
-                        <a href="#" data-action="archives" class="footer-link">
-                            <p class="primary_content_block_content">
-                                <i class="bi bi-archive-fill"></i>
-                            </p>
-                            <p class="primary_content_block_content">檔案庫</p>
-                        </a>
-                    </div>
-                    <div class="primary_content_block_row_01_div" id="toolsContainer">
-                        <a href="#" id="toolsButton">
-                            <p class="primary_content_block_content">
-                                <i class="bi bi-wrench-adjustable-circle-fill"></i>
-                            </p>
-                            <p class="primary_content_block_content">實用工具</p>
-                        </a>
-                        <div class="tools-dropdown" id="toolsDropdown">
-                            <a href="#" class="tools-dropdown-item" data-action="world-time" role="menuitem">
-                                <i class="bi bi-clock"></i> 世界時間
-                            </a>
-                            <a href="#" class="tools-dropdown-item" data-action="currency-calculator" role="menuitem">
-                                <i class="bi bi-currency-exchange"></i> 貨幣計算器
-                            </a>
-                        </div>
-                    </div>
-                    <div class="primary_content_block_row_01_div">
-                        <a href="#" data-action="favorited-products" class="footer-link">
-                            <p class="primary_content_block_content">
-                                <i class="bi bi-bag-heart-fill"></i>
-                            </p>
-                            <p class="primary_content_block_content">精選商品</p>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <p>Concierge Anywhere © All Rights Reserved</p>
-        </div>
-    </footer>
 
     <script>
     (function() {
         'use strict';
 
-        // 狀態管理
         const state = {
             isVerified: false,
             pendingAction: null,
             isTurnstileRendered: false,
-            activeTab: 'tab1',
-            turnstileToken: null,
-            maxTurnstileRetries: 5,
-            turnstileRetryCount: 0
+            turnstileToken: null
         };
 
-        // DOM 元素緩存
         const elements = {
             typing: document.getElementById('typing'),
             time: document.getElementById('time'),
@@ -209,51 +69,13 @@
             searchInput: document.getElementById('searchInput'),
             searchButton: document.getElementById('searchButton'),
             clearIcon: document.getElementById('clearIcon'),
-            categoryButtons: document.querySelectorAll('.action-button[data-category]'),
-            turnstileContainer: document.getElementById('turnstileContainer'),
-            menuButton: document.getElementById('menuButton'),
-            controlCenterButton: document.getElementById('controlCenterButton'),
-            dropdownMenu: document.getElementById('dropdownMenu'),
-            dropdownClose: document.getElementById('dropdownClose'),
-            tabButtons: document.querySelectorAll('.tab-button'),
-            tabContents: document.querySelectorAll('.tab-content'),
-            errorModal: document.getElementById('errorModal'),
-            errorMessage: document.getElementById('errorMessage'),
-            modalClose: document.getElementById('modalClose'),
-            toolsButton: document.getElementById('toolsButton'),
-            toolsDropdown: document.getElementById('toolsDropdown'),
-            toolsContainer: document.getElementById('toolsContainer'),
-            dropdownItems: document.querySelectorAll('.dropdown-item[data-action]'),
-            footerLinks: document.querySelectorAll('.footer-link')
+            turnstileContainer: document.getElementById('turnstileContainer')
         };
 
-        // 防抖函數
-        function debounce(fn, delay) {
-            let timeoutId;
-            return function (...args) {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => fn.apply(this, args), delay);
-            };
-        }
-
-        // 顯示錯誤模態窗口
         function showErrorModal(message) {
-            elements.errorMessage.textContent = message;
-            elements.errorModal.style.display = 'flex';
+            alert(message);
         }
 
-        // 關閉錯誤模態窗口
-        function closeErrorModal() {
-            elements.errorModal.style.display = 'none';
-            elements.turnstileContainer.style.display = 'none';
-            state.isTurnstileRendered = false;
-            state.turnstileToken = null;
-            if (window.turnstile) {
-                window.turnstile.reset();
-            }
-        }
-
-        // 驗證 Turnstile
         async function verifyTurnstile(token) {
             try {
                 const response = await fetch('/turnstile', {
@@ -262,10 +84,6 @@
                     body: JSON.stringify({ token })
                 });
                 const data = await response.json();
-                if (!data.success) {
-                    showErrorModal(data.error || '驗證失敗，請稍後再試或聯繫支援。');
-                    return false;
-                }
                 return data.success;
             } catch (error) {
                 showErrorModal('網絡錯誤，請檢查網絡連接後重試。');
@@ -273,127 +91,34 @@
             }
         }
 
-        // 跳轉到 Retool
-        async function redirectToRetool(action) {
-            if (!state.isVerified && state.turnstileToken) {
-                const isVerified = await verifyTurnstile(state.turnstileToken);
-                if (!isVerified) return;
-                state.isVerified = true;
-            }
-
-            if (!action?.type || !action?.value) {
-                showErrorModal('無效的操作，請重試。');
-                return;
-            }
-
-            const urls = {
-                'world-time': 'https://hello.concierge-anywhere.com/p/search/world-time-widget',
-                'currency-calculator': 'https://hello.concierge-anywhere.com/embedded/public/9cf4e167-8903-4c5d-b18b-1bdecc4576e5/CurrencyCalculatorWidget',
-                'search': `https://hello.concierge-anywhere.com/p/info_directory/search#keyword=${encodeURIComponent(action.value)}`,
-                'category': `https://hello.concierge-anywhere.com/p/info_directory/search#category=${encodeURIComponent(action.value)}`,
-                'info-directory': 'https://hello.concierge-anywhere.com/p/info_directory/search',
-                'archives': 'https://hello.concierge-anywhere.com/p/archives_space/search',
-                'favorited-products': 'https://hello.concierge-anywhere.com/p/search/favorited_products_page',
-                'laboratory': 'https://concierge-anywhere.com/private_room/my_laboratory'
-            };
-
-            const redirectUrl = urls[action.type];
-            if (action.type === 'currency-calculator' || action.type === 'laboratory') {
-                window.open(redirectUrl, '_blank');
-            } else {
-                window.location.href = redirectUrl;
-            }
-        }
-
-        // 顯示 Turnstile
-        function showTurnstile() {
-            elements.turnstileContainer.style.display = 'flex';
-            state.turnstileRetryCount++;
-
-            if (state.turnstileRetryCount > state.maxTurnstileRetries) {
-                showErrorModal('無法加載驗證組件，請稍後再試。');
-                return;
-            }
-
-            if (typeof window.turnstile !== 'undefined') {
-                window.turnstile.ready(() => {
-                    if (state.isTurnstileRendered) {
-                        window.turnstile.reset();
-                    }
-                    state.isTurnstileRendered = true;
-                    state.turnstileRetryCount = 0;
-                });
-            } else {
-                setTimeout(showTurnstile, 100);
-            }
-        }
-
-        // Turnstile 回調
         window.onTurnstileSuccess = async function(token) {
             state.turnstileToken = token;
-            if (!state.pendingAction) {
-                elements.turnstileContainer.style.display = 'none';
-                state.isTurnstileRendered = false;
-                if (window.turnstile) window.turnstile.reset();
-                return;
+            if (state.pendingAction) {
+                const isVerified = await verifyTurnstile(token);
+                if (isVerified) {
+                    state.isVerified = true;
+                    performSearch();
+                }
             }
-            await redirectToRetool(state.pendingAction);
         };
 
-        // 執行搜尋
-        async function performSearch() {
+        function showTurnstile() {
+            elements.turnstileContainer.style.display = 'flex';
+        }
+
+        function performSearch() {
             const keyword = elements.searchInput.value.trim();
             if (!keyword) return;
-            state.pendingAction = { type: 'search', value: keyword };
-            if (state.isVerified) {
-                await redirectToRetool(state.pendingAction);
-            } else {
-                showTurnstile();
-            }
+            alert(`執行搜尋: ${keyword}`);
         }
 
-        // 處理分類點擊
-        async function handleCategoryClick(category) {
-            state.pendingAction = { type: 'category', value: category };
-            if (state.isVerified) {
-                await redirectToRetool(state.pendingAction);
-            } else {
-                showTurnstile();
-            }
-        }
-
-        // 處理工具項點擊
-        async function handleToolsItemClick(action) {
-            state.pendingAction = { type: action, value: action };
-            elements.toolsDropdown.classList.remove('show');
-            if (state.isVerified) {
-                await redirectToRetool(state.pendingAction);
-            } else {
-                showTurnstile();
-            }
-        }
-
-        // 處理選單和頁腳連結點擊
-        async function handleLinkClick(action) {
-            state.pendingAction = { type: action, value: action };
-            if (state.isVerified) {
-                await redirectToRetool(state.pendingAction);
-            } else {
-                showTurnstile();
-            }
-        }
-
-        // 清除搜尋輸入
         function clearSearchInput() {
             elements.searchInput.value = '';
             elements.clearIcon.style.display = 'none';
-            elements.searchButton.classList.remove('active');
             elements.searchInput.focus();
         }
 
-        // 打字效果
         function initTypingEffect() {
-            if (!elements.typing) return;
             const text = "顧客服務工作的好助手";
             let index = 0;
             let isDeleting = false;
@@ -433,107 +158,45 @@
                     }
                 }
             }
-
             setTimeout(typeWriter, typingSpeed);
         }
 
-        // 更新時間
         function updateTime() {
             const now = new Date();
-            elements.time.textContent = now.toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            elements.date.textContent = now.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' }).replace(/\//g, ' / ');
+            elements.time.textContent = now.toLocaleTimeString('zh-TW', { 
+                hour12: false, 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            });
+            elements.date.textContent = now.toLocaleDateString('zh-TW', { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit', 
+                weekday: 'short' 
+            }).replace(/\//g, ' / ');
         }
 
-        // 初始化事件監聽器
         function initEvents() {
-            const handleSearchInput = debounce(() => {
+            elements.searchInput.addEventListener('input', () => {
                 elements.clearIcon.style.display = elements.searchInput.value ? 'block' : 'none';
-                elements.searchButton.classList.toggle('active', !!elements.searchInput.value.trim());
-            }, 100);
+            });
 
-            elements.searchInput.addEventListener('input', handleSearchInput);
             elements.clearIcon.addEventListener('click', clearSearchInput);
-            elements.searchButton.addEventListener('click', performSearch);
+            
+            elements.searchButton.addEventListener('click', () => {
+                state.pendingAction = true;
+                showTurnstile();
+            });
+
             elements.searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') performSearch();
-            });
-
-            elements.categoryButtons.forEach(button => {
-                button.addEventListener('click', () => handleCategoryClick(button.dataset.category));
-            });
-
-            elements.menuButton.addEventListener('click', (e) => {
-                e.stopPropagation();
-                elements.dropdownMenu.classList.toggle('show');
-            });
-
-            elements.controlCenterButton.addEventListener('click', (e) => e.stopPropagation());
-            elements.dropdownClose.addEventListener('click', () => {
-                elements.dropdownMenu.classList.remove('show');
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!elements.dropdownMenu.contains(e.target) && !elements.menuButton.contains(e.target)) {
-                    elements.dropdownMenu.classList.remove('show');
+                if (e.key === 'Enter') {
+                    state.pendingAction = true;
+                    showTurnstile();
                 }
-                if (!elements.toolsContainer.contains(e.target)) {
-                    elements.toolsDropdown.classList.remove('show');
-                }
-            });
-
-            elements.toolsButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                elements.toolsDropdown.classList.toggle('show');
-            });
-
-            elements.toolsContainer.querySelectorAll('.tools-dropdown-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    handleToolsItemClick(item.dataset.action);
-                });
-            });
-
-            elements.dropdownItems.forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    // Add specific handling for 'laboratory' link to open in new tab
-                    if (item.dataset.action === 'laboratory') {
-                        window.open('https://concierge-anywhere.com/private_room/my_laboratory', '_blank');
-                    } else {
-                        handleLinkClick(item.dataset.action);
-                    }
-                });
-            });
-
-            elements.footerLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    handleLinkClick(link.dataset.action);
-                });
-            });
-
-            elements.tabButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    elements.tabButtons.forEach(btn => {
-                        btn.classList.remove('active');
-                        btn.setAttribute('aria-selected', 'false');
-                    });
-                    elements.tabContents.forEach(content => content.classList.remove('active'));
-                    button.classList.add('active');
-                    button.setAttribute('aria-selected', 'true');
-                    document.getElementById(button.dataset.tab).classList.add('active');
-                    state.activeTab = button.dataset.tab;
-                });
-            });
-
-            elements.modalClose.addEventListener('click', closeErrorModal);
-            elements.errorModal.addEventListener('click', (e) => {
-                if (e.target === elements.errorModal) closeErrorModal();
             });
         }
 
-        // 初始化
         function init() {
             initTypingEffect();
             updateTime();
