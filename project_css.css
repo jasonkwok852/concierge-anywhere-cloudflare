@@ -34,121 +34,70 @@ html, body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* 將 body 設定為 flex 容器，使其子元素（header, main, footer）垂直堆疊 */
 body {
     display: flex;
     flex-direction: column;
-    min-height: 100vh; /* 確保 body 佔滿整個視窗高度 */
-}
-
-a:link, a:visited, a:hover, a:active {
-    color: #23396C;
-    text-decoration: none;
-}
-
-a:hover, a:active {
-    text-decoration: underline;
+    min-height: 100vh;
 }
 
 header {
-    width: 100%;
     background-color: var(--header-bg);
     color: #fff;
-    height: 74px;
-    position: relative;
-    z-index: 10;
+    padding: 10px 20px;
+    box-shadow: var(--shadow);
+    z-index: 1000;
 }
 
 .header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     max-width: 1200px;
     margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 32px;
-    height: 100%;
 }
 
-.site-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #fff;
-    user-select: none;
-}
-
-.site-icon {
-    height: 80px;
-    width: 200px;
-    object-fit: contain;
-    transition: var(--transition);
+.site-brand img {
+    height: 40px;
 }
 
 .header-actions {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 15px;
 }
 
 .header-button {
-    background: transparent;
-    color: #fafafa;
-    border: 2px solid #fafafa;
-    border-radius: 6px;
-    font-weight: 700;
-    font-size: 14px;
-    padding: 4px 12px;
+    background-color: transparent;
+    border: 2px solid #fff;
+    color: #fff;
+    font-size: 1rem;
+    padding: 8px 16px;
+    border-radius: 5px;
     cursor: pointer;
     transition: var(--transition);
     display: flex;
     align-items: center;
-    height: 36px;
+    gap: 8px;
 }
 
-#controlCenterButton {
-    padding: 4px;
-    width: 36px;
-    height: 36px;
-    border: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#controlCenterButton span {
-    display: none;
-}
-
-#controlCenterButton .bi {
-    margin: 0;
-    font-size: 1.2rem;
-}
-
-.header-button .bi {
-    margin-right: 2px;
-}
-
-.header-button:hover,
-.header-button:focus {
-    background: #fafafa;
-    color: var(--main-color);
+.header-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .dropdown-menu {
     position: fixed;
     top: 0;
-    right: -20%;
-    width: 20%;
+    right: -300px;
     height: 100%;
-    background-color: #fafafa;
-    box-shadow: var(--shadow);
-    padding: 16px;
-    z-index: 1000;
+    width: 250px;
+    background-color: #fff;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    transition: right var(--transition);
     display: flex;
     flex-direction: column;
-    transition: right 0.3s ease-in-out;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .dropdown-menu.show {
@@ -156,209 +105,127 @@ header {
 }
 
 .dropdown-title {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--main-color);
-    margin-bottom: 12px;
     display: flex;
-    align-items: center;
     justify-content: space-between;
-}
-
-.dropdown-divider {
-    border-top: 1px solid var(--tab-border-color);
-    margin: 8px 0;
+    align-items: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: var(--main-color);
 }
 
 .dropdown-close {
     background: none;
     border: none;
-    font-size: 14px;
-    color: var(--main-color);
     cursor: pointer;
-    padding: 8px;
-    transition: var(--transition);
-    line-height: 1;
+    font-size: 1.5rem;
 }
 
-.dropdown-close:hover {
-    color: var(--button-hover-color);
-    transform: scale(1.1);
+.dropdown-divider {
+    border-top: 1px solid #eee;
+    margin: 10px 0;
 }
 
 .dropdown-item {
+    padding: 15px;
+    text-decoration: none;
+    color: var(--main-color);
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
-    color: var(--main-color);
-    text-decoration: none;
+    gap: 12px;
     font-weight: 500;
-    transition: background-color 0.2s;
-    border-radius: 4px;
+    transition: background-color var(--transition);
+    border-radius: 5px;
 }
 
 .dropdown-item:hover {
-    background-color: rgba(35, 57, 108, 0.1);
-    text-decoration: none;
+    background-color: #f5f5f5;
 }
 
-/* 主內容區塊的通用樣式 */
-.main-content {
-    flex: 1; /* 允許 main-content 佔用剩餘空間 */
+main {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center; /* 讓內容在主內容區塊內水平居中 */
-    padding: 32px 12px 40px;
-    /* 移除 Landing Page 的特定頂部間距，由登入頁面專用樣式處理 */
-    width: 100%;
-    max-width: 70%;
-    margin-left: auto;
-    margin-right: auto;
+    align-items: center;
+    padding: 20px 10px;
+    box-sizing: border-box;
+    max-width: 100%;
 }
 
 .title {
+    font-size: 2rem;
     font-weight: 700;
-    font-size: clamp(1.5rem, 4vw, 2.2rem);
     text-align: center;
-    margin-bottom: 1rem;
-    line-height: 1.2;
+    color: var(--main-color);
+    margin: 1rem 0;
 }
 
 .typing-text {
-    white-space: nowrap;
     overflow: hidden;
-    color: var(--main-color);
-    display: inline-block;
+    border-right: 0.15em solid var(--accent-color);
+    white-space: nowrap;
+    margin: 0 auto;
+    letter-spacing: .15em;
+    animation: typing 3.5s steps(30, end), blink-caret .75s step-end infinite;
 }
 
-.typing-text::after {
-    content: "|";
-    width: 0.15em;
-    height: 1.2em;
-    color: var(--main-color);
-    margin-left: 0.1em;
-    vertical-align: text-top;
-    animation: blinkCursor 0.7s steps(2) infinite;
-    border-radius: 2px;
+@keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
 }
 
-@keyframes blinkCursor {
-    50% { opacity: 0; }
+@keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: var(--accent-color); }
 }
 
 .timer-container {
-    padding: 0.8rem 1.5rem;
-    border-radius: 0.5rem;
     text-align: center;
-    margin-bottom: 1.5rem;
-    font-weight: bold;
-    user-select: none;
-    backdrop-filter: blur(5px);
+    margin-bottom: 2rem;
+    color: var(--secondary-color);
 }
 
 .time {
-    line-height: 1;
-    font-family: 'Archivo Black', sans-serif;
-    color: #23396C;
-    font-size: 24px;
-    margin-bottom: 0.2rem;
-    font-variant-numeric: tabular-nums;
+    font-size: 2.5rem;
+    font-weight: 700;
 }
 
 .date {
-    line-height: 1;
-    font-family: 'Archivo Black', sans-serif;
-    color: #808080;
-    font-size: 18px;
-}
-
-.tab-container {
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto 20px;
-    text-align: center;
-}
-
-.tab-header {
-    display: flex;
-    justify-content: center;
-    border-bottom: 1px solid var(--tab-border-color);
-    margin-bottom: 15px;
-}
-
-.tab-button {
-    padding: 6px 12px;
-    background: transparent;
-    color: var(--main-color);
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    margin: 0 5px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: var(--transition);
-}
-
-.tab-button.active {
-    background: var(--tab-active-bg-color);
-    color: white;
-}
-
-.tab-content {
-    display: none;
-    padding: 15px;
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    font-size: 1.1rem;
+    font-weight: 500;
 }
 
 .search-container {
-    position: relative;
-    width: 100%;
-    max-width: 500px;
-    margin: 0 auto 1.5rem;
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    gap: 10px;
+    align-items: stretch;
+    width: 100%;
+    max-width: 700px;
+    padding: 0 10px;
+    box-sizing: border-box;
+    margin-top: 20px;
+    position: relative;
 }
 
 .search-input-container {
-    flex: 1;
+    flex-grow: 1;
     position: relative;
-}
-
-.search-button-container {
     display: flex;
-    align-items: center;
 }
 
 .search-input {
     width: 100%;
-    padding: 10px 40px 10px 10px;
-    font-size: clamp(0.8rem, 3vw, 0.9rem);
-    border: 1px solid var(--border-color);
-    border-radius: 0.5rem;
-    outline: none;
-    transition: var(--transition);
-    background-color: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(5px);
-    color: var(--main-color);
+    padding: 0.8rem 3rem 0.8rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color var(--transition);
 }
 
 .search-input:focus {
-    border-color: var(--secondary-color);
-    box-shadow: 0 0 0 3px rgba(58, 90, 154, 0.2);
+    border-color: var(--accent-color);
+    outline: none;
 }
 
 .clear-icon {
@@ -366,375 +233,404 @@ header {
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 20px;
-    color: #999;
-    cursor: pointer;
-    display: none;
-    line-height: 1;
     background: none;
     border: none;
-    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    color: #999;
+    display: none;
 }
 
-.search-button, .action-button {
-    padding: 0.6rem 0.8rem;
-    font-size: clamp(0.85rem, 3vw, 0.95rem);
-    font-weight: 600;
-    color: var(--main-color);
-    background-color: #FAFAFA;
-    border: 1px solid var(--border-color);
-    border-radius: 0.5rem;
+.search-button-container {
+    display: flex;
+}
+
+.search-button {
+    background-color: var(--main-color);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 0.8rem 1.5rem;
     cursor: pointer;
-    transition: var(--transition);
+    font-size: 1rem;
+    transition: background-color var(--transition);
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.3rem;
+    gap: 8px;
+    min-width: 100px;
 }
 
-.search-button.active {
-    background-color: #243D51;
-    color: #fff;
-    border-color: #243D51;
-}
-
-.search-button:hover, .action-button:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--hover-shadow);
+.search-button:hover {
+    background-color: var(--button-hover-color);
 }
 
 .button-container {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.8rem;
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto 1.5rem;
+    gap: 10px;
+    margin-top: 20px;
+    max-width: 700px;
+    padding: 0 10px;
 }
 
 .action-button {
-    min-width: 90px;
-    background-color: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(5px);
+    background-color: var(--secondary-color);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 0.7rem 1.2rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color var(--transition);
+    min-width: 120px;
+    text-align: center;
 }
 
-.bi {
-    font-size: 1em;
-    vertical-align: middle;
+.action-button:hover {
+    background-color: var(--button-hover-color);
 }
 
 .turnstile-container {
-    margin: 1.5rem 0;
-    display: none;
+    margin-top: 20px;
     justify-content: center;
-    width: 100%;
-    min-height: 65px;
-    padding-bottom: 20px;
-}
-
-footer {
-    text-align: center;
-    padding: 15px 0;
-    font-size: 0.8rem;
-    color: var(--main-color);
-    background-color: var(--bg-color);
-    width: 100%;
-}
-
-.footer-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
     align-items: center;
-}
-
-footer p {
-    font-weight: bold;
-    margin: 5px 0;
-}
-
-.primary_content_block {
-    width: 80%;
-    max-width: 600px;
-    height: auto;
-    max-height: 70px;
-    margin: 5px auto;
-}
-
-.primary_content_block_row_01 {
-    border-radius: 12px;
-    background-color: var(--border-color);
-    display: grid;
-    grid-template-columns: auto auto auto auto;
-    padding: 2px;
-}
-
-.primary_content_block_row_01_div {
-    text-align: center;
-    padding: 2px;
-    position: relative;
-}
-
-.primary_content_block_content {
-    font-size: 14px;
-    font-weight: 600;
-    color: #ffffff;
-    margin: 2px;
-    transition: var(--transition);
-}
-
-.primary_content_block_content .bi {
-    font-size: 16px;
-}
-
-.primary_content_block_row_01_div a:hover .primary_content_block_content {
-    color: var(--accent-color);
-    transform: translateY(-2px);
-}
-
-.tools-dropdown {
-    position: absolute;
-    bottom: calc(100% + 5px);
-    left: 50%;
-    transform: translateX(-50%);
-    width: 150px;
-    background-color: #fafafa;
-    border-radius: 4px;
-    box-shadow: var(--shadow);
-    z-index: 1000;
     display: none;
-    flex-direction: column;
-    padding: 8px;
-}
-
-.tools-dropdown.show {
-    display: flex;
-}
-
-.tools-dropdown-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    color: var(--main-color);
-    text-decoration: none;
-    font-weight: 500;
-    transition: background-color 0.2s;
-    border-radius: 4px;
-}
-
-.tools-dropdown-item:hover {
-    background-color: rgba(35, 57, 108, 0.1);
-    text-decoration: none;
 }
 
 .modal {
-    display: none;
     position: fixed;
-    top: 0;
+    z-index: 1000;
     left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 2000;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+    display: none;
     justify-content: center;
     align-items: center;
 }
 
 .modal-content {
-    background-color: var(--bg-color);
+    background-color: #fefefe;
     padding: 20px;
-    border-radius: 8px;
-    max-width: 400px;
-    width: 90%;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
     text-align: center;
-    box-shadow: var(--shadow);
-}
-
-.modal-content h3 {
-    margin: 0 0 15px;
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--main-color);
-}
-
-.modal-content p {
-    margin: 0 0 20px;
-    font-size: 1rem;
-    color: var(--main-color);
+    border-radius: 10px;
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .modal-close {
-    background-color: var(--button-hover-color);
+    background-color: var(--main-color);
     color: #fff;
     border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
+    padding: 10px 20px;
+    border-radius: 5px;
     cursor: pointer;
-    font-weight: 600;
-    transition: var(--transition);
+    font-weight: 700;
+    margin-top: 15px;
 }
 
-.modal-close:hover {
-    background-color: var(--secondary-color);
-    transform: translateY(-2px);
-}
-
-/* Login Page Specific Styles - 新增的 CSS 規則 */
-/* 讓 body 在登入頁面模式下，將其內容（Header, Main, Footer）垂直堆疊並填充高度 */
-body.login-page {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    /* 不直接在這裡設置 justify-content: center，讓 main-content 負責其子元素的垂直居中 */
-}
-
-/* 針對登入頁面模式下的 main-content 進行調整 */
-body.login-page .main-content {
-    flex: 1; /* 允許 main-content 佔用可用的垂直空間 */
-    display: flex;
-    flex-direction: column;
-    justify-content: center; /* 讓 main-content 內的元素垂直居中 */
-    align-items: center; /* 讓 main-content 內的元素水平居中 */
-    padding: 20px 12px; /* 內容區域的統一內邊距 */
+.tab-container {
     width: 100%;
-    max-width: 70%; /* 保持內容的最大寬度 */
-    margin: 0 auto; /* 水平居中 main-content 本身 */
+    max-width: 700px;
+    margin-top: 20px;
 }
 
-/* 確保 #loading 和 #labButton 的邊距調整，以配合 main-content 的居中佈局 */
-#loading {
-    margin-top: 0; 
-    margin-bottom: 20px; /* 在 loading 和 labButton/login-container 之間留出空間 */
+.tab-header {
+    display: flex;
+    justify-content: center;
+    border-bottom: 2px solid var(--tab-border-color);
 }
 
-#labButton {
-    margin-top: 0; 
-    margin-bottom: 20px; /* 在 labButton 和 login-container 之間留出空間 */
-}
-
-.login-container {
-    width: 90%;
-    max-width: 400px;
-    margin-left: auto; /* 水平居中 */
-    margin-right: auto; /* 水平居中 */
-    /* 移除特定的 margin-top 和 margin-bottom，讓 main-content 的 flex 屬性處理間距 */
-    padding: 2rem;
-    background-color: rgba(255, 255, 255, 0.9); /* 半透明背景 */
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.login-input {
-    width: 100%;
-    padding: 12px;
-    margin: 8px 0;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
+.tab-button {
+    flex: 1;
+    background-color: transparent;
+    border: none;
+    padding: 12px 0;
     font-size: 1rem;
-    color: var(--main-color); /* 確保文字顏色與主題一致 */
-    background-color: rgba(255, 255, 255, 0.8); /* 稍微透明 */
-    backdrop-filter: blur(5px); /* 模糊效果 */
+    font-weight: 500;
+    color: var(--secondary-color);
+    cursor: pointer;
+    position: relative;
+    transition: color var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
-.login-input:focus {
-    border-color: var(--secondary-color);
-    box-shadow: 0 0 0 3px rgba(58, 90, 154, 0.2);
+.tab-button.active {
+    color: var(--main-color);
+}
+
+.tab-button::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: transparent;
+    transition: background-color var(--transition);
+}
+
+.tab-button.active::after {
+    background-color: var(--main-color);
+}
+
+.tab-content {
+    display: none;
+    padding: 20px 0;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.footer-content {
+    background-color: var(--header-bg);
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.primary_content_block {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    max-width: 800px;
+    margin-bottom: 20px;
+}
+
+.primary_content_block_row_01 {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.primary_content_block_row_01_div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.footer-link, #toolsButton {
+    text-decoration: none;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: color var(--transition);
+}
+
+.footer-link:hover, #toolsButton:hover {
+    color: var(--accent-color);
+}
+
+.primary_content_block_content i {
+    font-size: 2.5rem;
+    margin-bottom: 5px;
+}
+
+.tools-dropdown {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s linear 0.3s, opacity 0.3s;
+    z-index: 999;
+}
+
+.tools-dropdown.show {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0s;
+}
+
+.tools-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: var(--main-color);
+    white-space: nowrap;
+    border-radius: 5px;
+    transition: background-color var(--transition);
+}
+
+.tools-dropdown-item:hover {
+    background-color: #f0f0f0;
+}
+
+/* 登錄頁面專用樣式 */
+.login-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.login-form h2 {
+    color: var(--main-color);
+    margin-bottom: 25px;
+    font-weight: 700;
+}
+
+.login-form .input-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.login-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--secondary-color);
+}
+
+.login-form input[type="email"],
+.login-form input[type="password"] {
+    width: calc(100% - 20px);
+    padding: 12px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color var(--transition);
+}
+
+.login-form input[type="email"]:focus,
+.login-form input[type="password"]:focus {
+    border-color: var(--accent-color);
     outline: none;
 }
 
-.login-button {
-    width: 100%;
-    padding: 12px;
-    margin: 16px 0;
-    background-color: var(--main-color); /* 主要按鈕顏色 */
-    color: white;
-    border: none;
-    border-radius: 6px; /* 與 project_css.css 中的按鈕圓角一致 */
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 600; /* 更粗的字體 */
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    box-shadow: var(--shadow); /* 統一的陰影效果 */
+.login-btn {
+    background-color: var(--main-color);
+    color: #fff;
+    margin-top: 10px;
 }
 
-.login-button:hover {
-    background-color: var(--secondary-color); /* 懸停時的顏色 */
-    transform: translateY(-2px); /* 懸停時的微動畫 */
-    box-shadow: var(--hover-shadow); /* 懸停時的陰影效果 */
+.login-btn:hover {
+    background-color: var(--button-hover-color);
+}
+
+.logout-btn {
+    background-color: #f44336;
+    color: #fff;
+    margin-top: 20px;
+}
+
+.logout-btn:hover {
+    background-color: #d32f2f;
+}
+
+.lab-btn {
+    background-color: var(--secondary-color);
+    color: #fff;
+    margin-top: 20px;
+}
+
+.lab-btn:hover {
+    background-color: var(--button-hover-color);
 }
 
 .error-message {
-    color: #d32f2f; /* 錯誤信息顏色 */
-    text-align: center;
-    margin: 10px 0;
+    color: #d9534f;
+    margin-top: 10px;
+    font-size: 14px;
     display: none;
-    font-size: 0.9rem;
 }
 
-/* Styles for the "進入我的實驗室" button - 保持其獨特風格 */
-#labButton {
-    background-color: var(--accent-color);
-    color: var(--header-bg);
-    border: 2px solid var(--header-bg);
-    /* margin-bottom: 20px; -- 由上面 main-content 的 justify-content 和 labButton 的 margin-bottom 統一控制*/
-    width: 220px; /* 保持特定寬度 */
-    padding: 10px 20px;
-    font-size: 1rem;
-    display: none; /* Hidden by default, shown when logged in */
-    border-radius: 6px; /* 與 project_css.css 中的按鈕圓角一致 */
-    cursor: pointer;
-    font-weight: 600;
-    transition: var(--transition);
+.success-message {
+    color: #5cb85c;
+    margin-top: 10px;
+    font-size: 14px;
+    display: none;
+}
+
+.welcomeMessage, .labButton {
+    display: none;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
-    box-shadow: var(--shadow);
 }
 
-#labButton:hover {
-    background-color: var(--header-bg);
+.welcomeMessage p {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+.userEmail {
+    font-weight: 700;
     color: var(--accent-color);
-    transform: translateY(-2px); /* 懸停時的微動畫 */
-    box-shadow: var(--hover-shadow);
 }
 
-#welcomeMessage, #labAccess {
-    display: none;
-    text-align: center;
-    color: var(--main-color); /* 確保文字顏色與主題一致 */
+/* 私人房間頁面專用樣式 */
+.private-room-container {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
 }
 
-#loading { /* Style for the initial loading message */
-    text-align: center;
-    color: #666;
-    padding: 20px;
-    /* margin-top: 0; -- 由上面 main-content 的 justify-content 處理垂直居中 */
+.private-room-container h1, .private-room-container h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
 }
 
-/* 響應式調整 */
-@media (max-width: 767px) {
-    .login-container {
-        padding: 1.5rem;
+.private-room-button-group {
+    margin-top: 20px;
+}
+
+.private-room-button-group a {
+    display: inline-block;
+    padding: 12px 24px;
+    margin: 0 10px;
+    text-decoration: none;
+    color: #fff;
+    background-color: var(--secondary-color);
+    border-radius: 5px;
+    font-weight: 700;
+    transition: background-color var(--transition);
+}
+
+.private-room-button-group a:hover {
+    background-color: var(--button-hover-color);
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .header-inner {
+        padding: 0 10px;
     }
-    .login-button, #labButton {
-        padding: 10px;
-        font-size: 0.9rem;
-    }
-    #labButton {
-        width: 100%; /* 在小螢幕下變為全寬 */
-    }
-    .site-icon { height: 60px; width: 150px; }
-    .header-inner { padding: 0 16px; }
-    /* main-content 在小螢幕下最大寬度調整 */
     .main-content { padding: 16px 0 20px; max-width: 90%; }
-    /* 以下為 Landing Page 專有，但已移入 project_css.css 的響應式規則 */
     .dropdown-menu { width: 50%; right: -50%; }
     .dropdown-menu.show { right: 0; }
     .button-container { gap: 0.6rem; }
@@ -747,17 +643,4 @@ body.login-page .main-content {
     .search-button .bi { margin-right: 0; }
     #menuButton span { display: none; }
     #menuButton { width: 36px; padding: 4px; justify-content: center; align-items: center; }
-    #menuButton .bi { margin-right: 0; }
-    .primary_content_block { width: 90%; max-height: 60px; }
-    .primary_content_block_content { font-size: 12px; }
-    .primary_content_block_content .bi { font-size: 14px; }
-    .tab-button { padding: 4px 8px; font-size: 12px; }
-    .tab-button .bi { font-size: 12px; }
-    .time { font-size: 20px; }
-    .date { font-size: 16px; }
-    .turnstile-container { padding-bottom: 30px; }
-    .modal-content { width: 95%; padding: 15px; }
-    .modal-content h3 { font-size: 1.1rem; }
-    .tools-dropdown { width: 120px; }
-    .tools-dropdown-item { padding: 6px 10px; font-size: 12px; }
 }
