@@ -64,6 +64,7 @@ export async function onRequestPost({ request, env }) {
 
     // 處理驗證結果
     if (verification.success) {
+      console.log('Turnstile verification successful.');
       return new Response(
         JSON.stringify({ success: true, challenge_ts: verification.challenge_ts }),
         {
