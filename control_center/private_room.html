@@ -149,13 +149,18 @@
         const headerAuthText = document.getElementById('headerAuthText');
         const errorElement = document.getElementById('errorMessage');
 
+        console.log('--- 腳本開始執行 ---');
+
         async function initFirebase() {
             try {
+                console.log('嘗試初始化 Firebase...');
                 const response = await fetch('https://concierge-anywhere.com/firebase_config');
                 const firebaseConfig = await response.json();
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
+                console.log('Firebase 初始化成功。');
             } catch (error) {
+                console.error('Firebase 初始化失敗:', error);
                 showError('系統初始化失敗，請刷新頁面');
                 throw error;
             }
@@ -172,7 +177,9 @@
             try {
                 await signOut(auth);
                 document.cookie = 'firebase_jwt=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                console.log('登出成功。');
             } catch (error) {
+                console.error('登出時發生錯誤:', error);
                 showError('登出時發生錯誤');
                 updateUI(auth.currentUser);
             }
@@ -183,6 +190,7 @@
         }
         
         function updateUI(user) {
+            console.log('更新 UI 中，目前用戶:', user ? user.email : '未登入');
             authButton.style.display = 'flex';
             authButton.disabled = false;
 
@@ -205,9 +213,11 @@
             try {
                 await initFirebase();
                 onAuthStateChanged(auth, (user) => {
+                    console.log('onAuthStateChanged 事件觸發。');
                     updateUI(user);
                 });
             } catch (error) {
+                console.error('主執行函式失敗:', error);
                 showError('應用初始化失敗，請刷新頁面');
             }
         }
