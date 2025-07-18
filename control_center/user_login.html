@@ -181,7 +181,6 @@
                 const app = initializeApp(firebaseConfig);
                 return getAuth(app);
             } catch (error) {
-                console.error("Firebase 初始化錯誤:", error);
                 showError('無法初始化登入系統，請刷新頁面重試');
                 throw error;
             }
@@ -207,7 +206,6 @@
                 document.cookie = `firebase_jwt=${idToken}; path=/; max-age=3600; secure; samesite=lax`;
                 
             } catch (error) {
-                console.error("登入失敗:", error);
                 handleLoginError(error);
             } finally {
                 loginButton.disabled = false;
@@ -240,7 +238,6 @@
             document.cookie = 'firebase_jwt=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
             
             signOut(auth).catch(error => {
-                console.error("登出失敗:", error);
                 showError('登出時發生錯誤');
             });
         }
@@ -259,7 +256,6 @@
             try {
                 window.location.href = LAB_URL;
             } catch (error) {
-                console.error('實驗室存取錯誤:', error);
                 showError('無法進入實驗室');
             } finally {
                 labButton.disabled = false;
@@ -292,16 +288,17 @@
 
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
-                        console.log('用戶已登錄:', user.email);
                         loginForm.style.display = 'none';
                         welcomeMessage.style.display = 'block';
                         userEmailSpan.textContent = user.email || '用戶';
                         
+                        // 修正：登入成功後，明確顯示按鈕
+                        labButton.style.display = 'flex'; 
+
                         if (!user.emailVerified) {
                             showError('請先驗證您的電子郵件地址');
                         }
                     } else {
-                        console.log('用戶未登錄');
                         loginForm.style.display = 'block';
                         welcomeMessage.style.display = 'none';
                     }
@@ -316,7 +313,6 @@
                 });
 
             } catch (error) {
-                console.error('頁面初始化錯誤:', error);
                 showError('系統初始化失敗，請刷新頁面');
             }
         });
