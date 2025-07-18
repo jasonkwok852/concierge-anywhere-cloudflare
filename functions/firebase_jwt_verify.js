@@ -25,18 +25,14 @@ async function getPublicKeys() {
 }
 
 function base64UrlDecode(str) {
-    // 替換 URL-safe 字符
     let output = str.replace(/-/g, '+').replace(/_/g, '/');
-    // 補齊 base64 長度
     switch (output.length % 4) {
         case 0: break;
         case 2: output += '=='; break;
         case 3: output += '='; break;
         default: throw new Error('不合法的 base64 字符串');
     }
-    // 使用瀏覽器內建的 atob 函數解碼
     const decoded = atob(output);
-    // 轉換為 Uint8Array
     const bytes = new Uint8Array(decoded.length);
     for (let i = 0; i < decoded.length; i++) {
         bytes[i] = decoded.charCodeAt(i);
@@ -88,7 +84,7 @@ async function verifyFirebaseToken(token, env) {
         return { 
             verified: true, 
             payload,
-            redirect_url: `${PROTECTED_PREFIX}/my_laboratory`
+            redirect_url: `${PROTECTED_PREFIX}` // 改為只返回 private_room 路徑
         };
     } catch (error) {
         console.error('Token 驗證失敗:', error.message);
