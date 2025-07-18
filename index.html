@@ -130,12 +130,10 @@
 
         window.onTurnstileSuccess = async function(token) {
             state.turnstileToken = token;
-            if (state.pendingAction) {
-                const isVerified = await verifyTurnstile(token);
-                if (isVerified) {
-                    state.isVerified = true;
-                    performSearch();
-                }
+            const isVerified = await verifyTurnstile(token);
+            if (isVerified) {
+                state.isVerified = true;
+                handleSuccessfulVerification();
             }
         };
 
@@ -143,10 +141,13 @@
             elements.turnstileContainer.style.display = 'flex';
         }
 
-        function performSearch() {
+        function handleSuccessfulVerification() {
             const keyword = elements.searchInput.value.trim();
-            if (!keyword) return;
-            alert(`執行搜尋: ${keyword}`);
+            if (!keyword) {
+                alert("請輸入搜尋關鍵字。");
+                return;
+            }
+            window.open(`https://concierge-anywhere.com/search_result?q=${encodeURIComponent(keyword)}`, '_blank');
         }
 
         function clearSearchInput() {
