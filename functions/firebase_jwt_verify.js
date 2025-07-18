@@ -24,6 +24,26 @@ async function getPublicKeys() {
     return cachedKeys;
 }
 
+function base64UrlDecode(str) {
+    // 替換 URL-safe 字符
+    let output = str.replace(/-/g, '+').replace(/_/g, '/');
+    // 補齊 base64 長度
+    switch (output.length % 4) {
+        case 0: break;
+        case 2: output += '=='; break;
+        case 3: output += '='; break;
+        default: throw new Error('不合法的 base64 字符串');
+    }
+    // 使用瀏覽器內建的 atob 函數解碼
+    const decoded = atob(output);
+    // 轉換為 Uint8Array
+    const bytes = new Uint8Array(decoded.length);
+    for (let i = 0; i < decoded.length; i++) {
+        bytes[i] = decoded.charCodeAt(i);
+    }
+    return bytes;
+}
+
 async function verifyFirebaseToken(token, env) {
     try {
         console.log('開始驗證 Token');
@@ -37,7 +57,9 @@ async function verifyFirebaseToken(token, env) {
         }
 
         const [headerEncoded] = tokenParts;
-        const header = JSON.parse(Buffer.from(headerEncoded, 'base64').toString());
+        const headerBytes = base64UrlDecode(headerEncoded);
+        const headerText = new TextDecoder().decode(headerBytes);
+        const header = JSON.parse(headerText);
         const kid = header.kid;
         
         if (!kid) {
