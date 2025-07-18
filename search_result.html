@@ -13,10 +13,24 @@
     <div class="private-room-container">
         <h1>純粹測試</h1>
         <h2>Search Result</h2>
+        <p id="search-term"></p>
         <div class="private-room-button-group">
             <a href="https://concierge-anywhere.com/">返回首頁</a>
             <a href="https://concierge-anywhere.com/control_center/user_login">返回登入</a>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const searchTerm = params.get('q');
+            const searchTermElement = document.getElementById('search-term');
+            if (searchTerm) {
+                searchTermElement.textContent = `您搜尋的內容是：「${searchTerm}」`;
+            } else {
+                searchTermElement.textContent = '未接收到搜尋內容。';
+            }
+        });
+    </script>
 </body>
 </html>
