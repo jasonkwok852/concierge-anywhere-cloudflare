@@ -14,61 +14,43 @@
         .private-room-container {
             max-width: 500px;
             margin: 2rem auto;
-            padding: 3rem 2rem;
+            padding: 2rem;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             text-align: center;
-            position: relative;
         }
         
         .private-room-container h2 {
             color: #23396C;
-            margin-bottom: 1.5rem;
-            font-weight: 700;
+            margin-bottom: 1rem;
         }
         
-        .auth-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 20px 25px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-            display: none;
-            z-index: 1000;
-            width: 80%;
-            max-width: 400px;
-            font-size: 1rem;
-            line-height: 1.5;
+        .private-room-container p {
+            margin-bottom: 2rem;
+            color: #555;
+            font-size: 1.1rem;
+            line-height: 1.6;
         }
         
-        .success-message {
-            background-color: rgba(35, 57, 108, 0.95);
-            color: white;
+        .user-email {
+            font-weight: bold;
+            color: #23396C;
         }
         
-        .error-message {
-            background-color: rgba(221, 53, 69, 0.95);
-            color: white;
-        }
-        
-        .auth-button-container {
-            margin-top: 2rem;
-            padding: 0 2rem;
+        .private-room-button-group {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            gap: 1rem;
         }
         
-        .auth-button {
+        .private-room-button-group a, .private-room-button-group button {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            padding: 0.85rem;
-            border-radius: 6px;
+            padding: 0.75rem;
+            border-radius: 4px;
             font-size: 1rem;
             font-weight: 500;
             text-decoration: none;
@@ -76,19 +58,50 @@
             transition: all 0.3s ease;
             border: none;
             cursor: pointer;
-            width: 200px; /* 修改為固定寬度200px */
-            background-color: #23396C;
-            color: white; /* 確保文字顏色為白色 */
         }
         
-        .auth-button:hover {
-            background-color: #1a2c52;
+        .home-btn {
+            background-color: #23396C;
+            color: white !important;
+        }
+        
+        .login-btn {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .private-room-button-group a:hover, 
+        .private-room-button-group button:hover {
+            opacity: 0.9;
             transform: translateY(-2px);
+        }
+        
+        .error-message {
+            color: #dc3545;
+            margin-top: 1rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <!-- 其餘HTML內容保持不變 -->
     <header>
         <div class="header-inner">
             <div class="site-brand">
@@ -108,10 +121,15 @@
     <main>
         <div class="private-room-container">
             <h2>私人空間</h2>
+            <p id="welcomeMessage">正在檢查登入狀態...</p>
+            <div class="private-room-button-group">
+                <a href="https://concierge-anywhere.com" class="home-btn">
+                    <i class="bi bi-house-fill"></i> 返回主頁
+                </a>
+                <button id="authButton" style="display: none;"></button>
+            </div>
+            <p id="errorMessage" class="error-message" style="display: none;"></p>
         </div>
-        
-        <div id="authMessage" class="auth-message"></div>
-        <div id="authButton" class="auth-button-container"></div>
     </main>
 
     <footer>
@@ -121,15 +139,15 @@
     </footer>
 
     <script type="module">
-        // JavaScript部分保持不變
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         
         let auth; 
 
-        const headerAuthText = document.getElementById('headerAuthText');
-        const authMessage = document.getElementById('authMessage');
+        const welcomeMessage = document.getElementById('welcomeMessage');
         const authButton = document.getElementById('authButton');
+        const headerAuthText = document.getElementById('headerAuthText');
+        const errorElement = document.getElementById('errorMessage');
 
         console.log('--- 腳本開始執行 ---');
 
@@ -149,69 +167,46 @@
         }
         
         function showError(message) {
-            authMessage.textContent = message;
-            authMessage.className = 'auth-message error-message';
-            authMessage.style.display = 'block';
-            createButton('登入', 'https://concierge-anywhere.com/control_center/user_login');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
         }
         
-        function createButton(text, url) {
-            authButton.innerHTML = '';
-            const button = document.createElement('a');
-            button.href = url;
-            button.className = 'auth-button';
-            button.innerHTML = text;
-            
-            if (url === '#logoutHandler') {
-                button.onclick = async (e) => {
-                    e.preventDefault();
-                    await handleLogout();
-                };
-            }
-            
-            authButton.appendChild(button);
-        }
-
         async function handleLogout() {
-            authMessage.style.display = 'none';
-            
+            authButton.disabled = true;
+            authButton.innerHTML = '<span class="spinner"></span> 登出中...';
             try {
                 await signOut(auth);
+                document.cookie = 'firebase_jwt=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
                 console.log('登出成功。');
-                updateButtonForGuest();
+                updateUI(null);
             } catch (error) {
                 console.error('登出時發生錯誤:', error);
-                updateButtonForGuest();
+                showError('登出時發生錯誤');
+                updateUI(auth.currentUser);
             }
         }
 
-        function updateButtonForGuest() {
-            authButton.innerHTML = '';
-            createButton('登入', 'https://concierge-anywhere.com/control_center/user_login');
-            headerAuthText.textContent = '登入';
+        function redirectToLogin() {
+            window.location.href = 'https://concierge-anywhere.com/control_center/user_login';
         }
-
+        
         function updateUI(user) {
             console.log('更新 UI 中，目前用戶:', user ? user.email : '未登入');
-            
+            authButton.style.display = 'flex';
+            authButton.disabled = false;
+
             if (user) {
-                authMessage.className = 'auth-message success-message';
-                authMessage.style.display = 'block';
-                authMessage.textContent = `歡迎回來，${user.email}`;
-                
-                authButton.innerHTML = '';
-                createButton('登出', '#logoutHandler');
-                
+                welcomeMessage.innerHTML = `Hello, <span class="user-email">${user.email}</span>`;
+                authButton.className = 'logout-btn';
+                authButton.innerHTML = '<i class="bi bi-box-arrow-in-left"></i> 登出';
                 headerAuthText.textContent = '登出';
+                authButton.onclick = handleLogout;
             } else {
-                authMessage.className = 'auth-message error-message';
-                authMessage.style.display = 'block';
-                authMessage.textContent = '這個頁面只供已登錄用戶瀏覽。';
-                
-                authButton.innerHTML = '';
-                createButton('登入', 'https://concierge-anywhere.com/control_center/user_login');
-                
+                welcomeMessage.textContent = '這個頁面只供已登錄用戶瀏覽。';
+                authButton.className = 'login-btn';
+                authButton.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> 登入';
                 headerAuthText.textContent = '登入';
+                authButton.onclick = redirectToLogin;
             }
         }
 
@@ -219,17 +214,10 @@
             try {
                 await initFirebase();
                 
-                const user = auth.currentUser;
-                console.log('檢查當前用戶:', user);
-                
                 onAuthStateChanged(auth, (user) => {
-                    console.log('onAuthStateChanged 事件觸發。');
+                    console.log('onAuthStateChanged 事件觸發，用戶狀態:', user ? '已登入' : '未登入');
                     updateUI(user);
                 });
-                
-                if (user) {
-                    updateUI(user);
-                }
             } catch (error) {
                 console.error('主執行函式失敗:', error);
                 showError('應用初始化失敗，請刷新頁面');
@@ -238,5 +226,5 @@
         
         main();
     </script>
-</body>
+</body> 
 </html>
