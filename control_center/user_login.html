@@ -194,8 +194,28 @@
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 console.log('登入成功！用戶:', userCredential.user.email);
                 
-                // 登入成功後，導向到私人空間頁面或其他頁面
-                window.location.href = 'https://concierge-anywhere.com/control_center/private_room';
+                // 獲取 ID Token
+                const idToken = await userCredential.user.getIdToken();
+                console.log('獲取到 ID Token:', idToken ? '成功' : '失敗');
+                
+                // 驗證 JWT
+                const verifyResponse = await fetch('https://concierge-anywhere.com/firebase_jwt_verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ idToken })
+                });
+                
+                const verifyResult = await verifyResponse.json();
+                console.log('JWT 驗證結果:', verifyResult);
+                
+                if (verifyResult.verified) {
+                    console.log('JWT 驗證成功，即將重定向');
+                    window.location.href = verifyResult.redirect_url || 'https://concierge-anywhere.com/control_center/private_room';
+                } else {
+                    throw new Error(verifyResult.message || 'JWT 驗證失敗');
+                }
             } catch (error) {
                 console.error('登入失敗:', error);
                 showLoading(false);
