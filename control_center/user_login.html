@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>用戶登錄 - Concierge Anywhere</title>
+    <title>使用者登入 - Concierge Anywhere</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet">
@@ -11,6 +11,74 @@
     <link rel="stylesheet" href="https://concierge-anywhere.com/project_css.css">
     
     <style>
+        .login-container {
+            max-width: 400px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .login-container h2 {
+            color: #23396C;
+            margin-bottom: 1.5rem;
+        }
+
+        .login-form .input-group {
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        .login-form .input-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+
+        .login-form .input-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .login-form .input-group input:focus {
+            outline: none;
+            border-color: #23396C;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 4px;
+            background-color: #23396C;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .login-btn:hover {
+            background-color: #3A5A9A;
+        }
+        
+        .error-message {
+            color: #dc3545;
+            margin-top: 1rem;
+            text-align: left;
+        }
+        
         .spinner {
             display: inline-block;
             width: 1rem;
@@ -20,82 +88,9 @@
             border-top-color: #fff;
             animation: spin 1s ease-in-out infinite;
         }
-        
+
         @keyframes spin {
             to { transform: rotate(360deg); }
-        }
-        
-        .login-container {
-            max-width: 500px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .input-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-        
-        .input-group input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-        
-        .login-btn, .logout-btn, .lab-btn {
-            width: 100%;
-            padding: 0.75rem;
-            border: none;
-            border-radius: 4px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .login-btn {
-            background-color: #23396C;
-            color: white;
-        }
-        
-        .logout-btn {
-            background-color: #dc3545;
-            color: white;
-        }
-        
-        .lab-btn {
-            background-color: #28a745;
-            color: white;
-        }
-        
-        .error-message {
-            color: #dc3545;
-            margin: 1rem 0;
-            display: none;
-        }
-        
-        .welcomeMessage {
-            display: none;
-            text-align: center;
-        }
-        
-        #userEmailSpan {
-            color: #23396C;
-            font-weight: bold;
         }
     </style>
 </head>
@@ -118,32 +113,21 @@
 
     <main>
         <div class="login-container">
-            <div class="login-form" id="loginForm">
-                <h2>用戶登入</h2>
+            <h2>使用者登入</h2>
+            <form id="loginForm" class="login-form">
                 <div class="input-group">
-                    <label for="emailInput">電郵地址</label>
-                    <input type="email" id="emailInput" placeholder="請輸入電郵地址" required>
+                    <label for="email">電子郵件</label>
+                    <input type="email" id="email" name="email" required>
                 </div>
                 <div class="input-group">
-                    <label for="passwordInput">密碼</label>
-                    <input type="password" id="passwordInput" placeholder="請輸入密碼" required>
+                    <label for="password">密碼</label>
+                    <input type="password" id="password" name="password" required>
                 </div>
-                <p class="error-message" id="errorMessage"></p>
-                <button type="button" class="login-btn" id="loginButton">
+                <button type="submit" class="login-btn" id="loginButton">
                     <i class="bi bi-box-arrow-in-right"></i> 登入
                 </button>
-            </div>
-    
-            <div class="welcomeMessage" id="welcomeMessage">
-                <h2>歡迎，<span id="userEmailSpan"></span></h2>
-                <p>您已成功登錄。</p>
-                <button type="button" class="logout-btn" id="logoutButton">
-                    <i class="bi bi-box-arrow-in-left"></i> 登出
-                </button>
-                <button type="button" class="lab-btn" id="labButton">
-                    <i class="bi bi-arrow-right-circle"></i> 進行測試
-                </button>
-            </div>
+            </form>
+            <p id="errorMessage" class="error-message" style="display: none;"></p>
         </div>
     </main>
 
@@ -154,168 +138,86 @@
     </footer>
 
     <script type="module">
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         
-        const FIREBASE_CONFIG_URL = 'https://concierge-anywhere.com/firebase_config';
-        const LAB_URL = 'https://concierge-anywhere.com/control_center/private_room';
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginButton = document.getElementById('loginButton');
+        const errorElement = document.getElementById('errorMessage');
 
         let auth;
-        let loginForm;
-        let welcomeMessage;
-        let userEmailSpan;
-        let emailInput;
-        let passwordInput;
-        let loginButton;
-        let logoutButton;
-        let labButton;
-        let errorMessage;
+        let firebaseApp;
+
+        console.log('--- 登入頁面腳本開始執行 ---');
+
+        function showError(message) {
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        function showLoading(isLoading) {
+            loginButton.disabled = isLoading;
+            loginButton.innerHTML = isLoading 
+                ? '<span class="spinner"></span> 登入中...' 
+                : '<i class="bi bi-box-arrow-in-right"></i> 登入';
+        }
 
         async function initFirebase() {
             try {
-                const response = await fetch(FIREBASE_CONFIG_URL);
-                if (!response.ok) {
-                    throw new Error('無法獲取 Firebase 配置');
-                }
+                console.log('嘗試初始化 Firebase...');
+                const response = await fetch('https://concierge-anywhere.com/firebase_config');
                 const firebaseConfig = await response.json();
-                const app = initializeApp(firebaseConfig);
-                return getAuth(app);
+                firebaseApp = initializeApp(firebaseConfig);
+                auth = getAuth(firebaseApp);
+                console.log('Firebase 初始化成功。');
             } catch (error) {
-                showError('無法初始化登入系統，請刷新頁面重試');
+                console.error('Firebase 初始化失敗:', error);
+                showError('系統初始化失敗，請檢查網路連線');
                 throw error;
             }
         }
 
-        async function handleLogin() {
-            const email = emailInput.value.trim();
+        async function handleLogin(event) {
+            event.preventDefault();
+            console.log('表單提交中...');
+            
+            const email = emailInput.value;
             const password = passwordInput.value;
             
-            if (!email || !password) {
-                showError('請輸入電郵和密碼');
-                return;
-            }
-
-            loginButton.disabled = true;
-            loginButton.innerHTML = '<span class="spinner"></span> 登入中...';
-            hideError();
+            showLoading(true);
+            errorElement.style.display = 'none';
 
             try {
+                console.log('嘗試以', email, '登入...');
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const idToken = await userCredential.user.getIdToken();
+                console.log('登入成功！用戶:', userCredential.user.email);
                 
-                document.cookie = `firebase_jwt=${idToken}; path=/; max-age=3600; secure; samesite=lax`;
-                
+                // 登入成功後，導向到私人空間頁面或其他頁面
+                window.location.href = 'https://concierge-anywhere.com/control_center/private_room';
             } catch (error) {
-                handleLoginError(error);
-            } finally {
-                loginButton.disabled = false;
-                loginButton.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> 登入';
+                console.error('登入失敗:', error);
+                showLoading(false);
+                let errorMessage = '登入失敗，請檢查電子郵件或密碼。';
+                if (error.code === 'auth/invalid-credential') {
+                    errorMessage = '電子郵件或密碼不正確。';
+                }
+                showError(errorMessage);
             }
         }
 
-        function handleLoginError(error) {
-            switch (error.code) {
-                case 'auth/invalid-email':
-                    showError('無效的電郵地址格式');
-                    break;
-                case 'auth/user-not-found':
-                case 'auth/wrong-password':
-                    showError('電郵或密碼錯誤');
-                    break;
-                case 'auth/user-disabled':
-                    showError('此帳戶已被停用');
-                    break;
-                case 'auth/too-many-requests':
-                    showError('嘗試次數過多，請稍後再試');
-                    break;
-                default:
-                    showError('登入失敗，請稍後再試');
-                    break;
-            }
-        }
-
-        function handleLogout() {
-            document.cookie = 'firebase_jwt=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-            
-            signOut(auth).catch(error => {
-                showError('登出時發生錯誤');
-            });
-        }
-
-        async function handleLabAccess() {
-            const user = auth.currentUser;
-            if (!user) {
-                showError('請先登入系統');
-                return;
-            }
-            
-            labButton.disabled = true;
-            labButton.innerHTML = '<span class="spinner"></span> 進入中...';
-            hideError();
-
+        async function main() {
             try {
-                window.location.href = LAB_URL;
+                await initFirebase();
+                loginForm.addEventListener('submit', handleLogin);
+                console.log('已綁定登入表單事件。');
             } catch (error) {
-                showError('無法進入實驗室');
-            } finally {
-                labButton.disabled = false;
-                labButton.innerHTML = '<i class="bi bi-arrow-right-circle"></i> 進行測試';
+                showError('應用初始化失敗，請刷新頁面');
             }
         }
-
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorMessage.style.display = 'block';
-        }
-
-        function hideError() {
-            errorMessage.style.display = 'none';
-        }
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                auth = await initFirebase();
-                
-                loginForm = document.getElementById('loginForm');
-                welcomeMessage = document.getElementById('welcomeMessage');
-                userEmailSpan = document.getElementById('userEmailSpan');
-                emailInput = document.getElementById('emailInput');
-                passwordInput = document.getElementById('passwordInput');
-                loginButton = document.getElementById('loginButton');
-                logoutButton = document.getElementById('logoutButton');
-                labButton = document.getElementById('labButton');
-                errorMessage = document.getElementById('errorMessage');
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        loginForm.style.display = 'none';
-                        welcomeMessage.style.display = 'block';
-                        userEmailSpan.textContent = user.email || '用戶';
-                        
-                        // 修正：登入成功後，明確顯示按鈕
-                        labButton.style.display = 'flex'; 
-
-                        if (!user.emailVerified) {
-                            showError('請先驗證您的電子郵件地址');
-                        }
-                    } else {
-                        loginForm.style.display = 'block';
-                        welcomeMessage.style.display = 'none';
-                    }
-                });
-
-                loginButton.addEventListener('click', handleLogin);
-                logoutButton.addEventListener('click', handleLogout);
-                labButton.addEventListener('click', handleLabAccess);
-                
-                passwordInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') handleLogin();
-                });
-
-            } catch (error) {
-                showError('系統初始化失敗，請刷新頁面');
-            }
-        });
+        
+        main();
     </script>
 </body>
 </html>
