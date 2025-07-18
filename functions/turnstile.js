@@ -1,4 +1,5 @@
 export async function onRequestPost({ request, env }) {
+  console.log('onRequestPost 觸發，接收到請求。');
   try {
     // 驗證環境變數
     if (!env.TURNSTILE_SECRET_KEY) {
@@ -37,6 +38,8 @@ export async function onRequestPost({ request, env }) {
       );
     }
 
+    console.log('成功接收到有效 token。');
+
     // 獲取客戶端 IP
     const clientIp = request.headers.get('CF-Connecting-IP') || 
                      (request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() || '');
@@ -50,6 +53,7 @@ export async function onRequestPost({ request, env }) {
     const corsOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
 
     // Turnstile API 請求
+    console.log('向 Cloudflare 驗證 Turnstile token...');
     const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -61,10 +65,11 @@ export async function onRequestPost({ request, env }) {
     });
 
     const verification = await verifyResponse.json();
+    console.log('收到 Cloudflare 驗證回應:', verification);
 
     // 處理驗證結果
     if (verification.success) {
-      console.log('Turnstile verification successful.');
+      console.log('Turnstile 驗證成功。');
       return new Response(
         JSON.stringify({ success: true, challenge_ts: verification.challenge_ts }),
         {
@@ -81,7 +86,7 @@ export async function onRequestPost({ request, env }) {
         }
       );
     } else {
-      console.warn('Turnstile verification failed:', verification['error-codes']);
+      console.warn('Turnstile 驗證失敗:', verification['error-codes']);
       let errorMessage = 'Turnstile verification failed';
       if (verification['error-codes']?.length) {
         const errorCode = verification['error-codes'][0];
@@ -108,7 +113,7 @@ export async function onRequestPost({ request, env }) {
       );
     }
   } catch (err) {
-    console.error('Internal server error:', err);
+    console.error('內部伺服器錯誤:', err);
     return new Response(
       JSON.stringify({ success: false, error: 'Internal server error' }),
       {
