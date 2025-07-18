@@ -11,8 +11,10 @@ const CACHE_TTL = 3600000;
 async function getPublicKeys() {
     const now = Date.now();
     if (cachedKeys && now - cachedAt < CACHE_TTL) {
+        console.log('使用緩存的公鑰');
         return cachedKeys;
     }
+    console.log('獲取新的公鑰');
     const res = await fetch(JWKS_URL);
     if (!res.ok) {
         throw new Error('獲取 Firebase 公鑰失敗');
@@ -24,12 +26,11 @@ async function getPublicKeys() {
 
 async function verifyFirebaseToken(token, env) {
     try {
-        // 檢查 token 是否存在
+        console.log('開始驗證 Token');
         if (!token) {
             throw new Error('缺少 ID Token');
         }
 
-        // 分割 token 並檢查格式
         const tokenParts = token.split('.');
         if (tokenParts.length !== 3) {
             throw new Error('無效的 Token 格式');
@@ -56,23 +57,23 @@ async function verifyFirebaseToken(token, env) {
             audience: env.FIREBASE_PROJECT_ID,
         });
 
-        // 檢查 token 是否過期
         const currentTime = Math.floor(Date.now() / 1000);
         if (payload.exp && payload.exp < currentTime) {
             throw new Error('Token 已過期');
         }
 
+        console.log('Token 驗證成功');
         return { 
             verified: true, 
             payload,
-            redirect_url: `${PROTECTED_PREFIX}/my_laboratory` // 添加重定向URL
+            redirect_url: `${PROTECTED_PREFIX}/my_laboratory`
         };
     } catch (error) {
         console.error('Token 驗證失敗:', error.message);
         return { 
             verified: false, 
             error: error.message,
-            stack: error.stack // 添加錯誤堆棧用於調試
+            stack: error.stack
         };
     }
 }
@@ -81,8 +82,8 @@ export const onRequest = async ({ request, env, next }) => {
     const url = new URL(request.url);
     const path = url.pathname;
 
-    // 處理預檢請求
     if (request.method === 'OPTIONS') {
+        console.log('處理預檢請求');
         return new Response(null, {
             status: 204,
             headers: {
@@ -94,8 +95,8 @@ export const onRequest = async ({ request, env, next }) => {
         });
     }
 
-    // 處理 JWT 驗證請求
     if (path === '/firebase_jwt_verify' && request.method === 'POST') {
+        console.log('處理 JWT 驗證請求');
         try {
             const contentType = request.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
@@ -133,6 +134,7 @@ export const onRequest = async ({ request, env, next }) => {
                 });
             }
 
+            console.log('JWT 驗證成功，設置 cookie');
             return new Response(JSON.stringify({ 
                 verified: true, 
                 message: '驗證成功',
@@ -159,36 +161,39 @@ export const onRequest = async ({ request, env, next }) => {
         }
     }
 
-    // 處理受保護路由
     if (path.startsWith(PROTECTED_PREFIX)) {
+        console.log('處理受保護路由:', path);
         try {
             let token;
             const authHeader = request.headers.get('Authorization');
             
-            // 檢查 Authorization 標頭
             if (authHeader && authHeader.startsWith('Bearer ')) {
                 token = authHeader.split(' ')[1];
+                console.log('從 Authorization 標頭獲取 token');
             } else {
-                // 檢查 cookie
                 const cookieHeader = request.headers.get('Cookie');
                 if (cookieHeader) {
                     const match = cookieHeader.match(/firebase_jwt=([^;]+)/);
                     token = match ? match[1] : null;
+                    console.log('從 Cookie 獲取 token:', token ? '成功' : '失敗');
                 }
             }
 
             if (!token) {
+                console.log('未找到 token，重定向到登入頁面');
                 return Response.redirect(LOGIN_PAGE, 302);
             }
 
             const { verified, error } = await verifyFirebaseToken(token, env);
             
             if (!verified) {
+                console.log('Token 驗證失敗，重定向到登入頁面');
                 const response = Response.redirect(LOGIN_PAGE, 302);
                 response.headers.set('Set-Cookie', 'firebase_jwt=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure; SameSite=Lax');
                 return response;
             }
 
+            console.log('Token 驗證成功，繼續處理請求');
             return next();
         } catch (e) {
             console.error('保護路由錯誤:', e);
