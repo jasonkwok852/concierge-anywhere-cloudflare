@@ -114,6 +114,7 @@
         }
 
         async function verifyTurnstile(token) {
+            console.log("驗證 Turnstile token...");
             try {
                 const response = await fetch('/turnstile', {
                     method: 'POST',
@@ -121,14 +122,17 @@
                     body: JSON.stringify({ token })
                 });
                 const data = await response.json();
+                console.log("Turnstile 驗證後端回應:", data);
                 return data.success;
             } catch (error) {
+                console.error("驗證 Turnstile 失敗:", error);
                 showErrorModal('網絡錯誤，請檢查網絡連接後重試。');
                 return false;
             }
         }
 
         window.onTurnstileSuccess = async function(token) {
+            console.log("Turnstile 驗證成功回呼觸發，獲得 token:", token);
             state.turnstileToken = token;
             const isVerified = await verifyTurnstile(token);
             if (isVerified) {
@@ -147,10 +151,19 @@
                 alert("請輸入搜尋關鍵字。");
                 return;
             }
+            console.log("驗證成功，執行搜尋動作。關鍵字:", keyword);
             window.open(`https://concierge-anywhere.com/search_result?q=${encodeURIComponent(keyword)}`, '_blank');
+            
+            // 重置 Turnstile 和應用程式狀態，為下一次搜尋做準備
+            turnstile.reset();
+            state.isVerified = false;
+            state.turnstileToken = null;
+            elements.turnstileContainer.style.display = 'none';
+            console.log("已重置 Turnstile 和狀態。");
         }
 
         function clearSearchInput() {
+            console.log("清除搜尋欄位。");
             elements.searchInput.value = '';
             elements.clearIcon.style.display = 'none';
             elements.searchInput.focus();
@@ -224,12 +237,14 @@
             elements.clearIcon.addEventListener('click', clearSearchInput);
             
             elements.searchButton.addEventListener('click', () => {
+                console.log("點擊搜尋按鈕，顯示 Turnstile。");
                 state.pendingAction = true;
                 showTurnstile();
             });
 
             elements.searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
+                    console.log("在搜尋欄位按下 Enter，顯示 Turnstile。");
                     state.pendingAction = true;
                     showTurnstile();
                 }
