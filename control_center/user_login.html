@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="https://concierge-anywhere.com/project_css.css" />
+    <link rel="stylesheet" href="https://concierge-anywhere.com/project_css.css">
     
     <style>
         .spinner {
@@ -157,7 +157,7 @@
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         
-        let auth;
+        const auth = await initFirebase();
         const loginForm = document.getElementById('loginForm');
         const welcomeMessage = document.getElementById('welcomeMessage');
         const userEmailSpan = document.getElementById('userEmailSpan');
@@ -168,23 +168,13 @@
         const labButton = document.getElementById('labButton');
         const errorMessage = document.getElementById('errorMessage');
         const FIREBASE_CONFIG_URL = 'https://concierge-anywhere.com/firebase_config';
-        const VERIFY_URL = 'https://concierge-anywhere.com/firebase_jwt_verify';
         const LAB_URL = 'https://concierge-anywhere.com/control_center/private_room';
 
         async function initFirebase() {
-            try {
-                const response = await fetch(FIREBASE_CONFIG_URL);
-                if (!response.ok) {
-                    throw new Error('無法獲取 Firebase 配置');
-                }
-                const firebaseConfig = await response.json();
-                const app = initializeApp(firebaseConfig);
-                return getAuth(app);
-            } catch (error) {
-                console.error("Firebase 初始化錯誤:", error);
-                showError('無法初始化登入系統，請刷新頁面重試');
-                throw error;
-            }
+            const response = await fetch(FIREBASE_CONFIG_URL);
+            const firebaseConfig = await response.json();
+            const app = initializeApp(firebaseConfig);
+            return getAuth(app);
         }
 
         async function handleLogin() {
@@ -203,12 +193,8 @@
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const idToken = await userCredential.user.getIdToken();
-                
-                // 設置 Cookie
                 document.cookie = `firebase_jwt=${idToken}; path=/; max-age=3600; secure; samesite=lax`;
-                
             } catch (error) {
-                console.error("登入失敗:", error);
                 handleLoginError(error);
             } finally {
                 loginButton.disabled = false;
@@ -218,56 +204,22 @@
 
         function handleLoginError(error) {
             switch (error.code) {
-                case 'auth/invalid-email':
-                    showError('無效的電郵地址格式');
-                    break;
+                case 'auth/invalid-email': showError('無效的電郵地址格式'); break;
                 case 'auth/user-not-found':
-                case 'auth/wrong-password':
-                    showError('電郵或密碼錯誤');
-                    break;
-                case 'auth/user-disabled':
-                    showError('此帳戶已被停用');
-                    break;
-                case 'auth/too-many-requests':
-                    showError('嘗試次數過多，請稍後再試');
-                    break;
-                default:
-                    showError('登入失敗，請稍後再試');
-                    break;
+                case 'auth/wrong-password': showError('電郵或密碼錯誤'); break;
+                case 'auth/user-disabled': showError('此帳戶已被停用'); break;
+                case 'auth/too-many-requests': showError('嘗試次數過多，請稍後再試'); break;
+                default: showError('登入失敗，請稍後再試'); break;
             }
         }
 
         function handleLogout() {
-            // 清除 Cookie
             document.cookie = 'firebase_jwt=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-            
-            signOut(auth).catch(error => {
-                console.error("登出失敗:", error);
-                showError('登出時發生錯誤');
-            });
+            signOut(auth).catch(error => showError('登出時發生錯誤'));
         }
 
-        async function handleLabAccess() {
-            const user = auth.currentUser;
-            if (!user) {
-                showError('請先登入系統');
-                return;
-            }
-            
-            labButton.disabled = true;
-            labButton.innerHTML = '<span class="spinner"></span> 進入中...';
-            hideError();
-
-            try {
-                // 直接跳轉到實驗室頁面，由後端驗證 Cookie
-                window.location.href = LAB_URL;
-            } catch (error) {
-                console.error('實驗室存取錯誤:', error);
-                showError('無法進入實驗室');
-            } finally {
-                labButton.disabled = false;
-                labButton.innerHTML = '<i class="bi bi-arrow-right-circle"></i> 進行測試';
-            }
+        function handleLabAccess() {
+            window.location.href = LAB_URL;
         }
 
         function showError(message) {
@@ -279,60 +231,24 @@
             errorMessage.style.display = 'none';
         }
 
-        function checkExistingSession() {
-            const cookies = document.cookie.split(';');
-            const tokenCookie = cookies.find(c => c.trim().startsWith('firebase_jwt='));
-            
-            if (tokenCookie) {
-                const token = tokenCookie.split('=')[1];
-                if (token) {
-                    // 如果有有效的 Cookie，顯示歡迎訊息
-                    loginForm.style.display = 'none';
-                    welcomeMessage.style.display = 'block';
-                    userEmailSpan.textContent = '用戶'; // 從 Cookie 無法獲取 email，需從後端獲取
-                }
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                loginForm.style.display = 'none';
+                welcomeMessage.style.display = 'block';
+                userEmailSpan.textContent = user.email || '用戶';
+                if (!user.emailVerified) showError('請先驗證您的電子郵件地址');
+            } else {
+                loginForm.style.display = 'block';
+                welcomeMessage.style.display = 'none';
             }
-        }
+        });
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                auth = await initFirebase();
-                
-                // 檢查現有會話
-                checkExistingSession();
-                
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        console.log('用戶已登錄:', user.email);
-                        loginForm.style.display = 'none';
-                        welcomeMessage.style.display = 'block';
-                        userEmailSpan.textContent = user.email || '用戶';
-                        
-                        // 檢查電子郵件是否驗證
-                        if (!user.emailVerified) {
-                            showError('請先驗證您的電子郵件地址');
-                        }
-                    } else {
-                        console.log('用戶未登錄');
-                        loginForm.style.display = 'block';
-                        welcomeMessage.style.display = 'none';
-                    }
-                });
-
-                // 事件監聽器
-                loginButton.addEventListener('click', handleLogin);
-                logoutButton.addEventListener('click', handleLogout);
-                labButton.addEventListener('click', handleLabAccess);
-                
-                // 回車鍵登入
-                passwordInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') handleLogin();
-                });
-
-            } catch (error) {
-                console.error('頁面初始化錯誤:', error);
-                showError('系統初始化失敗，請刷新頁面');
-            }
+        loginButton.addEventListener('click', handleLogin);
+        logoutButton.addEventListener('click', handleLogout);
+        labButton.addEventListener('click', handleLabAccess);
+        
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
         });
     </script>
 </body>
