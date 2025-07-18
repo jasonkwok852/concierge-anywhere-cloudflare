@@ -28,28 +28,21 @@
             font-weight: 700;
         }
         
-               .auth-button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.85rem;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 500;
-            text-decoration: none;
+        .auth-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 25px;
+            border-radius: 10px;
             text-align: center;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-            width: 200px;
-            background-color: #23396C;
-            color: white !important; /* 添加!important確保顏色優先級 */
-        }
-        
-        /* 確保header中的登入文字也是白色 */
-        .header-button {
-            color: white !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            display: none;
+            z-index: 1000;
+            width: 80%;
+            max-width: 400px;
+            font-size: 1rem;
+            line-height: 1.5;
         }
         
         .success-message {
@@ -65,6 +58,8 @@
         .auth-button-container {
             margin-top: 2rem;
             padding: 0 2rem;
+            display: flex;
+            justify-content: center;
         }
         
         .auth-button {
@@ -81,9 +76,9 @@
             transition: all 0.3s ease;
             border: none;
             cursor: pointer;
-            width: 100%;
+            width: 200px; /* 修改為固定寬度200px */
             background-color: #23396C;
-            color: white;
+            color: white; /* 確保文字顏色為白色 */
         }
         
         .auth-button:hover {
@@ -93,6 +88,7 @@
     </style>
 </head>
 <body>
+    <!-- 其餘HTML內容保持不變 -->
     <header>
         <div class="header-inner">
             <div class="site-brand">
@@ -125,6 +121,7 @@
     </footer>
 
     <script type="module">
+        // JavaScript部分保持不變
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         
