@@ -90,10 +90,7 @@
         'use strict';
 
         const state = {
-            isVerified: false,
-            pendingAction: null,
-            isTurnstileRendered: false,
-            turnstileToken: null
+            pendingAction: false, // 只有當使用者點擊按鈕或 Enter 時，才設為 true
         };
 
         const elements = {
@@ -133,11 +130,15 @@
 
         window.onTurnstileSuccess = async function(token) {
             console.log("Turnstile 驗證成功回呼觸發，獲得 token:", token);
-            state.turnstileToken = token;
-            const isVerified = await verifyTurnstile(token);
-            if (isVerified) {
-                state.isVerified = true;
-                handleSuccessfulVerification();
+            
+            // 只有在有待處理的搜尋操作時才繼續執行
+            if (state.pendingAction) {
+                const isVerified = await verifyTurnstile(token);
+                if (isVerified) {
+                    handleSuccessfulVerification();
+                }
+            } else {
+                console.log("驗證成功，但沒有待處理的搜尋操作，不執行任何動作。");
             }
         };
 
@@ -154,12 +155,11 @@
             console.log("驗證成功，執行搜尋動作。關鍵字:", keyword);
             window.open(`https://concierge-anywhere.com/search_result?q=${encodeURIComponent(keyword)}`, '_blank');
             
-            // 重置 Turnstile 和應用程式狀態，為下一次搜尋做準備
+            // 成功後重置狀態，為下一次搜尋做準備
+            state.pendingAction = false;
             turnstile.reset();
-            state.isVerified = false;
-            state.turnstileToken = null;
             elements.turnstileContainer.style.display = 'none';
-            console.log("已重置 Turnstile 和狀態。");
+            console.log("已重置狀態。");
         }
 
         function clearSearchInput() {
@@ -229,22 +229,30 @@
         }
 
         function initEvents() {
-            // 搜尋相關事件
             elements.searchInput.addEventListener('input', () => {
                 elements.clearIcon.style.display = elements.searchInput.value ? 'block' : 'none';
             });
-
             elements.clearIcon.addEventListener('click', clearSearchInput);
             
             elements.searchButton.addEventListener('click', () => {
-                console.log("點擊搜尋按鈕，顯示 Turnstile。");
+                const keyword = elements.searchInput.value.trim();
+                if (!keyword) {
+                    alert("請輸入搜尋關鍵字。");
+                    return;
+                }
+                console.log("點擊搜尋按鈕，設定 pendingAction = true，並顯示 Turnstile。");
                 state.pendingAction = true;
                 showTurnstile();
             });
 
             elements.searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
-                    console.log("在搜尋欄位按下 Enter，顯示 Turnstile。");
+                    const keyword = elements.searchInput.value.trim();
+                    if (!keyword) {
+                        alert("請輸入搜尋關鍵字。");
+                        return;
+                    }
+                    console.log("在搜尋欄位按下 Enter，設定 pendingAction = true，並顯示 Turnstile。");
                     state.pendingAction = true;
                     showTurnstile();
                 }
@@ -260,11 +268,11 @@
                 elements.dropdownMenu.classList.remove('show');
             });
 
-document.addEventListener('click', (e) => {
-    if (!elements.dropdownMenu.contains(e.target)) {
-        elements.dropdownMenu.classList.remove('show');
-    }
-});
+            document.addEventListener('click', (e) => {
+                if (!elements.dropdownMenu.contains(e.target)) {
+                    elements.dropdownMenu.classList.remove('show');
+                }
+            });
         }
 
         function init() {
