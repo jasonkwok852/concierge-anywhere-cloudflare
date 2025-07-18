@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="https://concierge-anywhere.com/project_css.css">
     
     <style>
         .private-room-container {
@@ -121,14 +120,9 @@
     <main>
         <div class="private-room-container">
             <h2>私人空間</h2>
-            <p id="welcomeMessage">正在檢查登入狀態...</p>
-            <div class="private-room-button-group">
-                <a href="https://concierge-anywhere.com" class="home-btn">
-                    <i class="bi bi-house-fill"></i> 返回主頁
-                </a>
-                <button id="authButton" style="display: none;"></button>
-            </div>
+            <p id="welcomeMessage"></p>
             <p id="errorMessage" class="error-message" style="display: none;"></p>
+            <div id="authButton" class="private-room-button-group"></div>
         </div>
     </main>
 
@@ -145,9 +139,9 @@
         let auth; 
 
         const welcomeMessage = document.getElementById('welcomeMessage');
+        const errorMessage = document.getElementById('errorMessage');
         const authButton = document.getElementById('authButton');
         const headerAuthText = document.getElementById('headerAuthText');
-        const errorElement = document.getElementById('errorMessage');
 
         console.log('--- 腳本開始執行 ---');
 
@@ -167,8 +161,9 @@
         }
         
         function showError(message) {
-            errorElement.textContent = message;
-            errorElement.style.display = 'block';
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            welcomeMessage.style.display = 'none';
         }
         
         async function handleLogout() {
@@ -176,12 +171,12 @@
             authButton.innerHTML = '<span class="spinner"></span> 登出中...';
             try {
                 await signOut(auth);
-                document.cookie = 'firebase_jwt=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
                 console.log('登出成功。');
             } catch (error) {
                 console.error('登出時發生錯誤:', error);
                 showError('登出時發生錯誤');
-                updateUI(auth.currentUser);
+            } finally {
+                updateUI(null); // 確保登出後UI被更新
             }
         }
 
@@ -191,31 +186,48 @@
         
         function updateUI(user) {
             console.log('更新 UI 中，目前用戶:', user ? user.email : '未登入');
-            authButton.style.display = 'flex';
-            authButton.disabled = false;
-
+            
+            // 顯示或隱藏歡迎信息和錯誤信息
+            welcomeMessage.style.display = user ? 'block' : 'none';
+            errorMessage.style.display = user ? 'none' : 'block';
+            
+            authButton.innerHTML = ''; // 清空按鈕區域
+            
             if (user) {
                 welcomeMessage.innerHTML = `Hello, <span class="user-email">${user.email}</span>`;
                 authButton.className = 'logout-btn';
                 authButton.innerHTML = '<i class="bi bi-box-arrow-in-left"></i> 登出';
                 headerAuthText.textContent = '登出';
                 authButton.onclick = handleLogout;
+                authButton.style.display = 'flex';
             } else {
                 welcomeMessage.textContent = '這個頁面只供已登錄用戶瀏覽。';
                 authButton.className = 'login-btn';
                 authButton.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> 登入';
                 headerAuthText.textContent = '登入';
                 authButton.onclick = redirectToLogin;
+                authButton.style.display = 'flex';
             }
         }
 
         async function main() {
             try {
                 await initFirebase();
-                onAuthStateChanged(auth, (user) => {
-                    console.log('onAuthStateChanged 事件觸發。');
+                authButton.style.display = 'none'; // 初始隱藏按鈕
+                
+                // 檢查用戶是否已登入
+                const user = auth.currentUser;
+                console.log('檢查當前用戶:', user);
+                
+                if (user) {
                     updateUI(user);
-                });
+                } else {
+                    // 添加到Auth狀態監聽器
+                    onAuthStateChanged(auth, (user) => {
+                        console.log('onAuthStateChanged 事件觸發。');
+                        updateUI(user);
+                    });
+                }
             } catch (error) {
                 console.error('主執行函式失敗:', error);
                 showError('應用初始化失敗，請刷新頁面');
